@@ -1,0 +1,870 @@
+---
+import Header from "../components/Header.astro";
+import BaseHead from "../components/BaseHead.astro";
+import Footer from "../components/Footer.astro";
+import { fetchProducts } from "../lib/catalog";
+import "../styles/global.css";
+
+const products = await fetchProducts({ includeInactive: true });
+const inventoryItems = [
+  ...products.map((product) => ({
+    id: product.id,
+    type: product.kind === "single" ? "single" : "sellado",
+    typeLabel: product.kind === "single" ? "Single" : "Sellado",
+    name: product.name,
+    category: product.category,
+    set: product.set,
+    stock: product.stock,
+    active: product.active
+  }))
+];
+const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <BaseHead
+      title="Admin inventario | OnlyCartitas"
+      description="Panel simple para ajustar stock y activar o desactivar productos."
+    />
+  </head>
+  <body class="bg-[color:var(--color-surface)] text-slate-900 antialiased">
+    <Header adminMode />
+
+    <section class="mx-auto w-full max-w-md px-4 pt-10 sm:px-6 lg:px-8" data-admin-login>
+      <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
+        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--color-secondary)]">Acceso admin</p>
+        <h1 class="mt-2 text-3xl font-semibold tracking-tight text-[color:var(--color-primary)]">Iniciar sesion</h1>
+        <form class="mt-5 grid gap-4" data-admin-login-form>
+          <label class="block">
+            <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Usuario</span>
+            <input
+              data-admin-user
+              type="text"
+              autocomplete="username"
+              class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"
+            />
+          </label>
+          <label class="block">
+            <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Clave</span>
+            <input
+              data-admin-password
+              type="password"
+              autocomplete="current-password"
+              class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"
+            />
+          </label>
+          <p class="hidden rounded-[1rem] border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" data-admin-login-error>
+            Usuario o clave incorrectos.
+          </p>
+          <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]">
+            Entrar
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <main class="hidden pb-20" data-admin-content>
+      <section class="mx-auto w-full max-w-4xl px-4 pt-6 sm:px-6 lg:px-8">
+        <div class="overflow-hidden rounded-[2rem] bg-[color:var(--color-primary)] px-6 py-8 text-white shadow-[0_28px_80px_rgba(17,48,71,0.22)] sm:px-8">
+          <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-300">Admin</p>
+          <h1 class="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">Panel admin</h1>
+          <p class="mt-4 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
+            Gestiona inventario, compras y codigos de descuento desde una sola vista.
+          </p>
+        </div>
+      </section>
+
+      <section class="mx-auto mt-6 w-full max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div class="grid gap-2 rounded-2xl bg-slate-100 p-1 sm:grid-cols-3" data-admin-tabs>
+          <button type="button" class="rounded-[1rem] bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm" data-admin-tab="inventory" aria-pressed="true">Inventario</button>
+          <button type="button" class="rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-admin-tab="orders" aria-pressed="false">Compras</button>
+          <button type="button" class="rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-admin-tab="discounts" aria-pressed="false">Descuentos</button>
+        </div>
+      </section>
+
+      <section class="mx-auto mt-8 w-full max-w-4xl px-4 sm:px-6 lg:px-8" data-admin-panel="inventory">
+        <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
+          <div class="grid gap-5">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Inventario</p>
+              <h2 class="mt-2 text-2xl font-semibold text-[color:var(--color-primary)]">Stock y visibilidad</h2>
+            </div>
+            <div>
+              <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Tipo</span>
+              <div class="grid gap-2 sm:grid-cols-2">
+                <button type="button" class="rounded-full bg-[color:var(--color-primary)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#173b56]" data-type-button data-type="sellado" aria-pressed="true">
+                  Sellados
+                  <span class="ml-2 rounded-full bg-white/15 px-2 py-0.5 text-xs" data-count-sellados>0</span>
+                </button>
+                <button type="button" class="rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900" data-type-button data-type="single" aria-pressed="false">
+                  Singles
+                  <span class="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs" data-count-singles>0</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Filtrar producto</span>
+                <input
+                  data-search
+                  type="search"
+                  placeholder="Nombre, categoria o set"
+                  class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"
+                />
+              </label>
+
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Producto</span>
+                <select data-product class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                  {inventoryItems.map((product) => <option value={product.id}>{product.name}</option>)}
+                </select>
+              </label>
+            </div>
+
+            <div class="grid gap-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 sm:grid-cols-[1fr_auto] sm:items-center">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]" data-product-type>
+                  Sellado
+                </p>
+                <h2 class="mt-2 text-2xl font-semibold text-[color:var(--color-primary)]" data-product-name>
+                  Producto
+                </h2>
+                <p class="mt-2 text-sm text-slate-500" data-product-meta>Categoria - Set</p>
+              </div>
+              <span class="w-fit rounded-full bg-[color:var(--color-surface)] px-4 py-2 text-sm font-semibold text-slate-700" data-status-badge>
+                Activo
+              </span>
+            </div>
+
+            <form class="grid gap-4" data-form>
+              <div class="grid gap-4 lg:grid-cols-[1fr_1fr]">
+                <div class="rounded-[1.5rem] border border-slate-200 bg-white p-4">
+                  <span class="block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Stock</span>
+                  <div class="mt-3 grid grid-cols-[44px_1fr_44px] gap-2">
+                    <button type="button" class="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 text-lg font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900" data-stock-minus aria-label="Restar stock">
+                      -
+                    </button>
+                    <input data-stock type="number" min="0" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-center text-lg font-semibold text-slate-900 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                    <button type="button" class="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 text-lg font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900" data-stock-plus aria-label="Sumar stock">
+                      +
+                    </button>
+                  </div>
+                  <p class="mt-3 text-sm text-slate-500">Usa los botones para cambios chicos o escribe el stock exacto.</p>
+                </div>
+
+                <div class="rounded-[1.5rem] border border-slate-200 bg-white p-4">
+                  <span class="block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Visibilidad</span>
+                  <select data-status class="mt-3 h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                    <option value="active">Activo en tienda</option>
+                    <option value="inactive">Inactivo / oculto</option>
+                  </select>
+                  <button type="button" class="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900" data-toggle-status>
+                    Cambiar estado
+                  </button>
+                  <p class="mt-3 text-sm text-slate-500">Inactivo funciona como borrado falso.</p>
+                </div>
+              </div>
+
+              <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]">
+                Guardar producto
+              </button>
+
+              <p class="hidden rounded-[1rem] bg-[color:var(--color-surface)] px-4 py-3 text-sm font-semibold text-[color:var(--color-primary)]" data-message></p>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="mx-auto mt-8 hidden w-full max-w-4xl px-4 sm:px-6 lg:px-8" data-admin-panel="orders">
+        <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Compras</p>
+              <h2 class="mt-2 text-2xl font-semibold text-[color:var(--color-primary)]">Historial y estados</h2>
+            </div>
+            <button type="button" class="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950" data-refresh-orders>
+              Actualizar
+            </button>
+          </div>
+
+          <div class="mt-5 grid gap-3 lg:grid-cols-[1fr_180px]">
+            <label class="block">
+              <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Filtrar usuario</span>
+              <input data-order-user-filter type="search" placeholder="Nombre, correo o usuario" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+            </label>
+            <label class="block">
+              <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Estado</span>
+              <select data-order-status-filter class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                <option value="">Todos</option>
+                <option value="pending">Pendiente</option>
+                <option value="paid">Pagado</option>
+                <option value="preparing">Preparando</option>
+                <option value="shipped">Enviado</option>
+                <option value="completed">Completado</option>
+                <option value="cancelled">Cancelado</option>
+              </select>
+            </label>
+          </div>
+          <p class="mt-3 text-sm font-semibold text-slate-500" data-order-filter-summary></p>
+          <div class="mt-5 grid gap-3" data-admin-orders></div>
+          <p class="mt-5 hidden rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center text-sm font-semibold text-slate-500" data-admin-orders-empty>
+            No hay compras para los filtros seleccionados.
+          </p>
+        </div>
+      </section>
+
+      <section class="mx-auto mt-8 hidden w-full max-w-4xl px-4 sm:px-6 lg:px-8" data-admin-panel="discounts">
+        <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Descuentos</p>
+            <h2 class="mt-2 text-2xl font-semibold text-[color:var(--color-primary)]">Codigos de descuento</h2>
+          </div>
+
+          <form class="mt-5 grid gap-3 lg:grid-cols-[1fr_150px_130px_120px_auto]" data-discount-form>
+            <input data-discount-code-input type="text" placeholder="Codigo" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+            <select data-discount-type-input class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+              <option value="percent">Porcentaje</option>
+              <option value="fixed">Monto fijo</option>
+            </select>
+            <input data-discount-value-input type="number" min="0" step="0.01" placeholder="Valor" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+            <input data-discount-max-input type="number" min="1" step="1" placeholder="Usos max." class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+            <button type="submit" class="inline-flex min-h-12 items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]">
+              Crear
+            </button>
+          </form>
+          <p class="mt-3 hidden rounded-[1rem] bg-[color:var(--color-surface)] px-4 py-3 text-sm font-semibold text-[color:var(--color-primary)]" data-discount-admin-message></p>
+          <div class="mt-5 grid gap-3" data-admin-discounts></div>
+        </div>
+      </section>
+    </main>
+    <Footer />
+
+    <script define:vars={{ inventoryItems, apiBaseUrl }}>
+      const STORAGE_KEY = "onlycartitas-inventory-state";
+      const SESSION_KEY = "onlycartitas-auth-session";
+      const API_BASE_URL = apiBaseUrl;
+
+      const adminLogin = document.querySelector("[data-admin-login]");
+      const adminContent = document.querySelector("[data-admin-content]");
+      const adminLoginForm = document.querySelector("[data-admin-login-form]");
+      const adminUser = document.querySelector("[data-admin-user]");
+      const adminPassword = document.querySelector("[data-admin-password]");
+      const adminLoginError = document.querySelector("[data-admin-login-error]");
+      const adminLogout = document.querySelector("[data-admin-logout]");
+      const adminTabs = Array.from(document.querySelectorAll("[data-admin-tab]"));
+      const adminPanels = Array.from(document.querySelectorAll("[data-admin-panel]"));
+      const typeButtons = Array.from(document.querySelectorAll("[data-type-button]"));
+      const searchInput = document.querySelector("[data-search]");
+      const productSelect = document.querySelector("[data-product]");
+      const productType = document.querySelector("[data-product-type]");
+      const productName = document.querySelector("[data-product-name]");
+      const productMeta = document.querySelector("[data-product-meta]");
+      const statusBadge = document.querySelector("[data-status-badge]");
+      const stockInput = document.querySelector("[data-stock]");
+      const statusSelect = document.querySelector("[data-status]");
+      const minusButton = document.querySelector("[data-stock-minus]");
+      const plusButton = document.querySelector("[data-stock-plus]");
+      const toggleButton = document.querySelector("[data-toggle-status]");
+      const form = document.querySelector("[data-form]");
+      const message = document.querySelector("[data-message]");
+      const sealedCount = document.querySelector("[data-count-sellados]");
+      const singlesCount = document.querySelector("[data-count-singles]");
+      const ordersContainer = document.querySelector("[data-admin-orders]");
+      const ordersEmpty = document.querySelector("[data-admin-orders-empty]");
+      const refreshOrdersButton = document.querySelector("[data-refresh-orders]");
+      const orderUserFilter = document.querySelector("[data-order-user-filter]");
+      const orderStatusFilter = document.querySelector("[data-order-status-filter]");
+      const orderFilterSummary = document.querySelector("[data-order-filter-summary]");
+      const discountsContainer = document.querySelector("[data-admin-discounts]");
+      const discountForm = document.querySelector("[data-discount-form]");
+      const discountCodeInput = document.querySelector("[data-discount-code-input]");
+      const discountTypeInput = document.querySelector("[data-discount-type-input]");
+      const discountValueInput = document.querySelector("[data-discount-value-input]");
+      const discountMaxInput = document.querySelector("[data-discount-max-input]");
+      const discountAdminMessage = document.querySelector("[data-discount-admin-message]");
+
+      const isElement = (value) => value instanceof HTMLElement;
+      const isInput = (value) => value instanceof HTMLInputElement;
+      const isSelect = (value) => value instanceof HTMLSelectElement;
+      const currencyFormatter = new Intl.NumberFormat("es-CL", {
+        style: "currency",
+        currency: "CLP",
+        maximumFractionDigits: 0
+      });
+      const statusLabels = {
+        pending: "Pendiente",
+        paid: "Pagado",
+        preparing: "Preparando",
+        shipped: "Enviado",
+        completed: "Completado",
+        cancelled: "Cancelado"
+      };
+
+      const productMap = new Map(inventoryItems.map((product) => [product.id, product]));
+      let activeType = "sellado";
+      let activeAdminTab = "inventory";
+      let adminOrders = [];
+
+      const readSession = () => {
+        try {
+          const storedSession = window.localStorage.getItem(SESSION_KEY);
+          const session = storedSession ? JSON.parse(storedSession) : null;
+          const isValidSession = Number(session?.expiresAt) > Date.now();
+
+          if (!isValidSession) window.localStorage.removeItem(SESSION_KEY);
+          return isValidSession ? session : null;
+        } catch {
+          window.localStorage.removeItem(SESSION_KEY);
+          return null;
+        }
+      };
+
+      const isAdminLoggedIn = () => readSession()?.role === "admin";
+
+      const createAdminSession = ({ user, token, expiresAt }) => {
+        window.localStorage.setItem(
+          SESSION_KEY,
+          JSON.stringify({
+            user: user.username,
+            role: user.role,
+            token,
+            expiresAt: new Date(expiresAt).getTime()
+          })
+        );
+      };
+
+      const loginAdmin = async (username, password) => {
+        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (!response.ok) {
+          throw new Error("Usuario o clave incorrectos.");
+        }
+
+        const payload = await response.json();
+        if (payload.user?.role !== "admin") {
+          throw new Error("Permisos insuficientes.");
+        }
+
+        return payload;
+      };
+
+      const updateInventory = async (product, productState) => {
+        const session = readSession();
+        if (!session?.token) throw new Error("Sesion admin requerida.");
+
+        const response = await fetch(`${API_BASE_URL}/api/products/${product.id}/inventory`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.token}`
+          },
+          body: JSON.stringify({
+            stock: productState.stock,
+            active: productState.status === "active"
+          })
+        });
+
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) {
+          throw new Error(payload?.error ?? "No se pudo actualizar el inventario.");
+        }
+
+        return payload.data;
+      };
+
+      const authHeaders = () => {
+        const session = readSession();
+        if (!session?.token) throw new Error("Sesion admin requerida.");
+        return {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.token}`
+        };
+      };
+
+      const renderAdminSession = () => {
+        const isLoggedIn = isAdminLoggedIn();
+
+        adminLogin?.classList.toggle("hidden", isLoggedIn);
+        adminContent?.classList.toggle("hidden", !isLoggedIn);
+        if (isLoggedIn) {
+          loadOrders();
+          loadDiscounts();
+        }
+      };
+
+      const readState = () => {
+        try {
+          const stored = window.localStorage.getItem(STORAGE_KEY);
+          return stored ? JSON.parse(stored) : {};
+        } catch {
+          return {};
+        }
+      };
+
+      const state = readState();
+
+      const getProductState = (product) => ({
+        stock: Number(state[product.id]?.stock ?? product.stock),
+        status: state[product.id]?.status ?? (product.active === false ? "inactive" : "active")
+      });
+
+      const saveState = () => {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      };
+
+      const showMessage = (text) => {
+        if (!isElement(message)) return;
+
+        message.textContent = text;
+        message.classList.remove("hidden");
+        window.setTimeout(() => message.classList.add("hidden"), 1800);
+      };
+
+      const showDiscountMessage = (text) => {
+        if (!isElement(discountAdminMessage)) return;
+
+        discountAdminMessage.textContent = text;
+        discountAdminMessage.classList.remove("hidden");
+        window.setTimeout(() => discountAdminMessage.classList.add("hidden"), 1800);
+      };
+
+      const escapeHtml = (value) =>
+        String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+
+      const activeClass =
+        "rounded-full bg-[color:var(--color-primary)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#173b56]";
+      const inactiveClass =
+        "rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900";
+
+      const renderAdminTab = () => {
+        adminTabs.forEach((tab) => {
+          if (!(tab instanceof HTMLButtonElement)) return;
+          const isActive = tab.dataset.adminTab === activeAdminTab;
+          tab.className = isActive
+            ? "rounded-[1rem] bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm"
+            : "rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950";
+          tab.setAttribute("aria-pressed", isActive ? "true" : "false");
+        });
+
+        adminPanels.forEach((panel) => {
+          if (!isElement(panel)) return;
+          panel.classList.toggle("hidden", panel.dataset.adminPanel !== activeAdminTab);
+        });
+      };
+
+      const updateTypeButtons = () => {
+        const sealedActiveCount = inventoryItems.filter(
+          (product) => product.type === "sellado" && getProductState(product).status === "active"
+        ).length;
+        const singlesActiveCount = inventoryItems.filter(
+          (product) => product.type === "single" && getProductState(product).status === "active"
+        ).length;
+
+        if (isElement(sealedCount)) sealedCount.textContent = String(sealedActiveCount);
+        if (isElement(singlesCount)) singlesCount.textContent = String(singlesActiveCount);
+
+        typeButtons.forEach((button) => {
+          if (!(button instanceof HTMLButtonElement)) return;
+
+          const isActive = button.dataset.type === activeType;
+          button.className = isActive ? activeClass : inactiveClass;
+          button.setAttribute("aria-pressed", isActive ? "true" : "false");
+        });
+      };
+
+      const getFilteredProducts = () => {
+        const query = isInput(searchInput) ? searchInput.value.trim().toLowerCase() : "";
+        return inventoryItems.filter((product) => {
+          const matchesType = product.type === activeType;
+          const matchesQuery =
+            query.length === 0 ||
+            product.name.toLowerCase().includes(query) ||
+            product.category.toLowerCase().includes(query) ||
+            product.set.toLowerCase().includes(query);
+          return matchesType && matchesQuery;
+        });
+      };
+
+      const renderProductOptions = () => {
+        if (!isSelect(productSelect)) return;
+
+        const filteredProducts = getFilteredProducts();
+        productSelect.innerHTML = filteredProducts
+          .map((product) => {
+            const productState = getProductState(product);
+            const suffix = productState.status === "inactive" ? " (inactivo)" : "";
+            return `<option value="${product.id}">${product.name}${suffix}</option>`;
+          })
+          .join("");
+
+        productSelect.disabled = filteredProducts.length === 0;
+        renderSelectedProduct();
+      };
+
+      const getSelectedProduct = () => {
+        if (!isSelect(productSelect)) return null;
+        return productMap.get(productSelect.value) ?? null;
+      };
+
+      const renderSelectedProduct = () => {
+        const product = getSelectedProduct();
+
+        if (!product) {
+          if (isElement(productType)) productType.textContent = activeType === "single" ? "Single" : "Sellado";
+          if (isElement(productName)) productName.textContent = "Sin productos";
+          if (isElement(productMeta)) productMeta.textContent = "Cambia el filtro o busca otro producto.";
+          if (isInput(stockInput)) stockInput.value = "0";
+          if (isSelect(statusSelect)) statusSelect.value = "active";
+          return;
+        }
+
+        const productState = getProductState(product);
+
+        if (isElement(productType)) productType.textContent = product.typeLabel;
+        if (isElement(productName)) productName.textContent = product.name;
+        if (isElement(productMeta)) productMeta.textContent = `${product.category} - ${product.set}`;
+        if (isInput(stockInput)) stockInput.value = String(productState.stock);
+        if (isSelect(statusSelect)) statusSelect.value = productState.status;
+        if (isElement(statusBadge)) {
+          const isActive = productState.status === "active";
+          statusBadge.textContent = `${isActive ? "Activo" : "Inactivo"} - Stock ${productState.stock}`;
+          statusBadge.className = isActive
+            ? "w-fit rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700"
+            : "w-fit rounded-full bg-red-50 px-4 py-2 text-sm font-semibold text-red-700";
+        }
+      };
+
+      const syncStatusWithStock = () => {
+        if (!isInput(stockInput) || !isSelect(statusSelect)) return;
+
+        const stock = Number(stockInput.value);
+        if (Number.isFinite(stock) && stock <= 0) {
+          stockInput.value = "0";
+          statusSelect.value = "inactive";
+        } else if (Number.isFinite(stock) && stock > 0) {
+          statusSelect.value = "active";
+        }
+      };
+
+      const persistSelectedProduct = async () => {
+        const product = getSelectedProduct();
+        if (!product || !isInput(stockInput) || !isSelect(statusSelect)) return;
+
+        syncStatusWithStock();
+        const stock = Number(stockInput.value);
+        const nextState = {
+          stock: Number.isFinite(stock) && stock >= 0 ? stock : 0,
+          status: statusSelect.value === "inactive" ? "inactive" : "active"
+        };
+
+        try {
+          await updateInventory(product, nextState);
+          state[product.id] = nextState;
+          saveState();
+          showMessage("Producto actualizado en el backend.");
+        } catch (error) {
+          showMessage(error instanceof Error ? error.message : "No se pudo actualizar el inventario.");
+          return;
+        }
+        renderProductOptions();
+        if (isSelect(productSelect)) productSelect.value = product.id;
+        updateTypeButtons();
+        renderSelectedProduct();
+      };
+
+      const getFilteredOrders = () => {
+        const userQuery = isInput(orderUserFilter) ? orderUserFilter.value.trim().toLowerCase() : "";
+        const statusQuery = isSelect(orderStatusFilter) ? orderStatusFilter.value : "";
+
+        return adminOrders.filter((order) => {
+          const userText = [
+            order.customer_name,
+            order.customer_email,
+            order.customer_phone,
+            order.user_id
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+          const matchesUser = !userQuery || userText.includes(userQuery);
+          const matchesStatus = !statusQuery || order.status === statusQuery;
+          return matchesUser && matchesStatus;
+        });
+      };
+
+      const renderOrders = () => {
+        const orders = getFilteredOrders();
+        if (isElement(ordersEmpty)) ordersEmpty.classList.toggle("hidden", orders.length > 0);
+        if (isElement(orderFilterSummary)) {
+          orderFilterSummary.textContent = `${orders.length} de ${adminOrders.length} compra(s)`;
+        }
+        if (!isElement(ordersContainer)) return;
+
+        ordersContainer.innerHTML = orders
+          .map(
+            (order) => `
+              <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div class="grid gap-4 lg:grid-cols-[1fr_180px] lg:items-start">
+                  <div>
+                    <p class="text-sm font-semibold text-slate-950">${escapeHtml(order.id)}</p>
+                    <p class="mt-1 text-xs text-slate-500">${escapeHtml(new Date(order.created_at ?? Date.now()).toLocaleString("es-CL"))}</p>
+                    <p class="mt-3 text-sm font-semibold text-[color:var(--color-primary)]">${escapeHtml(order.customer_name)} · ${escapeHtml(order.customer_email)}</p>
+                    <p class="mt-1 text-sm text-slate-600">${escapeHtml(order.delivery_mode)} · ${Number(order.items?.length ?? 0)} producto(s)</p>
+                    <p class="mt-2 text-sm text-slate-600">Subtotal ${currencyFormatter.format(Number(order.subtotal ?? 0))} · Descuento ${currencyFormatter.format(Number(order.discount ?? 0))} · Total ${currencyFormatter.format(Number(order.total ?? 0))}</p>
+                  </div>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Estado</span>
+                    <select class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" data-order-status="${escapeHtml(order.id)}">
+                      ${Object.entries(statusLabels)
+                        .map(([value, label]) => `<option value="${value}" ${order.status === value ? "selected" : ""}>${label}</option>`)
+                        .join("")}
+                    </select>
+                  </label>
+                </div>
+              </article>
+            `
+          )
+          .join("");
+      };
+
+      const loadOrders = async () => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/orders`, {
+            headers: authHeaders()
+          });
+          const payload = await response.json().catch(() => null);
+          if (!response.ok) throw new Error(payload?.error ?? "No se pudieron cargar las compras.");
+          adminOrders = Array.isArray(payload.data) ? payload.data : [];
+          renderOrders();
+        } catch (error) {
+          if (isElement(ordersContainer)) {
+            ordersContainer.innerHTML = `<p class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">${escapeHtml(error instanceof Error ? error.message : "No se pudieron cargar las compras.")}</p>`;
+          }
+        }
+      };
+
+      const updateOrderStatus = async (id, status) => {
+        const response = await fetch(`${API_BASE_URL}/api/orders/${id}/status`, {
+          method: "PATCH",
+          headers: authHeaders(),
+          body: JSON.stringify({ status })
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(payload?.error ?? "No se pudo actualizar el estado.");
+      };
+
+      const renderDiscounts = (discounts) => {
+        if (!isElement(discountsContainer)) return;
+
+        discountsContainer.innerHTML = discounts
+          .map(
+            (discount) => `
+              <article class="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[1fr_150px_120px_120px] lg:items-center">
+                <div>
+                  <p class="text-base font-semibold text-[color:var(--color-primary)]">${escapeHtml(discount.code)}</p>
+                  <p class="mt-1 text-sm text-slate-500">${discount.type === "percent" ? `${discount.value}%` : currencyFormatter.format(Number(discount.value))} · ${Number(discount.used_count ?? 0)} uso(s)${discount.max_uses ? ` de ${discount.max_uses}` : ""}</p>
+                </div>
+                <select class="h-11 rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" data-discount-active="${escapeHtml(discount.id)}">
+                  <option value="true" ${discount.active ? "selected" : ""}>Activo</option>
+                  <option value="false" ${!discount.active ? "selected" : ""}>Inactivo</option>
+                </select>
+                <input type="number" min="0" step="0.01" value="${escapeHtml(discount.value)}" class="h-11 rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" data-discount-value="${escapeHtml(discount.id)}" />
+                <button type="button" class="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950" data-discount-save="${escapeHtml(discount.id)}">
+                  Guardar
+                </button>
+              </article>
+            `
+          )
+          .join("");
+      };
+
+      const loadDiscounts = async () => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/admin/discount-codes`, {
+            headers: authHeaders()
+          });
+          const payload = await response.json().catch(() => null);
+          if (!response.ok) throw new Error(payload?.error ?? "No se pudieron cargar los descuentos.");
+          renderDiscounts(Array.isArray(payload.data) ? payload.data : []);
+        } catch (error) {
+          if (isElement(discountsContainer)) {
+            discountsContainer.innerHTML = `<p class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">${escapeHtml(error instanceof Error ? error.message : "No se pudieron cargar los descuentos.")}</p>`;
+          }
+        }
+      };
+
+      const createDiscount = async () => {
+        if (!isInput(discountCodeInput) || !isSelect(discountTypeInput) || !isInput(discountValueInput)) return;
+
+        const value = Number(discountValueInput.value);
+        const maxUses = isInput(discountMaxInput) ? Number(discountMaxInput.value) : 0;
+        const response = await fetch(`${API_BASE_URL}/api/admin/discount-codes`, {
+          method: "POST",
+          headers: authHeaders(),
+          body: JSON.stringify({
+            code: discountCodeInput.value.trim(),
+            type: discountTypeInput.value,
+            value,
+            active: true,
+            maxUses: Number.isFinite(maxUses) && maxUses > 0 ? maxUses : null
+          })
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(payload?.error ?? "No se pudo crear el descuento.");
+
+        discountCodeInput.value = "";
+        discountValueInput.value = "";
+        if (isInput(discountMaxInput)) discountMaxInput.value = "";
+        showDiscountMessage("Codigo creado.");
+        await loadDiscounts();
+      };
+
+      const updateDiscount = async (id, container = document) => {
+        const activeSelect = container.querySelector(`[data-discount-active="${id}"]`);
+        const valueInput = container.querySelector(`[data-discount-value="${id}"]`);
+        const value = valueInput instanceof HTMLInputElement ? Number(valueInput.value) : 0;
+        const active = activeSelect instanceof HTMLSelectElement ? activeSelect.value === "true" : true;
+        const response = await fetch(`${API_BASE_URL}/api/admin/discount-codes/${id}`, {
+          method: "PATCH",
+          headers: authHeaders(),
+          body: JSON.stringify({ active, value })
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(payload?.error ?? "No se pudo actualizar el descuento.");
+
+        showDiscountMessage("Codigo actualizado.");
+        await loadDiscounts();
+      };
+
+      typeButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          if (!(button instanceof HTMLButtonElement)) return;
+          activeType = button.dataset.type === "single" ? "single" : "sellado";
+          updateTypeButtons();
+          renderProductOptions();
+        });
+      });
+
+      searchInput?.addEventListener("input", renderProductOptions);
+      productSelect?.addEventListener("change", renderSelectedProduct);
+      statusSelect?.addEventListener("change", renderSelectedProduct);
+      stockInput?.addEventListener("input", () => {
+        syncStatusWithStock();
+      });
+
+      minusButton?.addEventListener("click", () => {
+        if (!isInput(stockInput)) return;
+        stockInput.value = String(Math.max(0, Number(stockInput.value) - 1));
+        syncStatusWithStock();
+      });
+
+      plusButton?.addEventListener("click", () => {
+        if (!isInput(stockInput)) return;
+        stockInput.value = String(Number(stockInput.value) + 1);
+        syncStatusWithStock();
+      });
+
+      toggleButton?.addEventListener("click", () => {
+        if (!isSelect(statusSelect)) return;
+        statusSelect.value = statusSelect.value === "active" ? "inactive" : "active";
+        renderSelectedProduct();
+      });
+
+      form?.addEventListener("submit", (event) => {
+        event.preventDefault();
+        persistSelectedProduct();
+      });
+
+      adminTabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          if (!(tab instanceof HTMLButtonElement)) return;
+          activeAdminTab = tab.dataset.adminTab ?? "inventory";
+          renderAdminTab();
+        });
+      });
+
+      orderUserFilter?.addEventListener("input", renderOrders);
+      orderStatusFilter?.addEventListener("change", renderOrders);
+
+      ordersContainer?.addEventListener("change", async (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLSelectElement) || !target.dataset.orderStatus) return;
+
+        try {
+          await updateOrderStatus(target.dataset.orderStatus, target.value);
+          showMessage("Estado de compra actualizado.");
+        } catch (error) {
+          showMessage(error instanceof Error ? error.message : "No se pudo actualizar el estado.");
+          loadOrders();
+        }
+      });
+
+      refreshOrdersButton?.addEventListener("click", loadOrders);
+
+      discountForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        try {
+          await createDiscount();
+        } catch (error) {
+          showDiscountMessage(error instanceof Error ? error.message : "No se pudo crear el descuento.");
+        }
+      });
+
+      discountsContainer?.addEventListener("click", async (event) => {
+        const target = event.target instanceof HTMLElement ? event.target.closest("[data-discount-save]") : null;
+        if (!(target instanceof HTMLElement) || !target.dataset.discountSave) return;
+
+        try {
+          await updateDiscount(target.dataset.discountSave, target.closest("article") ?? document);
+        } catch (error) {
+          showDiscountMessage(error instanceof Error ? error.message : "No se pudo actualizar el descuento.");
+        }
+      });
+
+      adminLoginForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const user = isInput(adminUser) ? adminUser.value.trim() : "";
+        const password = isInput(adminPassword) ? adminPassword.value : "";
+
+        try {
+          const session = await loginAdmin(user, password);
+          createAdminSession(session);
+          adminLoginError?.classList.add("hidden");
+          if (isInput(adminUser)) adminUser.value = "";
+          if (isInput(adminPassword)) adminPassword.value = "";
+          renderAdminSession();
+        } catch (error) {
+          if (isElement(adminLoginError)) {
+            adminLoginError.textContent = error instanceof Error ? error.message : "Usuario o clave incorrectos.";
+            adminLoginError.classList.remove("hidden");
+          }
+        }
+      });
+
+      adminLogout?.addEventListener("click", () => {
+        window.localStorage.removeItem(SESSION_KEY);
+        renderAdminSession();
+      });
+
+      updateTypeButtons();
+      renderProductOptions();
+      renderAdminTab();
+      renderAdminSession();
+    </script>
+  </body>
+</html>

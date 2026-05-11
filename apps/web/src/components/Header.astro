@@ -1,0 +1,683 @@
+---
+type Props = {
+  adminMode?: boolean;
+};
+
+const { adminMode = false } = Astro.props;
+const navItems = [
+  { href: "/", label: "Inicio" },
+  { href: "/singles", label: "Singles" },
+  { href: "/sellados", label: "Sellados" },
+  { href: "/ofertas", label: "Ofertas", featured: true }
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="sticky top-0 z-50 border-b border-white/60 bg-[color:var(--color-surface)]/92 backdrop-blur-xl">
+  <div class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 lg:px-8">
+    <div class="flex items-center gap-3 lg:gap-5">
+      <a href="/" class="flex min-w-0 shrink-0 items-center gap-3">
+        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[color:var(--color-primary)] text-base font-semibold text-white shadow-[0_14px_32px_rgba(17,48,71,0.2)]">
+          OC
+        </div>
+        <div class="min-w-0">
+          <p class="truncate text-base font-semibold tracking-[0.14em] text-[color:var(--color-primary)] uppercase sm:text-lg">
+            OnlyCartitas
+          </p>
+          <p class="text-sm text-slate-500">TCG Store</p>
+        </div>
+      </a>
+
+      {!adminMode ? <nav class="hidden shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white/80 p-1.5 shadow-sm lg:flex">
+        {
+          navItems.map((item) => {
+            const isActive = currentPath === item.href;
+            const isFeatured = item.featured;
+
+            return (
+              <a
+                href={item.href}
+                data-nav-link
+                data-nav-layout="desktop"
+                data-featured={isFeatured ? "true" : "false"}
+                aria-current={isActive ? "page" : undefined}
+                class={`rounded-full px-5 py-2.5 text-sm font-semibold transition ${
+                  isFeatured
+                    ? "bg-[#071c2b] text-white shadow-[0_12px_28px_rgba(17,48,71,0.22)] hover:bg-[color:var(--color-primary)]"
+                    : isActive
+                    ? "bg-[color:var(--color-primary)] text-white shadow-[0_10px_24px_rgba(17,48,71,0.16)]"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                }`}
+              >
+                {item.label}
+              </a>
+            );
+          })
+        }
+      </nav> : null}
+
+      {!adminMode ? <div class="hidden min-w-0 flex-1 md:block">
+        <label class="relative block">
+          <span class="sr-only">Buscar producto o categoria</span>
+          <input
+            data-search-input
+            type="search"
+            placeholder="Buscar producto o categoria"
+            class="h-11 w-full rounded-full border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"
+          />
+        </label>
+      </div> : <div class="hidden min-w-0 flex-1 md:block"></div>}
+
+      <div class="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+        <button
+          type="button"
+          class="inline-flex h-11 items-center gap-1 rounded-full border border-slate-300 bg-white px-1.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:text-slate-950"
+          data-theme-toggle
+          aria-label="Cambiar a modo oscuro"
+          aria-pressed="false"
+        >
+          <span class="inline-flex h-8 w-8 items-center justify-center rounded-full transition" data-theme-sun aria-hidden="true">☀</span>
+          <span class="inline-flex h-8 w-8 items-center justify-center rounded-full transition" data-theme-moon aria-hidden="true">☾</span>
+        </button>
+        {!adminMode ? <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-full bg-[#071c2b] px-4 py-2.5 text-sm font-medium text-white shadow-[0_10px_22px_rgba(17,48,71,0.18)] transition hover:bg-[color:var(--color-primary)]"
+          data-cart-open
+          aria-haspopup="dialog"
+          aria-controls="cart-panel"
+          aria-expanded="false"
+        >
+          Carrito
+          <span class="hidden min-w-5 rounded-full bg-white px-1.5 py-0.5 text-center text-xs font-semibold text-[#071c2b]" data-cart-count>
+            0
+          </span>
+        </button> : null}
+        {adminMode ? (
+          <button
+            type="button"
+            class="rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:text-slate-900 md:inline-flex"
+            data-admin-logout
+          >
+            Salir
+          </button>
+        ) : (
+        <a href="/login" class="hidden rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:text-slate-900 md:inline-flex" data-auth-link>
+          Iniciar sesion
+        </a>
+        )}
+      </div>
+    </div>
+
+    {!adminMode ? <nav class="flex w-full snap-x snap-mandatory items-center gap-2 overflow-x-auto pb-1 hide-scrollbar lg:hidden">
+      {
+        navItems.map((item) => {
+          const isActive = currentPath === item.href;
+          const isFeatured = item.featured;
+
+          return (
+            <a
+              href={item.href}
+              data-nav-link
+              data-nav-layout="mobile"
+              data-featured={isFeatured ? "true" : "false"}
+              aria-current={isActive ? "page" : undefined}
+              class={`min-w-fit shrink-0 snap-start rounded-full px-4 py-3 text-sm font-semibold transition sm:px-5 ${
+                isFeatured
+                  ? "bg-[#071c2b] text-white shadow-[0_12px_28px_rgba(17,48,71,0.22)] hover:bg-[color:var(--color-primary)]"
+                  : isActive
+                  ? "bg-[color:var(--color-primary)] text-white shadow-[0_10px_24px_rgba(17,48,71,0.14)]"
+                  : "border border-slate-300 bg-white/90 text-slate-700 hover:border-slate-400 hover:text-slate-900"
+              }`}
+            >
+              {item.label}
+            </a>
+          );
+        })
+      }
+    </nav> : null}
+
+    {!adminMode ? <label class="relative block md:hidden">
+      <span class="sr-only">Buscar producto o categoria</span>
+      <input
+        data-search-input
+        type="search"
+        placeholder="Buscar producto o categoria"
+        class="h-11 w-full rounded-full border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"
+      />
+    </label> : null}
+  </div>
+</header>
+
+{!adminMode ? <div transition:persist="cart-overlay" class="pointer-events-none fixed inset-0 z-[80] bg-slate-950/0 opacity-0 transition-opacity duration-200 ease-out" data-cart-overlay></div> : null}
+{!adminMode ? (
+<aside
+  transition:persist="cart-panel"
+  id="cart-panel"
+  class="fixed inset-y-0 right-0 z-[90] flex w-full max-w-md translate-x-full transform-gpu flex-col border-l border-slate-200 bg-white shadow-[0_30px_90px_rgba(17,48,71,0.22)] transition-transform duration-[250ms] ease-out will-change-transform [contain:layout_paint] data-[open=true]:translate-x-0"
+  data-cart-panel
+  data-open="false"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+  aria-labelledby="cart-title"
+  inert
+>
+  <div class="flex items-center justify-between gap-4 border-b border-slate-200 px-5 py-4">
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Carrito</p>
+      <h2 id="cart-title" class="mt-1 text-xl font-semibold text-[color:var(--color-primary)]">Tu compra</h2>
+    </div>
+    <button
+      type="button"
+      class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 text-slate-600 transition hover:border-slate-400 hover:text-slate-950"
+      data-cart-close
+      aria-label="Cerrar carrito"
+    >
+      <span aria-hidden="true">X</span>
+    </button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto px-5 py-4">
+    <div class="hidden rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center" data-cart-empty>
+      <p class="text-lg font-semibold text-[color:var(--color-primary)]">Tu carrito esta vacio</p>
+      <p class="mt-2 text-sm text-slate-500">Agrega productos desde el catalogo para revisar tu compra.</p>
+    </div>
+    <div class="flex flex-col gap-4" data-cart-items></div>
+  </div>
+
+  <div class="border-t border-slate-200 bg-[color:var(--color-surface)]/70 px-5 py-4">
+    <div class="flex items-center justify-between gap-4">
+      <span class="text-sm font-semibold text-slate-600">Subtotal</span>
+      <span class="text-2xl font-semibold text-[color:var(--color-primary)]" data-cart-total>$0</span>
+    </div>
+    <button
+      type="button"
+      class="mt-4 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f] disabled:cursor-not-allowed disabled:opacity-45"
+      data-cart-checkout
+      disabled
+    >
+      Continuar compra
+    </button>
+  </div>
+</aside>
+) : null}
+
+<script>
+  const inputs = Array.from(document.querySelectorAll("[data-search-input]"));
+  const navLinks = Array.from(document.querySelectorAll("[data-nav-link]"));
+  const themeToggle = document.querySelector("[data-theme-toggle]");
+  const INVENTORY_STORAGE_KEY = "onlycartitas-inventory-state";
+  const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+
+  const isInputElement = (value) => value instanceof HTMLInputElement;
+  const isThemeButtonElement = (value) => value instanceof HTMLButtonElement;
+
+  const THEME_STORAGE_KEY = "onlycartitas-theme";
+
+  const getStoredTheme = () => {
+    try {
+      const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+      return storedTheme === "dark" || storedTheme === "light" ? storedTheme : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const getPreferredTheme = () =>
+    getStoredTheme() ?? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+
+  const applyTheme = (theme) => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+
+    if (isThemeButtonElement(themeToggle)) {
+      const isDark = theme === "dark";
+      themeToggle.setAttribute("aria-pressed", isDark ? "true" : "false");
+      themeToggle.setAttribute("aria-label", isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro");
+    }
+  };
+
+  const emitSearch = (value) => {
+    window.dispatchEvent(
+      new CustomEvent("carta-noble:search", {
+        detail: value
+      })
+    );
+  };
+
+  const readInventoryState = () => {
+    try {
+      const storedInventory = window.localStorage.getItem(INVENTORY_STORAGE_KEY);
+      return storedInventory ? JSON.parse(storedInventory) : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const syncInventoryFromApi = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/products?includeInactive=true`);
+      if (!response.ok) return;
+
+      const payload = await response.json();
+      if (!Array.isArray(payload.data)) return;
+
+      const apiState = payload.data.reduce((state, product) => {
+        state[product.id] = {
+          stock: Number(product.stock ?? 0),
+          status: product.active === false ? "inactive" : "active"
+        };
+        return state;
+      }, {});
+
+      window.localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(apiState));
+      applyInventoryState();
+    } catch {
+      // Keep the static catalog usable when the API is not running.
+    }
+  };
+
+  const applyInventoryState = () => {
+    const inventoryState = readInventoryState();
+    const productCards = Array.from(document.querySelectorAll("[data-product-id]"));
+
+    productCards.forEach((card) => {
+      if (!(card instanceof HTMLElement)) return;
+
+      const productId = card.dataset.productId;
+      const productState = productId ? inventoryState[productId] : null;
+      const cartButton = card.querySelector("[data-cart-add]");
+      const stockLabel = card.querySelector("[data-product-stock-label]");
+      const stock = Number(productState?.stock ?? cartButton?.dataset.cartStock ?? 0);
+      const isInactive = productState?.status === "inactive" || stock <= 0;
+
+      if (card.hasAttribute("data-product-card")) {
+        card.classList.toggle("inventory-hidden", isInactive);
+      }
+
+      if (cartButton instanceof HTMLButtonElement) {
+        cartButton.dataset.cartStock = String(stock);
+        cartButton.disabled = isInactive;
+        cartButton.textContent = isInactive ? "Sin stock" : "Agregar al carrito";
+      }
+
+      if (stockLabel instanceof HTMLElement) {
+        stockLabel.textContent = `Stock ${Math.max(0, stock)}`;
+      }
+    });
+  };
+
+  const navVariantClasses = [
+    "bg-[#071c2b]",
+    "bg-[color:var(--color-primary)]",
+    "bg-white/90",
+    "border",
+    "border-slate-300",
+    "text-white",
+    "text-slate-600",
+    "text-slate-700",
+    "hover:bg-[color:var(--color-primary)]",
+    "hover:bg-slate-100",
+    "hover:border-slate-400",
+    "hover:text-slate-900",
+    "hover:text-slate-950",
+    "shadow-[0_10px_24px_rgba(17,48,71,0.14)]",
+    "shadow-[0_10px_24px_rgba(17,48,71,0.16)]",
+    "shadow-[0_12px_28px_rgba(17,48,71,0.22)]"
+  ];
+
+  const updateNavState = () => {
+    const currentPath = window.location.pathname;
+
+    navLinks.forEach((link) => {
+      if (!(link instanceof HTMLAnchorElement)) return;
+
+      const isActive = link.pathname === currentPath;
+      const isFeatured = link.dataset.featured === "true";
+      const isMobile = link.dataset.navLayout === "mobile";
+
+      link.classList.remove(...navVariantClasses);
+      link.toggleAttribute("aria-current", isActive);
+      if (isActive) link.setAttribute("aria-current", "page");
+
+      if (isFeatured) {
+        link.classList.add(
+          "bg-[#071c2b]",
+          "text-white",
+          "shadow-[0_12px_28px_rgba(17,48,71,0.22)]",
+          "hover:bg-[color:var(--color-primary)]"
+        );
+      } else if (isActive) {
+        link.classList.add(
+          "bg-[color:var(--color-primary)]",
+          "text-white",
+          isMobile
+            ? "shadow-[0_10px_24px_rgba(17,48,71,0.14)]"
+            : "shadow-[0_10px_24px_rgba(17,48,71,0.16)]"
+        );
+      } else if (isMobile) {
+        link.classList.add(
+          "border",
+          "border-slate-300",
+          "bg-white/90",
+          "text-slate-700",
+          "hover:border-slate-400",
+          "hover:text-slate-900"
+        );
+      } else {
+        link.classList.add("text-slate-600", "hover:bg-slate-100", "hover:text-slate-950");
+      }
+    });
+  };
+
+  applyTheme(getPreferredTheme());
+
+  themeToggle?.addEventListener("click", () => {
+    const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    } catch {
+      // Ignore storage failures; the current page can still switch theme.
+    }
+    applyTheme(nextTheme);
+  });
+
+  window.addEventListener("storage", (event) => {
+    if (event.key !== THEME_STORAGE_KEY) return;
+    if (event.newValue !== "dark" && event.newValue !== "light") return;
+
+    applyTheme(event.newValue);
+  });
+
+  inputs.forEach((input) => {
+    input.addEventListener("input", (event) => {
+      const currentTarget = event.currentTarget;
+      const value = isInputElement(currentTarget) ? currentTarget.value : "";
+
+      inputs.forEach((item) => {
+        if (item !== currentTarget && isInputElement(item)) {
+          item.value = value;
+        }
+      });
+
+      emitSearch(value);
+    });
+  });
+
+  emitSearch("");
+  updateNavState();
+  applyInventoryState();
+  syncInventoryFromApi();
+  document.addEventListener("astro:page-load", updateNavState);
+  document.addEventListener("astro:page-load", () => {
+    applyInventoryState();
+    syncInventoryFromApi();
+  });
+  window.addEventListener("storage", (event) => {
+    if (event.key === INVENTORY_STORAGE_KEY) applyInventoryState();
+  });
+
+  const CART_STORAGE_KEY = "carta-noble-cart";
+  const AUTH_SESSION_KEY = "onlycartitas-auth-session";
+  const cartOpenButton = document.querySelector("[data-cart-open]");
+  const cartCloseButton = document.querySelector("[data-cart-close]");
+  const cartOverlay = document.querySelector("[data-cart-overlay]");
+  const cartPanel = document.querySelector("[data-cart-panel]");
+  const cartItemsContainer = document.querySelector("[data-cart-items]");
+  const cartEmptyState = document.querySelector("[data-cart-empty]");
+  const cartCount = document.querySelector("[data-cart-count]");
+  const cartTotal = document.querySelector("[data-cart-total]");
+  const cartCheckout = document.querySelector("[data-cart-checkout]");
+  const authLink = document.querySelector("[data-auth-link]");
+
+  const currencyFormatter = new Intl.NumberFormat("es-CL", {
+    style: "currency",
+    currency: "CLP",
+    maximumFractionDigits: 0
+  });
+
+  const isCartItemElement = (value) => value instanceof HTMLElement;
+  const isCartButtonElement = (value) => value instanceof HTMLButtonElement;
+  let isCartOpen = false;
+
+  const readCart = () => {
+    try {
+      const storedCart = window.localStorage.getItem(CART_STORAGE_KEY);
+      const parsedCart = storedCart ? JSON.parse(storedCart) : [];
+      return Array.isArray(parsedCart)
+        ? parsedCart.map((item) => ({
+            ...item,
+            stock: Number(item.stock ?? 99),
+            quantity: Number(item.quantity ?? 1)
+          }))
+        : [];
+    } catch {
+      return [];
+    }
+  };
+
+  let cart = readCart();
+
+  const updateAuthLink = () => {
+    if (!(authLink instanceof HTMLAnchorElement)) return;
+    try {
+      const storedSession = window.localStorage.getItem(AUTH_SESSION_KEY);
+      const session = storedSession ? JSON.parse(storedSession) : null;
+      const isValid = session?.expiresAt && Date.now() < Number(session.expiresAt);
+      if (!isValid) {
+        authLink.href = "/login";
+        authLink.textContent = "Iniciar sesion";
+        return;
+      }
+      authLink.href = session.role === "admin" ? "/admin-inventario" : "/cuenta";
+      authLink.textContent = session.role === "admin" ? "Admin" : "Mi cuenta";
+    } catch {
+      authLink.href = "/login";
+      authLink.textContent = "Iniciar sesion";
+    }
+  };
+
+  const writeCart = () => {
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+  };
+
+  const getCartQuantity = () => cart.reduce((total, item) => total + item.quantity, 0);
+  const getCartTotal = () => cart.reduce((total, item) => total + item.price * item.quantity, 0);
+
+  const openCart = () => {
+    isCartOpen = true;
+    if (isCartItemElement(cartOverlay)) {
+      cartOverlay.classList.remove("pointer-events-none", "bg-slate-950/0", "opacity-0");
+      cartOverlay.classList.add("bg-slate-950/45", "opacity-100");
+    }
+    if (isCartItemElement(cartPanel)) {
+      cartPanel.dataset.open = "true";
+      cartPanel.setAttribute("aria-hidden", "false");
+      cartPanel.removeAttribute("inert");
+      cartPanel.classList.remove("translate-x-full");
+    }
+    if (cartOpenButton instanceof HTMLButtonElement) {
+      cartOpenButton.setAttribute("aria-expanded", "true");
+    }
+    document.body.style.overflow = "hidden";
+    window.setTimeout(() => {
+      if (cartCloseButton instanceof HTMLButtonElement) cartCloseButton.focus();
+    }, 260);
+  };
+
+  const closeCart = () => {
+    if (!isCartOpen) return;
+    isCartOpen = false;
+    if (isCartItemElement(cartOverlay)) {
+      cartOverlay.classList.add("pointer-events-none", "bg-slate-950/0", "opacity-0");
+      cartOverlay.classList.remove("bg-slate-950/45", "opacity-100");
+    }
+    if (isCartItemElement(cartPanel)) {
+      cartPanel.dataset.open = "false";
+      cartPanel.setAttribute("aria-hidden", "true");
+      cartPanel.setAttribute("inert", "");
+      cartPanel.classList.add("translate-x-full");
+    }
+    if (cartOpenButton instanceof HTMLButtonElement) {
+      cartOpenButton.setAttribute("aria-expanded", "false");
+      cartOpenButton.focus();
+    }
+    document.body.style.overflow = "";
+  };
+
+  const setCartQuantity = (id, quantity) => {
+    const currentItem = cart.find((item) => item.id === id);
+    const nextQuantity = currentItem ? Math.min(quantity, currentItem.stock) : quantity;
+
+    if (quantity <= 0) {
+      cart = cart.filter((item) => item.id !== id);
+    } else {
+      cart = cart.map((item) => (item.id === id ? { ...item, quantity: nextQuantity } : item));
+    }
+    writeCart();
+    renderCart();
+  };
+
+  const renderCart = () => {
+    const itemCount = getCartQuantity();
+    const total = getCartTotal();
+
+    if (isCartItemElement(cartCount)) {
+      cartCount.textContent = String(itemCount);
+      cartCount.classList.toggle("hidden", itemCount === 0);
+    }
+
+    if (isCartItemElement(cartTotal)) {
+      cartTotal.textContent = currencyFormatter.format(total);
+    }
+
+    if (isCartButtonElement(cartCheckout)) {
+      cartCheckout.disabled = itemCount === 0;
+    }
+
+    if (isCartItemElement(cartEmptyState)) {
+      cartEmptyState.classList.toggle("hidden", itemCount > 0);
+    }
+
+    if (!isCartItemElement(cartItemsContainer)) return;
+
+    cartItemsContainer.innerHTML = cart
+      .map(
+        (item) => {
+          const isMaxQuantity = item.quantity >= item.stock;
+          return `
+          <article class="grid grid-cols-[72px_1fr] gap-3 rounded-[1.25rem] border border-slate-200 bg-white p-3 shadow-[0_12px_30px_rgba(17,48,71,0.06)] animate-[cartItemIn_180ms_ease-out]">
+            <div class="overflow-hidden rounded-2xl bg-[color:var(--color-surface)]">
+              <img src="${item.image}" alt="${item.name}" width="96" height="96" class="h-24 w-full object-contain p-2" loading="lazy" decoding="async" />
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-semibold text-slate-950">${item.name}</p>
+                  <p class="mt-1 text-xs text-slate-500">${item.set} - ${item.language}</p>
+                  <p class="mt-1 text-xs font-medium ${isMaxQuantity ? "text-amber-700" : "text-slate-600"}">
+                    ${isMaxQuantity ? "Maximo disponible" : `Stock disponible: ${item.stock}`}
+                  </p>
+                </div>
+                <button type="button" class="shrink-0 text-xs font-semibold text-slate-600 transition hover:text-red-600" data-cart-remove="${item.id}" aria-label="Quitar ${item.name} del carrito">
+                  Quitar
+                </button>
+              </div>
+
+              <div class="mt-3 flex items-center justify-between gap-3">
+                <div class="inline-flex items-center rounded-full border border-slate-300 bg-white">
+                  <button type="button" class="h-8 w-8 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-cart-decrease="${item.id}" aria-label="Restar una unidad de ${item.name}">-</button>
+                  <span class="min-w-8 text-center text-sm font-semibold text-slate-900">${item.quantity}</span>
+                  <button type="button" class="h-8 w-8 text-sm font-semibold text-slate-600 transition hover:text-slate-950 disabled:cursor-not-allowed disabled:text-slate-300" data-cart-increase="${item.id}" aria-label="Sumar una unidad de ${item.name}" ${isMaxQuantity ? "disabled" : ""}>+</button>
+                </div>
+                <p class="text-sm font-semibold text-[color:var(--color-primary)]">${currencyFormatter.format(item.price * item.quantity)}</p>
+              </div>
+            </div>
+          </article>
+        `;
+        }
+      )
+      .join("");
+  };
+
+  const addToCart = (product) => {
+    const existingItem = cart.find((item) => item.id === product.id);
+    if (existingItem) {
+      if (existingItem.quantity >= product.stock) {
+        renderCart();
+        openCart();
+        return;
+      }
+      cart = cart.map((item) =>
+        item.id === product.id
+          ? { ...item, stock: product.stock, quantity: Math.min(item.quantity + 1, product.stock) }
+          : item
+      );
+    } else {
+      cart = [...cart, { ...product, quantity: 1 }];
+    }
+    writeCart();
+    renderCart();
+    window.requestAnimationFrame(openCart);
+  };
+
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    const button = target instanceof HTMLElement ? target.closest("[data-cart-add]") : null;
+
+    if (button instanceof HTMLElement) {
+      const price = Number(button.dataset.cartPrice ?? 0);
+      const stock = Number(button.dataset.cartStock ?? 0);
+      if (stock <= 0) return;
+
+      addToCart({
+        id: button.dataset.cartId ?? "",
+        name: button.dataset.cartName ?? "",
+        category: button.dataset.cartCategory ?? "",
+        set: button.dataset.cartSet ?? "",
+        language: button.dataset.cartLanguage ?? "",
+        price,
+        stock,
+        image: button.dataset.cartImage ?? ""
+      });
+    }
+  });
+
+  cartItemsContainer?.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+
+    const increaseId = target.dataset.cartIncrease;
+    const decreaseId = target.dataset.cartDecrease;
+    const removeId = target.dataset.cartRemove;
+
+    if (increaseId) {
+      const item = cart.find((cartItem) => cartItem.id === increaseId);
+      if (item) setCartQuantity(increaseId, item.quantity + 1);
+    }
+
+    if (decreaseId) {
+      const item = cart.find((cartItem) => cartItem.id === decreaseId);
+      if (item) setCartQuantity(decreaseId, item.quantity - 1);
+    }
+
+    if (removeId) {
+      setCartQuantity(removeId, 0);
+    }
+  });
+
+  cartOpenButton?.addEventListener("click", openCart);
+  cartCloseButton?.addEventListener("click", closeCart);
+  cartOverlay?.addEventListener("click", closeCart);
+  cartCheckout?.addEventListener("click", () => {
+    if (getCartQuantity() === 0) return;
+    window.location.href = "/checkout";
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeCart();
+  });
+
+  renderCart();
+  updateAuthLink();
+</script>

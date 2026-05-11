@@ -1,0 +1,51 @@
+---
+import { ClientRouter } from "astro:transitions";
+
+type Props = {
+  title: string;
+  description: string;
+  image?: string;
+};
+
+const { title, description, image } = Astro.props;
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
+const faviconSvg =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23113047'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-family='Arial,sans-serif' font-size='22' font-weight='700' fill='white'%3EOC%3C/text%3E%3C/svg%3E";
+const socialImage = image ? new URL(image, canonicalUrl).toString() : null;
+---
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content={description} />
+<meta name="robots" content="index, follow" />
+<meta name="theme-color" content="#113047" />
+<link rel="canonical" href={canonicalUrl.toString()} />
+<link rel="icon" href={faviconSvg} type="image/svg+xml" />
+<link rel="preconnect" href="https://tcgplayer-cdn.tcgplayer.com" crossorigin />
+<link rel="preconnect" href="https://images.pokemontcg.io" crossorigin />
+<title>{title}</title>
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="OnlyCartitas" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonicalUrl.toString()} />
+{socialImage ? <meta property="og:image" content={socialImage} /> : null}
+
+<meta name="twitter:card" content={socialImage ? "summary_large_image" : "summary"} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+{socialImage ? <meta name="twitter:image" content={socialImage} /> : null}
+<script is:inline>
+  (() => {
+    try {
+      const storedTheme = window.localStorage.getItem("onlycartitas-theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const theme = storedTheme === "dark" || storedTheme === "light" ? storedTheme : prefersDark ? "dark" : "light";
+      document.documentElement.dataset.theme = theme;
+    } catch {
+      document.documentElement.dataset.theme = "light";
+    }
+  })();
+</script>
+<ClientRouter fallback="none" />

@@ -1,0 +1,73 @@
+import "dotenv/config";
+import cors from "@fastify/cors";
+import Fastify from "fastify";
+import { ZodError } from "zod";
+import { env, hasDatabaseConfig } from "./env.js";
+import { ApiError } from "./http.js";
+import { authRoutes } from "./routes/auth.js";
+import { discountCodeRoutes } from "./routes/discount-codes.js";
+import { orderRoutes } from "./routes/orders.js";
+import { paymentRoutes } from "./routes/payments.js";
+import { productRoutes } from "./routes/products.js";
+
+const app = Fastify({
+  logger: true
+});
+
+app.addHook("onRequest", async (_request, reply) => {
+  reply.header("X-Content-Type-Options", "nosniff");
+  reply.header("X-Frame-Options", "DENY");
+  reply.header("Referrer-Policy", "no-referrer");
+  reply.header("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+  reply.header("Cross-Origin-Resource-Policy", "same-site");
+});
+
+await app.register(cors, {
+  origin: env.NODE_ENV === "production" ? env.WEB_ORIGIN : env.WEB_ORIGIN === "*" ? true : env.WEB_ORIGIN,
+  methods: ["GET", "POST", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+});
+
+app.setErrorHandler((error, _request, reply) => {
+  if (error instanceof ApiError) {
+    reply.status(error.statusCode).send({
+      error: error.message
+    });
+    return;
+  }
+
+  if (error instanceof ZodError) {
+    reply.status(400).send({
+      error: "Solicitud invalida",
+      details: error.issues
+    });
+    return;
+  }
+
+  app.log.error(error);
+  reply.status(500).send({
+    error: "Error interno"
+  });
+});
+
+app.get("/health", async () => ({
+  ok: true,
+  service: "onlycartitas-api",
+  database: hasDatabaseConfig ? "configured" : "missing"
+}));
+
+await app.register(authRoutes);
+await app.register(discountCodeRoutes);
+await app.register(orderRoutes);
+await app.register(paymentRoutes);
+await app.register(productRoutes);
+
+try {
+  await app.listen({
+    port: env.PORT,
+    host: "0.0.0.0"
+  });
+} catch (error) {
+  app.log.error(error);
+  process.exit(1);
+}

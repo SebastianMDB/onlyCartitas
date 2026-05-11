@@ -1,0 +1,479 @@
+---
+import Header from "../components/Header.astro";
+import BaseHead from "../components/BaseHead.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/global.css";
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <BaseHead
+      title="Checkout | OnlyCartitas"
+      description="Procesa el pago de tu carrito en OnlyCartitas con datos de contacto, entrega y resumen del pedido."
+    />
+  </head>
+  <body class="bg-[color:var(--color-surface)] text-slate-900 antialiased">
+    <Header />
+
+    <main class="pb-16">
+      <section class="mx-auto grid w-full max-w-7xl gap-8 px-4 pt-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_440px] lg:px-8">
+        <form class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-7" data-checkout-form>
+          <div class="flex flex-col gap-2 border-b border-slate-200 pb-5">
+            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--color-secondary)]">Checkout</p>
+            <h1 class="text-3xl font-semibold tracking-tight text-[color:var(--color-primary)] sm:text-4xl">Finalizar compra</h1>
+            <p class="text-sm leading-6 text-slate-500">Completa tus datos para preparar el pedido y confirmar el pago.</p>
+          </div>
+
+          <div class="mt-7 grid gap-8">
+            <section class="grid gap-4">
+              <div class="flex items-center justify-between gap-4">
+                <h2 class="text-xl font-semibold text-[color:var(--color-primary)]">Contacto</h2>
+                <a href="/login" class="text-sm font-semibold text-[color:var(--color-secondary)] hover:underline">Iniciar sesion</a>
+              </div>
+              <label class="block">
+                <span class="sr-only">Correo electronico</span>
+                <input data-required data-checkout-email type="email" autocomplete="email" placeholder="Correo electronico" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+              </label>
+              <label class="flex items-center gap-3 text-sm text-slate-600">
+                <input type="checkbox" class="h-4 w-4 rounded border-slate-300 text-[color:var(--color-primary)]" />
+                Enviarme novedades y ofertas por correo electronico
+              </label>
+            </section>
+
+            <section class="grid gap-4">
+              <h2 class="text-xl font-semibold text-[color:var(--color-primary)]">Entrega</h2>
+              <div class="grid rounded-2xl bg-slate-100 p-1 sm:grid-cols-2" data-delivery-tabs>
+                <button type="button" class="rounded-[1rem] bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm" data-delivery-option="envio" aria-pressed="true">Envio</button>
+                <button type="button" class="rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-delivery-option="retiro" aria-pressed="false">Retiro</button>
+              </div>
+
+              <div class="grid gap-3" data-address-fields>
+                <select data-required class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                  <option>Chile</option>
+                </select>
+                <div class="grid gap-3 sm:grid-cols-2">
+                  <input data-required data-checkout-first-name type="text" autocomplete="given-name" placeholder="Nombre" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  <input data-required data-checkout-last-name type="text" autocomplete="family-name" placeholder="Apellidos" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                </div>
+                <input data-required type="text" placeholder="RUT" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                <input data-required data-checkout-address type="text" autocomplete="street-address" placeholder="Direccion" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                <input type="text" placeholder="Casa, departamento, etc. (opcional)" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                <input data-required type="text" placeholder="Comuna" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                <select data-required class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                  <option>Region Metropolitana</option>
+                  <option>Valparaiso</option>
+                  <option>Biobio</option>
+                  <option>La Araucania</option>
+                  <option>Los Lagos</option>
+                </select>
+              </div>
+
+              <div class="hidden rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600" data-pickup-info>
+                Retiro disponible coordinando por mensaje despues de confirmar el pedido. No se cobrara envio.
+              </div>
+
+              <input data-required data-checkout-phone type="tel" autocomplete="tel" placeholder="Telefono" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+            </section>
+
+            <section class="grid gap-4">
+              <h2 class="text-xl font-semibold text-[color:var(--color-primary)]">Pago</h2>
+              <div class="grid gap-3 sm:grid-cols-2">
+                <label class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-300 bg-white p-4 text-sm font-semibold text-slate-700">
+                  <input type="radio" name="payment" value="transferencia" checked class="h-4 w-4" />
+                  Transferencia bancaria
+                </label>
+                <label class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-300 bg-white p-4 text-sm font-semibold text-slate-700">
+                  <input type="radio" name="payment" value="tarjeta" class="h-4 w-4" />
+                  Tarjeta / Webpay
+                </label>
+              </div>
+              <p class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
+                Este checkout deja el pedido preparado. La integracion real con pasarela de pago se puede conectar despues.
+              </p>
+              <label class="flex items-start gap-3 text-sm leading-6 text-slate-600">
+                <input type="checkbox" class="mt-1 h-4 w-4 rounded border-slate-300" data-terms-check />
+                <span>Acepto las <a href="/politicas" class="font-semibold text-[color:var(--color-primary)] hover:underline">politicas de compra, envio y devoluciones</a>.</span>
+              </label>
+            </section>
+          </div>
+
+          <p class="mt-6 hidden rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" data-checkout-error>
+            Completa los campos requeridos, acepta las politicas y revisa que el carrito tenga productos.
+          </p>
+
+          <button type="submit" class="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]" data-pay-button>
+            Pagar pedido
+          </button>
+        </form>
+
+        <aside class="lg:sticky lg:top-28 lg:self-start">
+          <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--color-secondary)]">Resumen</p>
+                <h2 class="mt-1 text-2xl font-semibold text-[color:var(--color-primary)]">Tu pedido</h2>
+              </div>
+              <a href="/ofertas" class="text-sm font-semibold text-slate-500 hover:text-slate-950">Seguir comprando</a>
+            </div>
+
+            <div class="mt-5 grid gap-4" data-summary-items></div>
+
+            <div class="mt-5 hidden rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center" data-empty-checkout>
+              <p class="text-base font-semibold text-[color:var(--color-primary)]">Tu carrito esta vacio</p>
+              <p class="mt-2 text-sm text-slate-500">Agrega productos antes de pagar.</p>
+              <a href="/ofertas" class="mt-4 inline-flex rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white">Ver productos</a>
+            </div>
+
+            <div class="mt-5 grid grid-cols-[1fr_auto] gap-3">
+              <input type="text" placeholder="Codigo de descuento" class="h-12 min-w-0 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" data-discount-code />
+              <button type="button" class="rounded-2xl border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950" data-apply-discount>Aplicar</button>
+            </div>
+            <p class="mt-2 hidden text-sm font-semibold text-emerald-700" data-discount-message>Descuento aplicado.</p>
+
+            <dl class="mt-6 grid gap-3 border-t border-slate-200 pt-5 text-sm">
+              <div class="flex items-center justify-between gap-4">
+                <dt class="text-slate-600">Subtotal</dt>
+                <dd class="font-semibold text-slate-950" data-summary-subtotal>$0</dd>
+              </div>
+              <div class="flex items-center justify-between gap-4">
+                <dt class="text-slate-600">Envio</dt>
+                <dd class="font-semibold text-slate-950" data-summary-shipping>Por calcular</dd>
+              </div>
+              <div class="flex items-center justify-between gap-4">
+                <dt class="text-slate-600">Descuento</dt>
+                <dd class="font-semibold text-emerald-700" data-summary-discount>$0</dd>
+              </div>
+              <div class="flex items-end justify-between gap-4 border-t border-slate-200 pt-4">
+                <dt>
+                  <span class="block text-lg font-semibold text-[color:var(--color-primary)]">Total</span>
+                  <span class="mt-1 block text-xs text-slate-500">Incluye impuestos cuando correspondan</span>
+                </dt>
+                <dd class="text-2xl font-semibold text-[color:var(--color-primary)]" data-summary-total>$0</dd>
+              </div>
+            </dl>
+          </div>
+        </aside>
+      </section>
+
+      <section class="mx-auto hidden w-full max-w-xl px-4 pt-10 sm:px-6 lg:px-8" data-success-state>
+        <div class="rounded-[2rem] border border-emerald-200 bg-white/90 p-6 text-center shadow-[0_20px_60px_rgba(17,48,71,0.08)]">
+          <p class="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Pedido creado</p>
+          <h2 class="mt-2 text-3xl font-semibold text-[color:var(--color-primary)]">Compra registrada</h2>
+          <p class="mt-2 text-lg font-semibold text-emerald-700" data-success-order></p>
+          <p class="mt-3 text-sm leading-6 text-slate-600">Guardamos el pedido en el backend. El carrito quedo limpio.</p>
+          <p class="mt-2 hidden text-sm leading-6 text-slate-600" data-success-payment-note>
+            Mercado Pago todavia no esta configurado; el pedido quedo pendiente para coordinar pago.
+          </p>
+          <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+            <a href="/cuenta" class="inline-flex rounded-full bg-[#071c2b] px-6 py-3 text-sm font-semibold text-white">Ver mi cuenta</a>
+            <a href="/" class="inline-flex rounded-full border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700">Volver al inicio</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <Footer />
+
+    <script>
+      const CART_STORAGE_KEY = "carta-noble-cart";
+      const SESSION_STORAGE_KEY = "onlycartitas-auth-session";
+      const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+      const SHIPPING_PRICE = 4990;
+
+      const checkoutForm = document.querySelector("[data-checkout-form]");
+      const summaryItems = document.querySelector("[data-summary-items]");
+      const emptyCheckout = document.querySelector("[data-empty-checkout]");
+      const addressFields = document.querySelector("[data-address-fields]");
+      const pickupInfo = document.querySelector("[data-pickup-info]");
+      const deliveryButtons = Array.from(document.querySelectorAll("[data-delivery-option]"));
+      const discountInput = document.querySelector("[data-discount-code]");
+      const discountButton = document.querySelector("[data-apply-discount]");
+      const discountMessage = document.querySelector("[data-discount-message]");
+      const checkoutError = document.querySelector("[data-checkout-error]");
+      const successState = document.querySelector("[data-success-state]");
+      const successOrder = document.querySelector("[data-success-order]");
+      const successPaymentNote = document.querySelector("[data-success-payment-note]");
+      const payButton = document.querySelector("[data-pay-button]");
+      const termsCheck = document.querySelector("[data-terms-check]");
+      const emailInput = document.querySelector("[data-checkout-email]");
+      const firstNameInput = document.querySelector("[data-checkout-first-name]");
+      const lastNameInput = document.querySelector("[data-checkout-last-name]");
+      const addressInput = document.querySelector("[data-checkout-address]");
+      const phoneInput = document.querySelector("[data-checkout-phone]");
+      const subtotalLabel = document.querySelector("[data-summary-subtotal]");
+      const shippingLabel = document.querySelector("[data-summary-shipping]");
+      const discountLabel = document.querySelector("[data-summary-discount]");
+      const totalLabel = document.querySelector("[data-summary-total]");
+      let deliveryMode = "envio";
+      /** @type {{ code: string; discount: number } | null} */
+      let appliedDiscount = null;
+
+      const currencyFormatter = new Intl.NumberFormat("es-CL", {
+        style: "currency",
+        currency: "CLP",
+        maximumFractionDigits: 0
+      });
+
+      const isHTMLElement = (/** @type {unknown} */ value) => value instanceof HTMLElement;
+      const isInputElement = (/** @type {unknown} */ value) => value instanceof HTMLInputElement;
+
+      const escapeHtml = (/** @type {unknown} */ value) =>
+        String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+
+      const readCart = () => {
+        try {
+          const storedCart = window.localStorage.getItem(CART_STORAGE_KEY);
+          const parsedCart = storedCart ? JSON.parse(storedCart) : [];
+          return Array.isArray(parsedCart)
+            ? parsedCart.map((item) => ({
+                ...item,
+                price: Number(item.price ?? 0),
+                quantity: Number(item.quantity ?? 1)
+              }))
+            : [];
+        } catch {
+          return [];
+        }
+      };
+
+      const readSession = () => {
+        try {
+          const storedSession = window.localStorage.getItem(SESSION_STORAGE_KEY);
+          const session = storedSession ? JSON.parse(storedSession) : null;
+          if (!session?.expiresAt || Date.now() > Number(session.expiresAt)) return null;
+          return session;
+        } catch {
+          return null;
+        }
+      };
+
+      const applySessionToForm = () => {
+        const session = readSession();
+        if (!session) return;
+        if (firstNameInput instanceof HTMLInputElement && !firstNameInput.value) {
+          firstNameInput.value = session.user ?? "";
+        }
+      };
+
+      let cart = readCart();
+
+      const getSubtotal = () => cart.reduce((total, item) => total + item.price * item.quantity, 0);
+      const getShipping = () => (deliveryMode === "envio" && cart.length > 0 ? SHIPPING_PRICE : 0);
+      const getDiscount = () => Number(appliedDiscount?.discount ?? 0);
+      const getTotal = () => Math.max(0, getSubtotal() + getShipping() - getDiscount());
+
+      const renderSummary = () => {
+        const subtotal = getSubtotal();
+        const shipping = getShipping();
+        const discount = getDiscount();
+        const total = getTotal();
+
+        if (isHTMLElement(emptyCheckout)) emptyCheckout.classList.toggle("hidden", cart.length > 0);
+        if (isHTMLElement(payButton)) {
+          payButton.toggleAttribute("disabled", cart.length === 0);
+          payButton.classList.toggle("opacity-45", cart.length === 0);
+          payButton.classList.toggle("cursor-not-allowed", cart.length === 0);
+        }
+        if (isHTMLElement(subtotalLabel)) subtotalLabel.textContent = currencyFormatter.format(subtotal);
+        if (isHTMLElement(shippingLabel)) shippingLabel.textContent = shipping > 0 ? currencyFormatter.format(shipping) : "Gratis";
+        if (isHTMLElement(discountLabel)) discountLabel.textContent = `-${currencyFormatter.format(discount)}`;
+        if (isHTMLElement(totalLabel)) totalLabel.textContent = currencyFormatter.format(total);
+        if (!isHTMLElement(summaryItems)) return;
+
+        summaryItems.innerHTML = cart
+          .map(
+            (item) => `
+              <article class="grid grid-cols-[68px_1fr_auto] items-center gap-3">
+                <div class="relative rounded-2xl bg-slate-50 p-2">
+                  <img src="${escapeHtml(item.image ?? "")}" alt="${escapeHtml(item.name ?? "")}" class="h-16 w-full object-contain" loading="lazy" decoding="async" />
+                  <span class="absolute -right-2 -top-2 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[#071c2b] px-1.5 text-xs font-semibold text-white">${escapeHtml(item.quantity)}</span>
+                </div>
+                <div class="min-w-0">
+                  <p class="line-clamp-2 text-sm font-semibold text-slate-950">${escapeHtml(item.name ?? "")}</p>
+                  <p class="mt-1 text-xs text-slate-500">${escapeHtml(item.set ?? "")} - ${escapeHtml(item.language ?? "")}</p>
+                </div>
+                <p class="text-sm font-semibold text-slate-950">${currencyFormatter.format(item.price * item.quantity)}</p>
+              </article>
+            `
+          )
+          .join("");
+      };
+
+      const setDeliveryMode = (/** @type {"envio" | "retiro"} */ mode) => {
+        deliveryMode = mode;
+        deliveryButtons.forEach((button) => {
+          if (!(button instanceof HTMLButtonElement)) return;
+          const isActive = button.dataset.deliveryOption === mode;
+          button.setAttribute("aria-pressed", isActive ? "true" : "false");
+          button.className = isActive
+            ? "rounded-[1rem] bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm"
+            : "rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950";
+        });
+        if (isHTMLElement(addressFields)) addressFields.classList.toggle("hidden", mode !== "envio");
+        if (isHTMLElement(pickupInfo)) pickupInfo.classList.toggle("hidden", mode !== "retiro");
+        renderSummary();
+      };
+
+      deliveryButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          if (!(button instanceof HTMLButtonElement)) return;
+          setDeliveryMode(button.dataset.deliveryOption === "retiro" ? "retiro" : "envio");
+        });
+      });
+
+      discountButton?.addEventListener("click", async () => {
+        const code = isInputElement(discountInput) ? discountInput.value.trim().toUpperCase() : "";
+        appliedDiscount = null;
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/discount-codes/validate`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              code,
+              subtotal: getSubtotal()
+            })
+          });
+
+          const payload = await response.json().catch(() => null);
+          if (!response.ok) throw new Error(payload?.error ?? "Codigo no valido.");
+          appliedDiscount = payload.data;
+
+          if (isHTMLElement(discountMessage)) {
+            discountMessage.textContent = "Descuento aplicado.";
+            discountMessage.classList.toggle("hidden", false);
+            discountMessage.classList.add("text-emerald-700");
+            discountMessage.classList.remove("text-red-700");
+          }
+        } catch (error) {
+          if (isHTMLElement(discountMessage)) {
+            discountMessage.textContent = error instanceof Error ? error.message : "Codigo no valido.";
+            discountMessage.classList.toggle("hidden", false);
+            discountMessage.classList.remove("text-emerald-700");
+            discountMessage.classList.add("text-red-700");
+          }
+        }
+
+        renderSummary();
+      });
+
+      const createOrder = async () => {
+        const firstName = firstNameInput instanceof HTMLInputElement ? firstNameInput.value.trim() : "";
+        const lastName = lastNameInput instanceof HTMLInputElement ? lastNameInput.value.trim() : "";
+        const email = emailInput instanceof HTMLInputElement ? emailInput.value.trim() : "";
+        const phone = phoneInput instanceof HTMLInputElement ? phoneInput.value.trim() : "";
+        const address = addressInput instanceof HTMLInputElement ? addressInput.value.trim() : "";
+        const session = readSession();
+        const response = await fetch(`${API_BASE_URL}/api/orders`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(session?.token ? { Authorization: `Bearer ${session.token}` } : {})
+          },
+          body: JSON.stringify({
+            customerName: `${firstName} ${lastName}`.trim(),
+            customerEmail: email,
+            customerPhone: phone || undefined,
+            deliveryMode,
+            address: deliveryMode === "envio" ? address : undefined,
+            discountCode: appliedDiscount?.code,
+            items: cart.map((item) => ({
+              id: item.id,
+              quantity: item.quantity
+            }))
+          })
+        });
+
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) {
+          throw new Error(payload?.error ?? "No se pudo crear el pedido.");
+        }
+
+        return payload.data;
+      };
+
+      const createMercadoPagoPreference = async (/** @type {string} */ orderId) => {
+        const session = readSession();
+        const response = await fetch(`${API_BASE_URL}/api/payments/mercadopago/preferences`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(session?.token ? { Authorization: `Bearer ${session.token}` } : {})
+          },
+          body: JSON.stringify({ orderId })
+        });
+
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) {
+          if (response.status === 503) return null;
+          throw new Error(payload?.error ?? "No se pudo iniciar Mercado Pago.");
+        }
+
+        return payload.data;
+      };
+
+      checkoutForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const requiredFields = Array.from(document.querySelectorAll("[data-required]")).filter((field) => {
+          if (!(field instanceof HTMLInputElement || field instanceof HTMLSelectElement)) return false;
+          return deliveryMode === "envio" || !isHTMLElement(addressFields) || !addressFields.contains(field);
+        });
+        const hasInvalidField = requiredFields.some((field) =>
+          field instanceof HTMLInputElement || field instanceof HTMLSelectElement ? field.value.trim().length === 0 : false
+        );
+        const acceptedTerms = termsCheck instanceof HTMLInputElement && termsCheck.checked;
+        const isInvalid = hasInvalidField || !acceptedTerms || cart.length === 0;
+
+        checkoutError?.classList.toggle("hidden", !isInvalid);
+        if (isInvalid) return;
+
+        try {
+          if (isHTMLElement(payButton)) {
+            payButton.setAttribute("disabled", "");
+            payButton.textContent = "Creando pedido...";
+          }
+          const order = await createOrder();
+          const payment = await createMercadoPagoPreference(order.id);
+          window.localStorage.removeItem(CART_STORAGE_KEY);
+          cart = [];
+
+          if (payment?.checkout_url) {
+            if (isHTMLElement(payButton)) payButton.textContent = "Redirigiendo a Mercado Pago...";
+            window.location.href = payment.checkout_url;
+            return;
+          }
+
+          renderSummary();
+          checkoutForm.classList.add("hidden");
+          if (isHTMLElement(successOrder)) successOrder.textContent = `Orden ${order.id}`;
+          if (isHTMLElement(successPaymentNote)) successPaymentNote.classList.remove("hidden");
+          if (isHTMLElement(successState)) successState.classList.remove("hidden");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } catch (error) {
+          if (isHTMLElement(checkoutError)) {
+            checkoutError.textContent = error instanceof Error ? error.message : "No se pudo crear el pedido.";
+            checkoutError.classList.remove("hidden");
+          }
+        } finally {
+          if (isHTMLElement(payButton)) {
+            payButton.removeAttribute("disabled");
+            payButton.textContent = "Pagar pedido";
+          }
+        }
+      });
+
+      applySessionToForm();
+      setDeliveryMode("envio");
+      renderSummary();
+    </script>
+  </body>
+</html>
+

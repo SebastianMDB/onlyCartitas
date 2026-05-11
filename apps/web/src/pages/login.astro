@@ -1,0 +1,119 @@
+---
+import Header from "../components/Header.astro";
+import BaseHead from "../components/BaseHead.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/global.css";
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <BaseHead
+      title="Iniciar sesion | OnlyCartitas"
+      description="Acceso para clientes y administradores de OnlyCartitas."
+    />
+  </head>
+  <body class="bg-[color:var(--color-surface)] text-slate-900 antialiased">
+    <Header />
+
+    <main class="pb-20">
+      <section class="mx-auto w-full max-w-md px-4 pt-10 sm:px-6 lg:px-8">
+        <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
+          <p class="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--color-secondary)]">Acceso</p>
+          <h1 class="mt-2 text-3xl font-semibold tracking-tight text-[color:var(--color-primary)]">Iniciar sesion</h1>
+
+          <form class="mt-5 grid gap-4" data-login-form>
+            <label class="block">
+              <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Usuario</span>
+              <input
+                data-login-user
+                type="text"
+                autocomplete="username"
+                class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"
+              />
+            </label>
+
+            <label class="block">
+              <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Clave</span>
+              <input
+                data-login-password
+                type="password"
+                autocomplete="current-password"
+                class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"
+              />
+            </label>
+
+            <p class="hidden rounded-[1rem] border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" data-login-error>
+              Usuario o clave incorrectos.
+            </p>
+
+            <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]">
+              Entrar
+            </button>
+          </form>
+
+          <p class="mt-5 text-center text-sm text-slate-500">
+            No tienes cuenta?
+            <a href="/registro" class="font-semibold text-[color:var(--color-primary)] hover:underline">Registrate</a>
+          </p>
+        </div>
+      </section>
+    </main>
+    <Footer />
+
+    <script>
+      const SESSION_KEY = "onlycartitas-auth-session";
+      const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+
+      const form = document.querySelector("[data-login-form]");
+      const userInput = document.querySelector("[data-login-user]");
+      const passwordInput = document.querySelector("[data-login-password]");
+      const errorMessage = document.querySelector("[data-login-error]");
+
+      const isInput = (value) => value instanceof HTMLInputElement;
+
+      const createSession = ({ user, token, expiresAt }) => {
+        window.localStorage.setItem(
+          SESSION_KEY,
+          JSON.stringify({
+            user: user.username,
+            role: user.role,
+            token,
+            expiresAt: new Date(expiresAt).getTime()
+          })
+        );
+      };
+
+      const login = async (username, password) => {
+        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (!response.ok) {
+          throw new Error("Credenciales invalidas");
+        }
+
+        return response.json();
+      };
+
+      form?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const username = isInput(userInput) ? userInput.value.trim() : "";
+        const password = isInput(passwordInput) ? passwordInput.value : "";
+
+        try {
+          const session = await login(username, password);
+          createSession(session);
+          errorMessage?.classList.add("hidden");
+          window.location.href = session.user.role === "admin" ? "/admin-inventario" : "/";
+        } catch {
+          errorMessage?.classList.remove("hidden");
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,195 @@
+---
+import type { Product } from "../lib/catalog";
+
+type Props = {
+  products: Product[];
+};
+
+const { products } = Astro.props;
+const hero = {
+  primaryBadge: "Set destacado",
+  secondaryBadge: "Catalogo",
+  title: "Productos disponibles",
+  description: "Disponible en OnlyCartitas.",
+  bannerAlt: "Banner promocional de OnlyCartitas",
+  launchTitle: "Catalogo OnlyCartitas",
+  launchLabel: "Nuevo"
+};
+const offerProducts = products.filter((product) => product.offer || product.previousPrice);
+const featuredOffer = offerProducts[0];
+const launchSetName = "Journey Together";
+const launchProducts = products.filter((product) => product.set === launchSetName);
+const launchSealedProducts = products.filter((product) => product.kind === "sealed" && product.set === launchSetName).slice(0, 4);
+const featuredLaunch = products.find((product) => product.id === "etb-journey") ?? featuredOffer;
+const launchStock = launchProducts.reduce((total, product) => total + product.stock, 0);
+const discountPercent =
+  featuredLaunch?.previousPrice && featuredLaunch.previousPrice > featuredLaunch.price
+    ? Math.round(((featuredLaunch.previousPrice - featuredLaunch.price) / featuredLaunch.previousPrice) * 100)
+    : null;
+const currencyFormatter = new Intl.NumberFormat("es-CL", {
+  style: "currency",
+  currency: "CLP",
+  maximumFractionDigits: 0
+});
+---
+
+<section class="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+  <div class="relative overflow-hidden rounded-[2rem] bg-[color:var(--color-primary)] text-white shadow-[0_28px_80px_rgba(17,48,71,0.24)]">
+    <svg
+      class="absolute inset-0 h-full w-full object-cover opacity-95"
+      viewBox="0 0 1200 520"
+      role="img"
+      aria-label={hero.bannerAlt}
+      preserveAspectRatio="xMidYMid slice"
+    >
+      <defs>
+        <radialGradient id="launchGlowA" cx="70%" cy="45%" r="42%">
+          <stop offset="0" stop-color="#8bd7ff" stop-opacity=".95" />
+          <stop offset=".38" stop-color="#347fa8" stop-opacity=".55" />
+          <stop offset="1" stop-color="#04131d" stop-opacity="0" />
+        </radialGradient>
+        <radialGradient id="launchGlowB" cx="88%" cy="20%" r="34%">
+          <stop offset="0" stop-color="#ffe17a" stop-opacity=".95" />
+          <stop offset=".34" stop-color="#ff8d35" stop-opacity=".5" />
+          <stop offset="1" stop-color="#04131d" stop-opacity="0" />
+        </radialGradient>
+        <linearGradient id="launchTitleFill" x1="0" x2="1">
+          <stop offset="0" stop-color="#f6fbff" />
+          <stop offset=".45" stop-color="#aee7ff" />
+          <stop offset="1" stop-color="#fff3a6" />
+        </linearGradient>
+        <pattern id="launchDots" width="32" height="32" patternUnits="userSpaceOnUse">
+          <circle cx="4" cy="4" r="2" fill="#8bd7ff" opacity=".35" />
+        </pattern>
+        <filter id="launchShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#000" flood-opacity=".35" />
+        </filter>
+      </defs>
+      <rect width="1200" height="520" fill="#04131d" />
+      <rect width="1200" height="520" fill="url(#launchDots)" opacity=".55" />
+      <rect width="1200" height="520" fill="url(#launchGlowA)" />
+      <rect width="1200" height="520" fill="url(#launchGlowB)" />
+      <g opacity=".9">
+        <path d="M735 444c150-52 258-156 319-312" fill="none" stroke="#f7d655" stroke-width="24" stroke-linecap="round" opacity=".32" />
+        <path d="M690 418c128-36 231-119 310-250" fill="none" stroke="#9ff0ff" stroke-width="14" stroke-linecap="round" opacity=".34" />
+        <path d="M804 100c74 78 92 182 39 315" fill="none" stroke="#ec71ff" stroke-width="18" stroke-linecap="round" opacity=".32" />
+      </g>
+      <g transform="translate(720 72)" filter="url(#launchShadow)">
+        <circle cx="128" cy="150" r="112" fill="#123d5a" opacity=".94" />
+        <circle cx="128" cy="150" r="84" fill="#ffe17a" opacity=".92" />
+        <path d="M66 162c38-82 92-112 160-104-24 34-44 66-60 98 33 1 62 12 88 32-74 11-126 49-156 115 2-48 12-86 31-116-25-6-46-15-63-25Z" fill="#ff7b35" />
+        <path d="M35 229c66-28 117-26 154 6-46 5-90 21-133 48-8-16-15-34-21-54Z" fill="#8bd7ff" />
+        <path d="M230 76c49 31 80 72 93 125-46-28-92-45-139-49 10-27 25-52 46-76Z" fill="#f6fbff" />
+      </g>
+      <g transform="translate(72 112)" filter="url(#launchShadow)">
+        <text x="0" y="0" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="800" letter-spacing="2" fill="#f6fbff">POKEMON TCG</text>
+        <rect x="0" y="22" width="168" height="34" rx="8" fill="#e53935" />
+        <text x="84" y="45" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" fill="#fff">LANZAMIENTO</text>
+        <text x="0" y="138" font-family="Segoe UI, Arial, sans-serif" font-size="78" font-weight="900" letter-spacing="1" fill="url(#launchTitleFill)">JOURNEY</text>
+        <text x="0" y="220" font-family="Segoe UI, Arial, sans-serif" font-size="78" font-weight="900" letter-spacing="1" fill="url(#launchTitleFill)">TOGETHER</text>
+        <text x="4" y="270" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="6" fill="#aee7ff">TRAINERS & PARTNERS</text>
+      </g>
+    </svg>
+    <div class="absolute inset-0 bg-gradient-to-r from-[#04131d]/95 via-[#071c2b]/72 to-[#04131d]/12"></div>
+
+    <div class="relative grid min-h-[520px] gap-8 px-6 py-8 sm:px-8 lg:grid-cols-[0.92fr_1.08fr] lg:px-10 lg:py-10">
+      <div class="flex flex-col justify-between gap-8">
+        <div>
+          <div class="flex flex-wrap gap-3">
+            <span class="rounded-full bg-[#dcecf7] px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#061d2a] shadow-[0_12px_28px_rgba(17,48,71,0.22)]">
+              {hero.secondaryBadge}
+            </span>
+            <span class="rounded-full border border-white/20 bg-white/8 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-100">
+              Stock limitado
+            </span>
+          </div>
+
+          <div class="mt-8 max-w-2xl">
+            <p class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300">{hero.primaryBadge}</p>
+            <h1 class="mt-3 text-5xl font-semibold leading-none tracking-tight sm:text-6xl lg:text-7xl">
+              {launchSetName}
+            </h1>
+            <p class="mt-4 text-2xl font-semibold text-slate-100 sm:text-3xl">{hero.title}</p>
+            <p class="mt-4 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
+              {hero.description} ETB, blisters, bundles y singles del set para reservar antes de que cambie el stock.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-5">
+          <div class="flex flex-col gap-3 sm:flex-row">
+            <a
+              href="/sellados"
+              class="inline-flex min-h-13 items-center justify-center rounded-full bg-[#dcecf7] px-7 py-3.5 text-base font-semibold text-[#061d2a] shadow-[0_14px_30px_rgba(17,48,71,0.24)] transition hover:bg-[#f4f9fc]"
+            >
+              Ver lanzamiento
+            </a>
+            <a
+              href="/ofertas"
+              class="inline-flex min-h-12 items-center justify-center rounded-full border border-white/25 bg-[#071c2b]/55 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-white/40 hover:bg-[#123d5a]/70"
+            >
+              Ver ofertas
+            </a>
+          </div>
+
+          <div class="grid max-w-md grid-cols-3 gap-2 text-white">
+            <div class="rounded-2xl border border-white/18 bg-[#071c2b]/72 px-3 py-3 backdrop-blur-sm">
+              <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">Items</p>
+              <p class="mt-1 text-2xl font-semibold text-white">{launchProducts.length}</p>
+            </div>
+            <div class="rounded-2xl border border-white/18 bg-[#071c2b]/72 px-3 py-3 backdrop-blur-sm">
+              <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">Stock</p>
+              <p class="mt-1 text-2xl font-semibold text-white">{launchStock}</p>
+            </div>
+            <div class="rounded-2xl border border-white/18 bg-[#071c2b]/72 px-3 py-3 backdrop-blur-sm">
+              <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">Oferta</p>
+              <p class="mt-1 text-2xl font-semibold text-white">{discountPercent ? `-${discountPercent}%` : "Hot"}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex min-h-[360px] items-end justify-end">
+        <div class="w-full max-w-xl rounded-[1.75rem] border border-white/12 bg-[#071c2b]/72 p-4 backdrop-blur-md">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">
+                Set destacado
+              </p>
+              <h2 class="mt-2 text-2xl font-semibold leading-tight">{hero.launchTitle}</h2>
+            </div>
+            <span class="shrink-0 rounded-full bg-amber-300 px-3 py-1.5 text-xs font-semibold text-slate-950">
+              {discountPercent ? `-${discountPercent}%` : hero.launchLabel}
+            </span>
+          </div>
+
+          <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {
+              launchSealedProducts.slice(0, 3).map((product) => (
+                <a
+                  href="/sellados"
+                  class="group rounded-[1.1rem] border border-white/12 bg-white/8 p-3 transition hover:border-white/25 hover:bg-white/12"
+                >
+                  <p class="truncate text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-secondary)]">
+                    {product.category}
+                  </p>
+                  <p class="mt-2 line-clamp-2 min-h-10 text-sm font-semibold leading-5 text-white">{product.name}</p>
+                  <p class="mt-2 text-sm font-semibold text-slate-200">{currencyFormatter.format(product.price)}</p>
+                </a>
+              ))
+            }
+          </div>
+
+          {launchSealedProducts.length === 0 ? <p class="mt-5 rounded-[1.1rem] border border-white/12 bg-white/8 p-4 text-sm text-slate-200">No hay productos cargados en la base de datos.</p> : null}
+
+          <a
+            href="/sellados"
+            class="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#dcecf7] px-5 py-3 text-sm font-semibold text-[#061d2a] transition hover:bg-[#f4f9fc]"
+          >
+            Explorar productos del set
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

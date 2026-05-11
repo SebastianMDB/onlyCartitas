@@ -1,0 +1,45 @@
+---
+import Header from "../components/Header.astro";
+import BaseHead from "../components/BaseHead.astro";
+import Footer from "../components/Footer.astro";
+import HeroBanner from "../components/HeroBanner.astro";
+import ProductCarousel from "../components/ProductCarousel.astro";
+import { categoriesFromProducts, fetchProducts } from "../lib/catalog";
+import "../styles/global.css";
+
+const allProducts = await fetchProducts();
+const sealedProducts = allProducts.filter((product) => product.kind === "sealed");
+const productSections = categoriesFromProducts(sealedProducts);
+const offerProducts = allProducts.filter((product) => product.offer || product.previousPrice);
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <BaseHead
+      title="OnlyCartitas | TCG Store"
+      description="Tienda TCG OnlyCartitas con productos sellados, singles, ofertas, filtros por idioma y carrito de compras."
+    />
+  </head>
+  <body class="bg-[color:var(--color-surface)] text-slate-900 antialiased">
+    <Header />
+
+    <main class="pb-20">
+      <HeroBanner products={allProducts} />
+
+      <section id="productos" class="mx-auto mt-10 flex w-full max-w-7xl flex-col gap-12 px-4 sm:mt-14 sm:px-6 lg:px-8">
+        <ProductCarousel title="Ofertas" products={offerProducts} />
+
+        {
+          productSections.map((section) => (
+            <ProductCarousel
+              title={section}
+              products={sealedProducts.filter((product) => product.category === section)}
+            />
+          ))
+        }
+      </section>
+    </main>
+    <Footer />
+  </body>
+</html>

@@ -1,0 +1,151 @@
+---
+import ProductCard from "./ProductCard.astro";
+import type { Product } from "../lib/catalog";
+
+type Props = {
+  title: string;
+  products: Product[];
+};
+
+const { title, products } = Astro.props;
+const sectionId = `carousel-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+---
+
+<section class="space-y-6" data-carousel-section>
+  <div class="flex items-center justify-between gap-4">
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">
+        OnlyCartitas
+      </p>
+      <h2 class="mt-2 text-3xl font-semibold tracking-tight text-[color:var(--color-primary)] sm:text-4xl">
+        {title}
+      </h2>
+    </div>
+
+    <div class="hidden items-center gap-2 lg:flex">
+      <button
+        type="button"
+        aria-label={`Desplazar ${title} a la izquierda`}
+        data-carousel-prev={sectionId}
+        class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 transition hover:border-slate-400 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        <svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6"></path>
+        </svg>
+      </button>
+      <button
+        type="button"
+        aria-label={`Desplazar ${title} a la derecha`}
+        data-carousel-next={sectionId}
+        class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 transition hover:border-slate-400 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        <svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 18l6-6-6-6"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div
+    id={sectionId}
+    data-carousel-track
+    class="hide-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 scroll-smooth"
+  >
+    {products.map((product) => <ProductCard product={product} />)}
+  </div>
+</section>
+
+<script>
+  const isHTMLElement = (value) => value instanceof HTMLElement;
+  const isButtonElement = (value) => value instanceof HTMLButtonElement;
+
+  const initCarouselSections = () => {
+    const sections = Array.from(document.querySelectorAll("[data-carousel-section]"));
+
+    sections.forEach((section) => {
+      if (!isHTMLElement(section) || section.dataset.bound === "true") {
+        return;
+      }
+
+      section.dataset.bound = "true";
+
+      const track = section.querySelector("[data-carousel-track]");
+      const prevButton = section.querySelector("[data-carousel-prev]");
+      const nextButton = section.querySelector("[data-carousel-next]");
+      const cards = Array.from(section.querySelectorAll("[data-product-card]"));
+
+      if (!isHTMLElement(track)) {
+        return;
+      }
+
+      const updateArrows = () => {
+        if (!isButtonElement(prevButton) || !isButtonElement(nextButton)) {
+          return;
+        }
+
+        prevButton.disabled = track.scrollLeft <= 8;
+        nextButton.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 8;
+      };
+
+      const updateVisibility = (query) => {
+        const normalizedQuery = query.trim().toLowerCase();
+        let visibleCount = 0;
+
+        cards.forEach((card) => {
+          if (!isHTMLElement(card)) {
+            return;
+          }
+
+          const productName = card.dataset.productName ?? "";
+          const productCategory = card.dataset.productCategory ?? "";
+          const productSet = card.dataset.productSet ?? "";
+          const productLanguage = card.dataset.productLanguage ?? "";
+          const productLanguageLabel = card.dataset.productLanguageLabel ?? "";
+          const isVisible =
+            normalizedQuery.length === 0 ||
+            productName.includes(normalizedQuery) ||
+            productCategory.includes(normalizedQuery) ||
+            productSet.includes(normalizedQuery) ||
+            productLanguage.includes(normalizedQuery) ||
+            productLanguageLabel.includes(normalizedQuery);
+
+          card.style.display = isVisible ? "" : "none";
+
+          if (isVisible) {
+            visibleCount += 1;
+          }
+        });
+
+        section.style.display = visibleCount > 0 ? "" : "none";
+        track.scrollTo({ left: 0, behavior: "auto" });
+        window.requestAnimationFrame(updateArrows);
+      };
+
+      prevButton?.addEventListener("click", () => {
+        const amount = Math.min(360, track.clientWidth * 0.92);
+        track.scrollBy({ left: -amount, behavior: "smooth" });
+      });
+
+      nextButton?.addEventListener("click", () => {
+        const amount = Math.min(360, track.clientWidth * 0.92);
+        track.scrollBy({ left: amount, behavior: "smooth" });
+      });
+
+      track.addEventListener("scroll", updateArrows, { passive: true });
+      window.addEventListener("resize", updateArrows);
+      window.addEventListener("carta-noble:search", (event) => {
+        const value = event instanceof CustomEvent && typeof event.detail === "string" ? event.detail : "";
+        updateVisibility(value);
+      });
+
+      updateArrows();
+      updateVisibility("");
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initCarouselSections, { once: true });
+  } else {
+    initCarouselSections();
+  }
+</script>

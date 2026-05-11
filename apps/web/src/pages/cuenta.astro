@@ -1,0 +1,174 @@
+---
+import Header from "../components/Header.astro";
+import BaseHead from "../components/BaseHead.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/global.css";
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <BaseHead
+      title="Mi cuenta | OnlyCartitas"
+      description="Revisa tu sesion, datos de cliente y pedidos en OnlyCartitas."
+    />
+  </head>
+  <body class="bg-[color:var(--color-surface)] text-slate-900 antialiased">
+    <Header />
+
+    <main class="pb-20">
+      <section class="mx-auto w-full max-w-5xl px-4 pt-8 sm:px-6 lg:px-8">
+        <div class="rounded-[2rem] bg-[linear-gradient(135deg,#113047_0%,#173b56_100%)] p-6 text-white shadow-[0_28px_80px_rgba(17,48,71,0.24)] sm:p-8">
+          <p class="text-xs font-semibold uppercase tracking-[0.24em] text-sky-200">Cuenta</p>
+          <h1 class="mt-3 text-4xl font-semibold tracking-tight">Mi cuenta</h1>
+          <p class="mt-3 max-w-2xl text-sm leading-7 text-slate-200">
+            Revisa tu sesion, pedidos recientes y accesos rapidos de compra.
+          </p>
+        </div>
+      </section>
+
+      <section class="mx-auto mt-8 grid w-full max-w-5xl gap-5 px-4 sm:px-6 lg:grid-cols-[320px_1fr] lg:px-8">
+        <aside class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)]">
+          <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Sesion</p>
+          <h2 class="mt-2 text-2xl font-semibold text-[color:var(--color-primary)]" data-account-user>Cliente</h2>
+          <p class="mt-2 text-sm text-slate-500" data-account-role>Rol cliente</p>
+          <div class="mt-5 grid gap-3">
+            <a href="/ofertas" class="inline-flex min-h-11 items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white">Ver ofertas</a>
+            <button type="button" class="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950" data-logout-button>
+              Cerrar sesion
+            </button>
+          </div>
+        </aside>
+
+        <div class="grid gap-5">
+          <section class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)]">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Pedidos</p>
+                <h2 class="mt-2 text-2xl font-semibold text-[color:var(--color-primary)]">Historial de pedidos</h2>
+              </div>
+              <a href="/checkout" class="text-sm font-semibold text-slate-500 hover:text-slate-950">Ir al checkout</a>
+            </div>
+            <div class="mt-5 grid gap-3" data-orders-list></div>
+            <div class="mt-5 hidden rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center" data-orders-empty>
+              <p class="text-base font-semibold text-[color:var(--color-primary)]">Aun no hay pedidos</p>
+              <p class="mt-2 text-sm text-slate-500">Cuando completes una compra, aparecera aqui.</p>
+            </div>
+          </section>
+
+          <section class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)]">
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Datos guardados</p>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+              <input type="text" placeholder="Nombre" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+              <input type="email" placeholder="Correo" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+              <input type="tel" placeholder="Telefono" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+              <input type="text" placeholder="Comuna" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+            </div>
+            <p class="mt-3 text-sm text-slate-500">Estos campos son visuales por ahora; se conectaran al servidor cuando el front este aprobado.</p>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <Footer />
+
+    <script>
+      const SESSION_KEY = "onlycartitas-auth-session";
+      const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+      const userLabel = document.querySelector("[data-account-user]");
+      const roleLabel = document.querySelector("[data-account-role]");
+      const logoutButton = document.querySelector("[data-logout-button]");
+      const ordersList = document.querySelector("[data-orders-list]");
+      const ordersEmpty = document.querySelector("[data-orders-empty]");
+
+      const currencyFormatter = new Intl.NumberFormat("es-CL", {
+        style: "currency",
+        currency: "CLP",
+        maximumFractionDigits: 0
+      });
+
+      const isHTMLElement = (value) => value instanceof HTMLElement;
+      const escapeHtml = (value) =>
+        String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+
+      const readSession = () => {
+        try {
+          const storedSession = window.localStorage.getItem(SESSION_KEY);
+          return storedSession ? JSON.parse(storedSession) : null;
+        } catch {
+          return null;
+        }
+      };
+
+      const session = readSession();
+      if (!session?.expiresAt || Date.now() > Number(session.expiresAt)) {
+        window.location.href = "/login";
+      } else {
+        if (isHTMLElement(userLabel)) userLabel.textContent = session.user ?? "Cliente";
+        if (isHTMLElement(roleLabel)) roleLabel.textContent = session.role === "admin" ? "Rol admin" : "Rol cliente";
+      }
+
+      const renderOrders = (orders) => {
+        if (isHTMLElement(ordersEmpty)) ordersEmpty.classList.toggle("hidden", orders.length > 0);
+        if (!isHTMLElement(ordersList)) return;
+
+        ordersList.innerHTML = orders
+          .map(
+            (order) => `
+              <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p class="text-sm font-semibold text-slate-950">${escapeHtml(order.id ?? "Pedido")}</p>
+                    <p class="mt-1 text-xs text-slate-500">${escapeHtml(order.delivery_mode ?? order.deliveryMode ?? "envio")} - ${escapeHtml(new Date(order.created_at ?? order.createdAt ?? Date.now()).toLocaleString("es-CL"))}</p>
+                  </div>
+                  <p class="text-lg font-semibold text-[color:var(--color-primary)]">${currencyFormatter.format(Number(order.total ?? order.totals?.total ?? 0))}</p>
+                </div>
+                <p class="mt-3 text-sm text-slate-600">${Number(order.items?.length ?? 0)} producto(s)</p>
+              </article>
+            `
+          )
+          .join("");
+      };
+
+      const loadOrders = async () => {
+        if (!session?.token) return [];
+
+        const response = await fetch(`${API_BASE_URL}/api/orders`, {
+          headers: {
+            Authorization: `Bearer ${session.token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error("No se pudieron cargar los pedidos.");
+        }
+
+        const payload = await response.json();
+        return Array.isArray(payload.data) ? payload.data : [];
+      };
+
+      loadOrders()
+        .then(renderOrders)
+        .catch(() => {
+          if (isHTMLElement(ordersEmpty)) ordersEmpty.classList.remove("hidden");
+          if (isHTMLElement(ordersList)) {
+            ordersList.innerHTML = `
+              <p class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                No se pudieron cargar los pedidos desde el backend.
+              </p>
+            `;
+          }
+        });
+
+      logoutButton?.addEventListener("click", () => {
+        window.localStorage.removeItem(SESSION_KEY);
+        window.location.href = "/";
+      });
+    </script>
+  </body>
+</html>

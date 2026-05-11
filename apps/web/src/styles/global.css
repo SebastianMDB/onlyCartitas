@@ -1,0 +1,170 @@
+@import "tailwindcss";
+
+:root {
+  --color-surface: #eef3f8;
+  --color-primary: #113047;
+  --color-secondary: #739ab9;
+  --color-page-start: #f5f8fb;
+  --color-page-end: #e9f0f7;
+  --astro-transition-duration: 0ms;
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  --color-surface: #061d2a;
+  --color-primary: #edf6fb;
+  --color-secondary: #86afc9;
+  --color-page-start: #04131d;
+  --color-page-end: #082534;
+  color-scheme: dark;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: radial-gradient(circle at top, rgba(115, 154, 185, 0.12), transparent 26%),
+    linear-gradient(180deg, var(--color-page-start) 0%, var(--color-surface) 32%, var(--color-page-end) 100%);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body > main {
+  flex: 1 0 auto;
+}
+
+body > footer {
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+html[data-theme="dark"] body {
+  background: radial-gradient(circle at top, rgba(20, 61, 88, 0.46), transparent 32%),
+    linear-gradient(180deg, var(--color-page-start) 0%, var(--color-surface) 34%, var(--color-page-end) 100%);
+}
+
+html[data-theme="dark"] .bg-\[\#071c2b\],
+html[data-theme="dark"] .hover\:bg-\[\#071c2b\]:hover,
+html[data-theme="dark"] .hover\:bg-\[\#0d2a3f\]:hover,
+html[data-theme="dark"] .hover\:bg-\[\#173b56\]:hover {
+  background-color: #dcecf7 !important;
+  color: #061d2a !important;
+}
+
+html[data-theme="dark"] header [data-nav-link][aria-current="page"],
+html[data-theme="dark"] [data-category-button][aria-pressed="true"],
+html[data-theme="dark"] [data-cart-open],
+html[data-theme="dark"] [data-theme-toggle] [data-theme-moon],
+html:not([data-theme="dark"]) [data-theme-toggle] [data-theme-sun] {
+  background-color: #dcecf7 !important;
+  color: #061d2a !important;
+}
+
+html[data-theme="dark"] .bg-\[color\:var\(--color-primary\)\] {
+  background-color: #143d58 !important;
+}
+
+html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] .bg-white\/80,
+html[data-theme="dark"] .bg-white\/90 {
+  background-color: rgba(6, 29, 42, 0.88) !important;
+}
+
+html[data-theme="dark"] .bg-slate-50,
+html[data-theme="dark"] .bg-slate-100,
+html[data-theme="dark"] .hover\:bg-slate-100:hover {
+  background-color: rgba(9, 38, 55, 0.92) !important;
+}
+
+html[data-theme="dark"] .border-white\/60,
+html[data-theme="dark"] .border-white\/70,
+html[data-theme="dark"] .border-slate-200,
+html[data-theme="dark"] .border-slate-200\/80,
+html[data-theme="dark"] .border-slate-300 {
+  border-color: rgba(134, 175, 201, 0.26) !important;
+}
+
+html[data-theme="dark"] .text-slate-950,
+html[data-theme="dark"] .text-slate-900,
+html[data-theme="dark"] .hover\:text-slate-950:hover,
+html[data-theme="dark"] .hover\:text-slate-900:hover {
+  color: #f4f9fc !important;
+}
+
+html[data-theme="dark"] .text-slate-700,
+html[data-theme="dark"] .text-slate-600 {
+  color: #bfd4e2 !important;
+}
+
+html[data-theme="dark"] .text-slate-500,
+html[data-theme="dark"] .text-slate-400,
+html[data-theme="dark"] .placeholder\:text-slate-400::placeholder {
+  color: #88a6b9 !important;
+}
+
+html[data-theme="dark"] .bg-amber-300 {
+  background-color: #ffd23f !important;
+  color: #061d2a !important;
+}
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] select {
+  background-color: rgba(5, 22, 33, 0.94) !important;
+  border-color: rgba(134, 175, 201, 0.28) !important;
+  color: #eaf3f8 !important;
+}
+
+html[data-theme="dark"] [data-theme-toggle] [data-theme-sun] {
+  color: #88a6b9;
+}
+
+html:not([data-theme="dark"]) [data-theme-toggle] [data-theme-moon] {
+  color: #64748b;
+}
+
+html[data-theme="dark"] [data-cart-count] {
+  background-color: #061d2a !important;
+  color: #dcecf7 !important;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.inventory-hidden {
+  display: none !important;
+}
+
+@keyframes cartItemIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
