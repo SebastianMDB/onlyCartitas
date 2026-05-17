@@ -12,6 +12,16 @@ type ProductFilters = {
   includeInactive?: boolean;
 };
 
+type ProductInput = Omit<Product, "previousPrice" | "offer" | "illustrator" | "rarity" | "playability" | "marketPrice" | "manualSegment"> & {
+  previousPrice?: number | null;
+  offer?: string | null;
+  illustrator?: string | null;
+  rarity?: string | null;
+  playability?: string | null;
+  marketPrice?: number | null;
+  manualSegment?: string | null;
+};
+
 export async function listProducts(filters: ProductFilters = {}) {
   if (!db) {
     throw new ApiError(503, "Base de datos no configurada");
@@ -49,6 +59,36 @@ export async function getProductById(id: string) {
     return (product as Product | undefined) ?? null;
   } catch {
     throw new ApiError(500, "No se pudo obtener el producto");
+  }
+}
+
+export async function createProduct(input: ProductInput) {
+  if (!db) {
+    throw new ApiError(503, "Base de datos no configurada");
+  }
+
+  try {
+    const [existing] = await db.select({ id: products.id }).from(products).where(eq(products.id, input.id)).limit(1);
+    if (existing) throw new ApiError(409, "El producto ya existe");
+
+    const [product] = await db
+      .insert(products)
+      .values({
+        ...input,
+        previousPrice: input.previousPrice ?? null,
+        offer: input.offer ?? null,
+        illustrator: input.illustrator ?? null,
+        rarity: input.rarity ?? null,
+        playability: input.playability ?? null,
+        marketPrice: input.marketPrice ?? null,
+        manualSegment: input.manualSegment ?? null
+      })
+      .returning();
+
+    return product as Product;
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    throw new ApiError(500, "No se pudo crear el producto");
   }
 }
 

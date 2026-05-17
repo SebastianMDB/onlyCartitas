@@ -117,8 +117,8 @@ const productSets = new Set(products.map((product) => product.set));
     <Footer />
 
     <script>
-      const isHTMLElement = (value) => value instanceof HTMLElement;
-      const isButtonElement = (value) => value instanceof HTMLButtonElement;
+      const isHTMLElement = (value: unknown) => value instanceof HTMLElement;
+      const isButtonElement = (value: unknown) => value instanceof HTMLButtonElement;
 
       const productCards = Array.from(document.querySelectorAll("[data-product-card]"));
       const categoryButtons = Array.from(document.querySelectorAll("[data-category-button]"));

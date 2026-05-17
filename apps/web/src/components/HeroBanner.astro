@@ -1,23 +1,30 @@
 ---
-import type { Product } from "../lib/catalog";
+import type { HeroSettings, Product } from "../lib/catalog";
 
 type Props = {
   products: Product[];
+  settings?: HeroSettings | null;
 };
 
-const { products } = Astro.props;
-const hero = {
+const { products, settings } = Astro.props;
+const defaultHero: HeroSettings = {
   primaryBadge: "Set destacado",
   secondaryBadge: "Catalogo",
   title: "Productos disponibles",
   description: "Disponible en OnlyCartitas.",
-  bannerAlt: "Banner promocional de OnlyCartitas",
+  launchSetName: "Journey Together",
   launchTitle: "Catalogo OnlyCartitas",
-  launchLabel: "Nuevo"
+  launchLabel: "Nuevo",
+  primaryCtaLabel: "Ver lanzamiento",
+  primaryCtaHref: "/sellados",
+  secondaryCtaLabel: "Ver ofertas",
+  secondaryCtaHref: "/ofertas",
+  backgroundImageUrl: ""
 };
+const hero = { ...defaultHero, ...(settings ?? {}) };
 const offerProducts = products.filter((product) => product.offer || product.previousPrice);
 const featuredOffer = offerProducts[0];
-const launchSetName = "Journey Together";
+const launchSetName = hero.launchSetName || defaultHero.launchSetName;
 const launchProducts = products.filter((product) => product.set === launchSetName);
 const launchSealedProducts = products.filter((product) => product.kind === "sealed" && product.set === launchSetName).slice(0, 4);
 const featuredLaunch = products.find((product) => product.id === "etb-journey") ?? featuredOffer;
@@ -35,13 +42,17 @@ const currencyFormatter = new Intl.NumberFormat("es-CL", {
 
 <section class="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
   <div class="relative overflow-hidden rounded-[2rem] bg-[color:var(--color-primary)] text-white shadow-[0_28px_80px_rgba(17,48,71,0.24)]">
-    <svg
-      class="absolute inset-0 h-full w-full object-cover opacity-95"
-      viewBox="0 0 1200 520"
-      role="img"
-      aria-label={hero.bannerAlt}
-      preserveAspectRatio="xMidYMid slice"
-    >
+    {hero.backgroundImageUrl ? (
+      <img
+        src={hero.backgroundImageUrl}
+        alt=""
+        class="absolute inset-0 h-full w-full object-cover opacity-95"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+      />
+    ) : (
+    <svg class="absolute inset-0 h-full w-full object-cover opacity-95" viewBox="0 0 1200 520" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
       <defs>
         <radialGradient id="launchGlowA" cx="70%" cy="45%" r="42%">
           <stop offset="0" stop-color="#8bd7ff" stop-opacity=".95" />
@@ -90,6 +101,7 @@ const currencyFormatter = new Intl.NumberFormat("es-CL", {
         <text x="4" y="270" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="6" fill="#aee7ff">TRAINERS & PARTNERS</text>
       </g>
     </svg>
+    )}
     <div class="absolute inset-0 bg-gradient-to-r from-[#04131d]/95 via-[#071c2b]/72 to-[#04131d]/12"></div>
 
     <div class="relative grid min-h-[520px] gap-8 px-6 py-8 sm:px-8 lg:grid-cols-[0.92fr_1.08fr] lg:px-10 lg:py-10">
@@ -111,7 +123,7 @@ const currencyFormatter = new Intl.NumberFormat("es-CL", {
             </h1>
             <p class="mt-4 text-2xl font-semibold text-slate-100 sm:text-3xl">{hero.title}</p>
             <p class="mt-4 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
-              {hero.description} ETB, blisters, bundles y singles del set para reservar antes de que cambie el stock.
+              {hero.description}
             </p>
           </div>
         </div>
@@ -119,16 +131,16 @@ const currencyFormatter = new Intl.NumberFormat("es-CL", {
         <div class="flex flex-col gap-5">
           <div class="flex flex-col gap-3 sm:flex-row">
             <a
-              href="/sellados"
+              href={hero.primaryCtaHref}
               class="inline-flex min-h-13 items-center justify-center rounded-full bg-[#dcecf7] px-7 py-3.5 text-base font-semibold text-[#061d2a] shadow-[0_14px_30px_rgba(17,48,71,0.24)] transition hover:bg-[#f4f9fc]"
             >
-              Ver lanzamiento
+              {hero.primaryCtaLabel}
             </a>
             <a
-              href="/ofertas"
+              href={hero.secondaryCtaHref}
               class="inline-flex min-h-12 items-center justify-center rounded-full border border-white/25 bg-[#071c2b]/55 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-white/40 hover:bg-[#123d5a]/70"
             >
-              Ver ofertas
+              {hero.secondaryCtaLabel}
             </a>
           </div>
 
@@ -183,7 +195,7 @@ const currencyFormatter = new Intl.NumberFormat("es-CL", {
           {launchSealedProducts.length === 0 ? <p class="mt-5 rounded-[1.1rem] border border-white/12 bg-white/8 p-4 text-sm text-slate-200">No hay productos cargados en la base de datos.</p> : null}
 
           <a
-            href="/sellados"
+            href={hero.primaryCtaHref}
             class="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#dcecf7] px-5 py-3 text-sm font-semibold text-[#061d2a] transition hover:bg-[#f4f9fc]"
           >
             Explorar productos del set

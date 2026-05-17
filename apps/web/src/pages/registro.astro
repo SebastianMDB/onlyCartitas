@@ -60,6 +60,15 @@ import "../styles/global.css";
     <Footer />
 
     <script>
+      type AuthSessionResponse = {
+        user: {
+          username: string;
+          role: "admin" | "customer";
+        };
+        token: string;
+        expiresAt: string;
+      };
+
       const SESSION_KEY = "onlycartitas-auth-session";
       const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 
@@ -68,16 +77,16 @@ import "../styles/global.css";
       const passwordInput = document.querySelector("[data-register-password]");
       const errorMessage = document.querySelector("[data-register-error]");
 
-      const isInput = (value) => value instanceof HTMLInputElement;
+      const isInput = (value: unknown) => value instanceof HTMLInputElement;
 
-      const showError = (message) => {
+      const showError = (message: string) => {
         if (!(errorMessage instanceof HTMLElement)) return;
 
         errorMessage.textContent = message;
         errorMessage.classList.remove("hidden");
       };
 
-      const createSession = ({ user, token, expiresAt }) => {
+      const createSession = ({ user, token, expiresAt }: AuthSessionResponse) => {
         window.localStorage.setItem(
           SESSION_KEY,
           JSON.stringify({
@@ -89,7 +98,7 @@ import "../styles/global.css";
         );
       };
 
-      const register = async (username, password) => {
+      const register = async (username: string, password: string): Promise<AuthSessionResponse> => {
         const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
           method: "POST",
           headers: {

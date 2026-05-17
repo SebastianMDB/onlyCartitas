@@ -77,10 +77,11 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       </section>
 
       <section class="mx-auto mt-6 w-full max-w-4xl px-4 sm:px-6 lg:px-8">
-        <div class="grid gap-2 rounded-2xl bg-slate-100 p-1 sm:grid-cols-3" data-admin-tabs>
+        <div class="grid gap-2 rounded-2xl bg-slate-100 p-1 sm:grid-cols-4" data-admin-tabs>
           <button type="button" class="rounded-[1rem] bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm" data-admin-tab="inventory" aria-pressed="true">Inventario</button>
           <button type="button" class="rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-admin-tab="orders" aria-pressed="false">Compras</button>
           <button type="button" class="rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-admin-tab="discounts" aria-pressed="false">Descuentos</button>
+          <button type="button" class="rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-admin-tab="hero" aria-pressed="false">Hero</button>
         </div>
       </section>
 
@@ -91,6 +92,73 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
               <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Inventario</p>
               <h2 class="mt-2 text-2xl font-semibold text-[color:var(--color-primary)]">Stock y visibilidad</h2>
             </div>
+
+            <details class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+              <summary class="cursor-pointer text-sm font-semibold text-[color:var(--color-primary)]">Nuevo producto</summary>
+              <form class="mt-4 grid gap-4" data-product-create-form>
+                <div class="grid gap-4 lg:grid-cols-2">
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">ID</span>
+                    <input data-product-create="id" type="text" placeholder="etb-prismatic" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Tipo</span>
+                    <select data-product-create="kind" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                      <option value="sealed">Sellado</option>
+                      <option value="single">Single</option>
+                    </select>
+                  </label>
+                  <label class="block lg:col-span-2">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Nombre</span>
+                    <input data-product-create="name" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Categoria</span>
+                    <input data-product-create="category" type="text" placeholder="Elite Trainer Box" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Set</span>
+                    <input data-product-create="set" type="text" placeholder="Journey Together" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Idioma</span>
+                    <select data-product-create="language" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                      <option value="english">Ingles</option>
+                      <option value="spanish">Espanol</option>
+                      <option value="japanese">Japones</option>
+                    </select>
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Imagen URL</span>
+                    <input data-product-create="image" type="text" placeholder="https://.../product.webp" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Stock</span>
+                    <input data-product-create="stock" type="number" min="0" step="1" value="0" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Precio</span>
+                    <input data-product-create="price" type="number" min="0" step="1" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Precio anterior</span>
+                    <input data-product-create="previousPrice" type="number" min="0" step="1" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Etiqueta oferta</span>
+                    <input data-product-create="offer" type="text" placeholder="Oferta" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Ilustrador</span>
+                    <input data-product-create="illustrator" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                </div>
+                <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]">
+                  Crear producto
+                </button>
+                <p class="hidden rounded-[1rem] bg-white px-4 py-3 text-sm font-semibold text-[color:var(--color-primary)]" data-product-create-message></p>
+              </form>
+            </details>
             <div>
               <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Tipo</span>
               <div class="grid gap-2 sm:grid-cols-2">
@@ -239,13 +307,84 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
           <div class="mt-5 grid gap-3" data-admin-discounts></div>
         </div>
       </section>
+
+      <section class="mx-auto mt-8 hidden w-full max-w-4xl px-4 sm:px-6 lg:px-8" data-admin-panel="hero">
+        <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Portada</p>
+            <h2 class="mt-2 text-2xl font-semibold text-[color:var(--color-primary)]">Hero principal</h2>
+          </div>
+
+          <form class="mt-5 grid gap-4" data-hero-form>
+            <div class="grid gap-4 lg:grid-cols-2">
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Set destacado</span>
+                <input data-hero-input="launchSetName" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+              </label>
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Titulo</span>
+                <input data-hero-input="title" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+              </label>
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Badge principal</span>
+                <input data-hero-input="primaryBadge" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+              </label>
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Badge secundario</span>
+                <input data-hero-input="secondaryBadge" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+              </label>
+            </div>
+
+            <label class="block">
+              <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Descripcion</span>
+              <textarea data-hero-input="description" rows="3" class="w-full resize-none rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"></textarea>
+            </label>
+
+            <label class="block">
+              <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Imagen de fondo</span>
+              <input data-hero-input="backgroundImageUrl" type="text" placeholder="/sets/hero.webp o URL publica" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+            </label>
+
+            <div class="grid gap-4 lg:grid-cols-2">
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Boton principal</span>
+                <input data-hero-input="primaryCtaLabel" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+              </label>
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Link principal</span>
+                <input data-hero-input="primaryCtaHref" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+              </label>
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Boton secundario</span>
+                <input data-hero-input="secondaryCtaLabel" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+              </label>
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Link secundario</span>
+                <input data-hero-input="secondaryCtaHref" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+              </label>
+            </div>
+
+            <div class="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-slate-50">
+              <img src="/sets/logo.webp" alt="" class="h-44 w-full object-cover" data-hero-preview />
+            </div>
+
+            <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]">
+              Guardar hero
+            </button>
+            <p class="hidden rounded-[1rem] bg-[color:var(--color-surface)] px-4 py-3 text-sm font-semibold text-[color:var(--color-primary)]" data-hero-message></p>
+          </form>
+        </div>
+      </section>
     </main>
     <Footer />
 
-    <script define:vars={{ inventoryItems, apiBaseUrl }}>
+    <script is:inline type="application/json" id="admin-inventory-config" set:html={JSON.stringify({ inventoryItems, apiBaseUrl })}></script>
+    <script is:inline>
       const STORAGE_KEY = "onlycartitas-inventory-state";
       const SESSION_KEY = "onlycartitas-auth-session";
-      const API_BASE_URL = apiBaseUrl;
+      const adminConfig = JSON.parse(document.getElementById("admin-inventory-config")?.textContent ?? "{}");
+      const inventoryItems = Array.isArray(adminConfig.inventoryItems) ? adminConfig.inventoryItems : [];
+      const API_BASE_URL = adminConfig.apiBaseUrl ?? "http://localhost:3000";
 
       const adminLogin = document.querySelector("[data-admin-login]");
       const adminContent = document.querySelector("[data-admin-content]");
@@ -270,6 +409,9 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       const toggleButton = document.querySelector("[data-toggle-status]");
       const form = document.querySelector("[data-form]");
       const message = document.querySelector("[data-message]");
+      const productCreateForm = document.querySelector("[data-product-create-form]");
+      const productCreateInputs = Array.from(document.querySelectorAll("[data-product-create]"));
+      const productCreateMessage = document.querySelector("[data-product-create-message]");
       const sealedCount = document.querySelector("[data-count-sellados]");
       const singlesCount = document.querySelector("[data-count-singles]");
       const ordersContainer = document.querySelector("[data-admin-orders]");
@@ -285,6 +427,10 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       const discountValueInput = document.querySelector("[data-discount-value-input]");
       const discountMaxInput = document.querySelector("[data-discount-max-input]");
       const discountAdminMessage = document.querySelector("[data-discount-admin-message]");
+      const heroForm = document.querySelector("[data-hero-form]");
+      const heroInputs = Array.from(document.querySelectorAll("[data-hero-input]"));
+      const heroPreview = document.querySelector("[data-hero-preview]");
+      const heroMessage = document.querySelector("[data-hero-message]");
 
       const isElement = (value) => value instanceof HTMLElement;
       const isInput = (value) => value instanceof HTMLInputElement;
@@ -307,6 +453,7 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       let activeType = "sellado";
       let activeAdminTab = "inventory";
       let adminOrders = [];
+      let heroSettings = null;
 
       const readSession = () => {
         try {
@@ -398,6 +545,7 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
         if (isLoggedIn) {
           loadOrders();
           loadDiscounts();
+          loadHeroSettings();
         }
       };
 
@@ -429,12 +577,28 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
         window.setTimeout(() => message.classList.add("hidden"), 1800);
       };
 
+      const showProductCreateMessage = (text) => {
+        if (!isElement(productCreateMessage)) return;
+
+        productCreateMessage.textContent = text;
+        productCreateMessage.classList.remove("hidden");
+        window.setTimeout(() => productCreateMessage.classList.add("hidden"), 2200);
+      };
+
       const showDiscountMessage = (text) => {
         if (!isElement(discountAdminMessage)) return;
 
         discountAdminMessage.textContent = text;
         discountAdminMessage.classList.remove("hidden");
         window.setTimeout(() => discountAdminMessage.classList.add("hidden"), 1800);
+      };
+
+      const showHeroMessage = (text) => {
+        if (!isElement(heroMessage)) return;
+
+        heroMessage.textContent = text;
+        heroMessage.classList.remove("hidden");
+        window.setTimeout(() => heroMessage.classList.add("hidden"), 2200);
       };
 
       const escapeHtml = (value) =>
@@ -586,6 +750,63 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
         renderSelectedProduct();
       };
 
+      const readProductCreateForm = () =>
+        productCreateInputs.reduce((input, element) => {
+          if (!(element instanceof HTMLInputElement) && !(element instanceof HTMLSelectElement)) return input;
+          const key = element.dataset.productCreate;
+          if (!key) return input;
+          input[key] = element.value.trim();
+          return input;
+        }, {});
+
+      const createProduct = async () => {
+        const raw = readProductCreateForm();
+        const stock = Number(raw.stock ?? 0);
+        const price = Number(raw.price ?? 0);
+        const previousPrice = Number(raw.previousPrice ?? 0);
+
+        const response = await fetch(`${API_BASE_URL}/api/products`, {
+          method: "POST",
+          headers: authHeaders(),
+          body: JSON.stringify({
+            id: raw.id,
+            kind: raw.kind,
+            name: raw.name,
+            category: raw.category,
+            set: raw.set,
+            language: raw.language,
+            stock: Number.isFinite(stock) ? stock : 0,
+            price: Number.isFinite(price) ? price : 0,
+            previousPrice: Number.isFinite(previousPrice) && previousPrice > 0 ? previousPrice : null,
+            image: raw.image,
+            offer: raw.offer || null,
+            illustrator: raw.illustrator || null,
+            active: true
+          })
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(payload?.error ?? "No se pudo crear el producto.");
+
+        const product = payload.data;
+        const adminProduct = {
+          id: product.id,
+          type: product.kind === "single" ? "single" : "sellado",
+          typeLabel: product.kind === "single" ? "Single" : "Sellado",
+          name: product.name,
+          category: product.category,
+          set: product.set,
+          stock: product.stock,
+          active: product.active
+        };
+
+        inventoryItems.unshift(adminProduct);
+        productMap.set(adminProduct.id, adminProduct);
+        if (productCreateForm instanceof HTMLFormElement) productCreateForm.reset();
+        renderProductOptions();
+        updateTypeButtons();
+        showProductCreateMessage("Producto creado. Ya aparece en inventario.");
+      };
+
       const getFilteredOrders = () => {
         const userQuery = isInput(orderUserFilter) ? orderUserFilter.value.trim().toLowerCase() : "";
         const statusQuery = isSelect(orderStatusFilter) ? orderStatusFilter.value : "";
@@ -707,6 +928,52 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
         }
       };
 
+      const fillHeroForm = (settings) => {
+        heroSettings = settings;
+        heroInputs.forEach((input) => {
+          if (!(input instanceof HTMLInputElement) && !(input instanceof HTMLTextAreaElement)) return;
+          const key = input.dataset.heroInput;
+          input.value = key ? String(settings?.[key] ?? "") : "";
+        });
+
+        if (heroPreview instanceof HTMLImageElement) {
+          heroPreview.src = settings?.backgroundImageUrl || "/sets/logo.webp";
+        }
+      };
+
+      const readHeroForm = () =>
+        heroInputs.reduce((input, element) => {
+          if (!(element instanceof HTMLInputElement) && !(element instanceof HTMLTextAreaElement)) return input;
+          const key = element.dataset.heroInput;
+          if (!key) return input;
+          input[key] = element.value.trim();
+          return input;
+        }, {});
+
+      const loadHeroSettings = async () => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/site-settings/hero`);
+          const payload = await response.json().catch(() => null);
+          if (!response.ok) throw new Error(payload?.error ?? "No se pudo cargar el hero.");
+          fillHeroForm(payload.data ?? {});
+        } catch (error) {
+          showHeroMessage(error instanceof Error ? error.message : "No se pudo cargar el hero.");
+        }
+      };
+
+      const saveHeroSettings = async () => {
+        const response = await fetch(`${API_BASE_URL}/api/admin/site-settings/hero`, {
+          method: "PATCH",
+          headers: authHeaders(),
+          body: JSON.stringify(readHeroForm())
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(payload?.error ?? "No se pudo guardar el hero.");
+
+        fillHeroForm(payload.data ?? heroSettings);
+        showHeroMessage("Hero actualizado.");
+      };
+
       const createDiscount = async () => {
         if (!isInput(discountCodeInput) || !isSelect(discountTypeInput) || !isInput(discountValueInput)) return;
 
@@ -789,6 +1056,16 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
         persistSelectedProduct();
       });
 
+      productCreateForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        try {
+          await createProduct();
+        } catch (error) {
+          showProductCreateMessage(error instanceof Error ? error.message : "No se pudo crear el producto.");
+        }
+      });
+
       adminTabs.forEach((tab) => {
         tab.addEventListener("click", () => {
           if (!(tab instanceof HTMLButtonElement)) return;
@@ -833,6 +1110,25 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
           await updateDiscount(target.dataset.discountSave, target.closest("article") ?? document);
         } catch (error) {
           showDiscountMessage(error instanceof Error ? error.message : "No se pudo actualizar el descuento.");
+        }
+      });
+
+      heroInputs.forEach((input) => {
+        input.addEventListener("input", () => {
+          if (!(input instanceof HTMLInputElement) || input.dataset.heroInput !== "backgroundImageUrl") return;
+          if (heroPreview instanceof HTMLImageElement) {
+            heroPreview.src = input.value.trim() || "/sets/logo.webp";
+          }
+        });
+      });
+
+      heroForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        try {
+          await saveHeroSettings();
+        } catch (error) {
+          showHeroMessage(error instanceof Error ? error.message : "No se pudo guardar el hero.");
         }
       });
 

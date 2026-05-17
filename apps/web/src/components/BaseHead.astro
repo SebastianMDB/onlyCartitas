@@ -38,14 +38,38 @@ const socialImage = image ? new URL(image, canonicalUrl).toString() : null;
 {socialImage ? <meta name="twitter:image" content={socialImage} /> : null}
 <script is:inline>
   (() => {
+    const storageKey = "onlycartitas-theme";
+
+    const resolveTheme = () => {
+      try {
+        const storedTheme = window.localStorage.getItem(storageKey);
+        if (storedTheme === "dark" || storedTheme === "light") return storedTheme;
+      } catch {
+        return "light";
+      }
+
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    };
+
+    const applyTheme = (root, theme) => {
+      root.dataset.theme = theme;
+      root.style.colorScheme = theme;
+    };
+
     try {
-      const storedTheme = window.localStorage.getItem("onlycartitas-theme");
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const theme = storedTheme === "dark" || storedTheme === "light" ? storedTheme : prefersDark ? "dark" : "light";
-      document.documentElement.dataset.theme = theme;
+      applyTheme(document.documentElement, resolveTheme());
     } catch {
-      document.documentElement.dataset.theme = "light";
+      applyTheme(document.documentElement, "light");
     }
+
+    document.addEventListener("astro:before-swap", (event) => {
+      if (!event.newDocument) return;
+      applyTheme(event.newDocument.documentElement, resolveTheme());
+    });
+
+    document.addEventListener("astro:page-load", () => {
+      applyTheme(document.documentElement, resolveTheme());
+    });
   })();
 </script>
 <ClientRouter fallback="none" />

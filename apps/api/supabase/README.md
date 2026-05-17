@@ -13,7 +13,7 @@ supabase db push
 Si no estas usando Supabase CLI, copia el contenido de:
 
 ```text
-supabase/migrations/20260509010305_initial_schema.sql
+supabase/migrations/20260511002000_bootstrap_current_schema.sql
 ```
 
 y ejecutalo en Supabase Dashboard > SQL Editor.
@@ -24,5 +24,8 @@ y ejecutalo en Supabase Dashboard > SQL Editor.
 - `app_users`
 - `orders`
 - `order_items`
+- `discount_codes`
+- `payments`
+- `site_settings`
 
 Despues de aplicar la migracion, revisa Supabase Dashboard > Table Editor.

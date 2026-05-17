@@ -73,6 +73,19 @@ import "../styles/global.css";
     <Footer />
 
     <script>
+      type AccountOrder = {
+        id?: string;
+        delivery_mode?: string;
+        deliveryMode?: string;
+        created_at?: string;
+        createdAt?: string;
+        total?: number | string;
+        totals?: {
+          total?: number | string;
+        };
+        items?: unknown[];
+      };
+
       const SESSION_KEY = "onlycartitas-auth-session";
       const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       const userLabel = document.querySelector("[data-account-user]");
@@ -87,8 +100,8 @@ import "../styles/global.css";
         maximumFractionDigits: 0
       });
 
-      const isHTMLElement = (value) => value instanceof HTMLElement;
-      const escapeHtml = (value) =>
+      const isHTMLElement = (value: unknown) => value instanceof HTMLElement;
+      const escapeHtml = (value: unknown) =>
         String(value)
           .replaceAll("&", "&amp;")
           .replaceAll("<", "&lt;")
@@ -113,13 +126,13 @@ import "../styles/global.css";
         if (isHTMLElement(roleLabel)) roleLabel.textContent = session.role === "admin" ? "Rol admin" : "Rol cliente";
       }
 
-      const renderOrders = (orders) => {
+      const renderOrders = (orders: AccountOrder[]) => {
         if (isHTMLElement(ordersEmpty)) ordersEmpty.classList.toggle("hidden", orders.length > 0);
         if (!isHTMLElement(ordersList)) return;
 
         ordersList.innerHTML = orders
           .map(
-            (order) => `
+            (order: AccountOrder) => `
               <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div>

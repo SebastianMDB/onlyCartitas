@@ -156,6 +156,13 @@ export const payments = pgTable(
   })
 );
 
+export const siteSettings = pgTable("site_settings", {
+  key: text("key").primaryKey(),
+  value: jsonb("value").$type<Record<string, unknown>>().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
+});
+
 export const usersRelations = relations(appUsers, ({ many }) => ({
   orders: many(orders)
 }));

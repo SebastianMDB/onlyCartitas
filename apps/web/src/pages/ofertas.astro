@@ -112,8 +112,8 @@ const maxDiscount = offerProducts.reduce((currentMax, product) => {
     <Footer />
 
     <script>
-      const isHTMLElement = (value) => value instanceof HTMLElement;
-      const isButtonElement = (value) => value instanceof HTMLButtonElement;
+      const isHTMLElement = (value: unknown) => value instanceof HTMLElement;
+      const isButtonElement = (value: unknown) => value instanceof HTMLButtonElement;
       const productCards = Array.from(document.querySelectorAll("[data-product-card]"));
       const categoryButtons = Array.from(document.querySelectorAll("[data-category-button]"));
       const setFilter = document.querySelector("[data-set-filter]");

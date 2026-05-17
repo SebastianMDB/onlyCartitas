@@ -18,9 +18,14 @@ const currentPath = Astro.url.pathname;
   <div class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 lg:px-8">
     <div class="flex items-center gap-3 lg:gap-5">
       <a href="/" class="flex min-w-0 shrink-0 items-center gap-3">
-        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[color:var(--color-primary)] text-base font-semibold text-white shadow-[0_14px_32px_rgba(17,48,71,0.2)]">
-          OC
-        </div>
+        <img
+          src="/sets/logo.webp"
+          alt="OnlyCartitas"
+          width="56"
+          height="56"
+          class="h-12 w-12 shrink-0 rounded-2xl object-cover shadow-[0_14px_32px_rgba(17,48,71,0.18)]"
+          decoding="async"
+        />
         <div class="min-w-0">
           <p class="truncate text-base font-semibold tracking-[0.14em] text-[color:var(--color-primary)] uppercase sm:text-lg">
             OnlyCartitas
@@ -204,14 +209,31 @@ const currentPath = Astro.url.pathname;
 ) : null}
 
 <script>
+  type Theme = "dark" | "light";
+  type InventoryProduct = {
+    id: string;
+    stock?: number;
+    active?: boolean;
+  };
+  type InventoryState = Record<string, { stock: number; status: "active" | "inactive" }>;
+  type CartItem = {
+    id: string;
+    name: string;
+    category?: string;
+    set: string;
+    language: string;
+    image: string;
+    price: number;
+    stock: number;
+    quantity: number;
+  };
+
   const inputs = Array.from(document.querySelectorAll("[data-search-input]"));
   const navLinks = Array.from(document.querySelectorAll("[data-nav-link]"));
-  const themeToggle = document.querySelector("[data-theme-toggle]");
   const INVENTORY_STORAGE_KEY = "onlycartitas-inventory-state";
   const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 
-  const isInputElement = (value) => value instanceof HTMLInputElement;
-  const isThemeButtonElement = (value) => value instanceof HTMLButtonElement;
+  const isInputElement = (value: unknown) => value instanceof HTMLInputElement;
 
   const THEME_STORAGE_KEY = "onlycartitas-theme";
 
@@ -227,18 +249,20 @@ const currentPath = Astro.url.pathname;
   const getPreferredTheme = () =>
     getStoredTheme() ?? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 
-  const applyTheme = (theme) => {
+  const applyTheme = (theme: Theme) => {
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
 
-    if (isThemeButtonElement(themeToggle)) {
+    document.querySelectorAll("[data-theme-toggle]").forEach((toggle) => {
+      if (!(toggle instanceof HTMLButtonElement)) return;
+
       const isDark = theme === "dark";
-      themeToggle.setAttribute("aria-pressed", isDark ? "true" : "false");
-      themeToggle.setAttribute("aria-label", isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro");
-    }
+      toggle.setAttribute("aria-pressed", isDark ? "true" : "false");
+      toggle.setAttribute("aria-label", isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro");
+    });
   };
 
-  const emitSearch = (value) => {
+  const emitSearch = (value: string) => {
     window.dispatchEvent(
       new CustomEvent("carta-noble:search", {
         detail: value
@@ -246,10 +270,10 @@ const currentPath = Astro.url.pathname;
     );
   };
 
-  const readInventoryState = () => {
+  const readInventoryState = (): InventoryState => {
     try {
       const storedInventory = window.localStorage.getItem(INVENTORY_STORAGE_KEY);
-      return storedInventory ? JSON.parse(storedInventory) : {};
+      return storedInventory ? JSON.parse(storedInventory) as InventoryState : {};
     } catch {
       return {};
     }
@@ -263,7 +287,7 @@ const currentPath = Astro.url.pathname;
       const payload = await response.json();
       if (!Array.isArray(payload.data)) return;
 
-      const apiState = payload.data.reduce((state, product) => {
+      const apiState = (payload.data as InventoryProduct[]).reduce<InventoryState>((state, product) => {
         state[product.id] = {
           stock: Number(product.stock ?? 0),
           status: product.active === false ? "inactive" : "active"
@@ -289,7 +313,7 @@ const currentPath = Astro.url.pathname;
       const productState = productId ? inventoryState[productId] : null;
       const cartButton = card.querySelector("[data-cart-add]");
       const stockLabel = card.querySelector("[data-product-stock-label]");
-      const stock = Number(productState?.stock ?? cartButton?.dataset.cartStock ?? 0);
+      const stock = Number(productState?.stock ?? (cartButton instanceof HTMLElement ? cartButton.dataset.cartStock : 0));
       const isInactive = productState?.status === "inactive" || stock <= 0;
 
       if (card.hasAttribute("data-product-card")) {
@@ -373,7 +397,11 @@ const currentPath = Astro.url.pathname;
 
   applyTheme(getPreferredTheme());
 
-  themeToggle?.addEventListener("click", () => {
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    const themeToggle = target instanceof HTMLElement ? target.closest("[data-theme-toggle]") : null;
+    if (!(themeToggle instanceof HTMLButtonElement)) return;
+
     const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
     try {
       window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
@@ -410,6 +438,7 @@ const currentPath = Astro.url.pathname;
   applyInventoryState();
   syncInventoryFromApi();
   document.addEventListener("astro:page-load", updateNavState);
+  document.addEventListener("astro:page-load", () => applyTheme(getPreferredTheme()));
   document.addEventListener("astro:page-load", () => {
     applyInventoryState();
     syncInventoryFromApi();
@@ -437,11 +466,11 @@ const currentPath = Astro.url.pathname;
     maximumFractionDigits: 0
   });
 
-  const isCartItemElement = (value) => value instanceof HTMLElement;
-  const isCartButtonElement = (value) => value instanceof HTMLButtonElement;
+  const isCartItemElement = (value: unknown) => value instanceof HTMLElement;
+  const isCartButtonElement = (value: unknown) => value instanceof HTMLButtonElement;
   let isCartOpen = false;
 
-  const readCart = () => {
+  const readCart = (): CartItem[] => {
     try {
       const storedCart = window.localStorage.getItem(CART_STORAGE_KEY);
       const parsedCart = storedCart ? JSON.parse(storedCart) : [];
@@ -526,7 +555,7 @@ const currentPath = Astro.url.pathname;
     document.body.style.overflow = "";
   };
 
-  const setCartQuantity = (id, quantity) => {
+  const setCartQuantity = (id: string, quantity: number) => {
     const currentItem = cart.find((item) => item.id === id);
     const nextQuantity = currentItem ? Math.min(quantity, currentItem.stock) : quantity;
 
@@ -601,7 +630,7 @@ const currentPath = Astro.url.pathname;
       .join("");
   };
 
-  const addToCart = (product) => {
+  const addToCart = (product: Omit<CartItem, "quantity">) => {
     const existingItem = cart.find((item) => item.id === product.id);
     if (existingItem) {
       if (existingItem.quantity >= product.stock) {

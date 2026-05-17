@@ -176,6 +176,12 @@ import "../styles/global.css";
     <Footer />
 
     <script>
+      type DeliveryMode = "envio" | "retiro";
+      type AppliedDiscount = {
+        code: string;
+        discount: number;
+      };
+
       const CART_STORAGE_KEY = "carta-noble-cart";
       const SESSION_STORAGE_KEY = "onlycartitas-auth-session";
       const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
@@ -205,9 +211,8 @@ import "../styles/global.css";
       const shippingLabel = document.querySelector("[data-summary-shipping]");
       const discountLabel = document.querySelector("[data-summary-discount]");
       const totalLabel = document.querySelector("[data-summary-total]");
-      let deliveryMode = "envio";
-      /** @type {{ code: string; discount: number } | null} */
-      let appliedDiscount = null;
+      let deliveryMode: DeliveryMode = "envio";
+      let appliedDiscount: AppliedDiscount | null = null;
 
       const currencyFormatter = new Intl.NumberFormat("es-CL", {
         style: "currency",
@@ -215,10 +220,10 @@ import "../styles/global.css";
         maximumFractionDigits: 0
       });
 
-      const isHTMLElement = (/** @type {unknown} */ value) => value instanceof HTMLElement;
-      const isInputElement = (/** @type {unknown} */ value) => value instanceof HTMLInputElement;
+      const isHTMLElement = (value: unknown) => value instanceof HTMLElement;
+      const isInputElement = (value: unknown) => value instanceof HTMLInputElement;
 
-      const escapeHtml = (/** @type {unknown} */ value) =>
+      const escapeHtml = (value: unknown) =>
         String(value)
           .replaceAll("&", "&amp;")
           .replaceAll("<", "&lt;")
@@ -305,7 +310,7 @@ import "../styles/global.css";
           .join("");
       };
 
-      const setDeliveryMode = (/** @type {"envio" | "retiro"} */ mode) => {
+      const setDeliveryMode = (mode: DeliveryMode) => {
         deliveryMode = mode;
         deliveryButtons.forEach((button) => {
           if (!(button instanceof HTMLButtonElement)) return;
@@ -400,7 +405,7 @@ import "../styles/global.css";
         return payload.data;
       };
 
-      const createMercadoPagoPreference = async (/** @type {string} */ orderId) => {
+      const createMercadoPagoPreference = async (orderId: string) => {
         const session = readSession();
         const response = await fetch(`${API_BASE_URL}/api/payments/mercadopago/preferences`, {
           method: "POST",

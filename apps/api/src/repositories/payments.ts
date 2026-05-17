@@ -168,7 +168,6 @@ export async function syncMercadoPagoPayment(providerPaymentId: string) {
     throw new ApiError(502, payload && "message" in payload && payload.message ? payload.message : "No se pudo consultar el pago");
   }
 
-  const orderId = payload.external_reference;
   const status = normalizePaymentStatus(payload.status);
   const order = await assertPaymentMatchesOrder(payload);
 

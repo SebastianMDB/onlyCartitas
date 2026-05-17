@@ -225,8 +225,3 @@ values (
   }'::jsonb
 )
 on conflict (key) do nothing;
-
--- Para crear un admin:
--- 1. Registra el usuario con POST /api/auth/register.
--- 2. En Supabase ejecuta:
--- update public.app_users set role = 'admin' where username = 'tu_usuario';

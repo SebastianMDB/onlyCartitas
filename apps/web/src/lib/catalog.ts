@@ -21,6 +21,21 @@ export type Product = {
   manualSegment?: string | null;
 };
 
+export type HeroSettings = {
+  primaryBadge: string;
+  secondaryBadge: string;
+  title: string;
+  description: string;
+  launchSetName: string;
+  launchTitle: string;
+  launchLabel: string;
+  primaryCtaLabel: string;
+  primaryCtaHref: string;
+  secondaryCtaLabel: string;
+  secondaryCtaHref: string;
+  backgroundImageUrl: string;
+};
+
 export const productLanguages: Array<{ value: ProductLanguage; label: string }> = [
   { value: "japanese", label: "Japones" },
   { value: "spanish", label: "Espanol" },
@@ -52,6 +67,18 @@ export const fetchProducts = async (filters: ProductFilters = {}): Promise<Produ
     return Array.isArray(payload.data) ? payload.data : [];
   } catch {
     return [];
+  }
+};
+
+export const fetchHeroSettings = async (): Promise<HeroSettings | null> => {
+  try {
+    const response = await fetch(new URL("/api/site-settings/hero", apiBaseUrl));
+    if (!response.ok) return null;
+
+    const payload = await response.json();
+    return payload.data ?? null;
+  } catch {
+    return null;
   }
 };
 

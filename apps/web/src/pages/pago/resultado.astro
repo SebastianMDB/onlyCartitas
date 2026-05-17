@@ -43,7 +43,7 @@ import "../../styles/global.css";
       const copy = document.querySelector("[data-payment-copy]");
       const order = document.querySelector("[data-payment-order]");
 
-      const content = {
+      const content: Record<string, { title: string; copy: string }> = {
         success: {
           title: "Pago recibido",
           copy: "Mercado Pago aprobo el pago. Actualizaremos el estado del pedido con la notificacion del proveedor."

@@ -9,6 +9,7 @@ import { discountCodeRoutes } from "./routes/discount-codes.js";
 import { orderRoutes } from "./routes/orders.js";
 import { paymentRoutes } from "./routes/payments.js";
 import { productRoutes } from "./routes/products.js";
+import { siteSettingsRoutes } from "./routes/site-settings.js";
 
 const app = Fastify({
   logger: true
@@ -61,6 +62,7 @@ await app.register(discountCodeRoutes);
 await app.register(orderRoutes);
 await app.register(paymentRoutes);
 await app.register(productRoutes);
+await app.register(siteSettingsRoutes);
 
 try {
   await app.listen({
