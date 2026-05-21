@@ -3,10 +3,6 @@ import { seedProducts } from "./seeds/products.js";
 import { db } from "./client.js";
 import { products } from "./schema.js";
 
-if (!db) {
-  throw new Error("DATABASE_URL no esta configurado. Agregalo en apps/api/.env antes de ejecutar el seed.");
-}
-
 let count = 0;
 
 for (const product of seedProducts) {

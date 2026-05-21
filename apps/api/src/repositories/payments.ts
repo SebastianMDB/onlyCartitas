@@ -125,19 +125,6 @@ export async function createMercadoPagoPreference(orderId: string, user?: AuthUs
   const checkoutUrl =
     env.MERCADO_PAGO_CHECKOUT_MODE === "production" ? payload.init_point : payload.sandbox_init_point ?? payload.init_point;
 
-  if (!db) {
-    return {
-      id: `local-payment-${order.id}`,
-      order_id: order.id,
-      provider: "mercado_pago",
-      status: "created",
-      amount: order.total,
-      currency: env.MERCADO_PAGO_CURRENCY_ID,
-      provider_preference_id: payload.id,
-      checkout_url: checkoutUrl
-    };
-  }
-
   const [payment] = await db
     .insert(payments)
     .values({
@@ -171,37 +158,35 @@ export async function syncMercadoPagoPayment(providerPaymentId: string) {
   const status = normalizePaymentStatus(payload.status);
   const order = await assertPaymentMatchesOrder(payload);
 
-  if (db) {
-    const [existingPayment] = await db
-      .select()
-      .from(payments)
-      .where(eq(payments.providerPaymentId, String(payload.id)))
-      .limit(1);
+  const [existingPayment] = await db
+    .select()
+    .from(payments)
+    .where(eq(payments.providerPaymentId, String(payload.id)))
+    .limit(1);
 
-    if (existingPayment) {
-      await db
-        .update(payments)
-        .set({
-          status,
-          metadata: payload as unknown as Record<string, unknown>,
-          updatedAt: new Date()
-        })
-        .where(eq(payments.id, existingPayment.id));
-    } else {
-      await db.insert(payments).values({
-        orderId: order.id,
-        provider: "mercado_pago",
+  if (existingPayment) {
+    await db
+      .update(payments)
+      .set({
         status,
-        amount: Number(payload.transaction_amount ?? 0),
-        currency: payload.currency_id ?? env.MERCADO_PAGO_CURRENCY_ID,
-        providerPaymentId: String(payload.id),
-        metadata: payload as unknown as Record<string, unknown>
-      });
-    }
+        metadata: payload as unknown as Record<string, unknown>,
+        updatedAt: new Date()
+      })
+      .where(eq(payments.id, existingPayment.id));
+  } else {
+    await db.insert(payments).values({
+      orderId: order.id,
+      provider: "mercado_pago",
+      status,
+      amount: Number(payload.transaction_amount ?? 0),
+      currency: payload.currency_id ?? env.MERCADO_PAGO_CURRENCY_ID,
+      providerPaymentId: String(payload.id),
+      metadata: payload as unknown as Record<string, unknown>
+    });
+  }
 
-    if (status === "approved") {
-      await db.update(orders).set({ status: "paid", updatedAt: new Date() }).where(eq(orders.id, order.id));
-    }
+  if (status === "approved") {
+    await db.update(orders).set({ status: "paid", updatedAt: new Date() }).where(eq(orders.id, order.id));
   }
 
   return {

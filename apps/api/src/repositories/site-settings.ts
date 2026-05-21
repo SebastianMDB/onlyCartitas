@@ -41,8 +41,6 @@ const normalizeHeroSettings = (value: Record<string, unknown> | null | undefined
 });
 
 export async function getHeroSettings() {
-  if (!db) throw new ApiError(503, "Base de datos no configurada");
-
   try {
     const [row] = await db.select().from(siteSettings).where(eq(siteSettings.key, HERO_SETTINGS_KEY)).limit(1);
     return normalizeHeroSettings(row?.value);
@@ -52,8 +50,6 @@ export async function getHeroSettings() {
 }
 
 export async function updateHeroSettings(input: Partial<HeroSettings>) {
-  if (!db) throw new ApiError(503, "Base de datos no configurada");
-
   const currentSettings = await getHeroSettings();
   const nextSettings = {
     ...currentSettings,

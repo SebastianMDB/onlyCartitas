@@ -18,7 +18,6 @@ type CreateOrderInput = {
   discountCode?: string;
 };
 
-const localOrders: unknown[] = [];
 const SHIPPING_PRICE = 4990;
 
 type OrderRow = typeof orders.$inferSelect;
@@ -93,11 +92,6 @@ export async function createOrder(input: CreateOrderInput) {
     created_at: new Date().toISOString()
   };
 
-  if (!db) {
-    localOrders.unshift(localOrder);
-    return localOrder;
-  }
-
   try {
     return await db.transaction(async (tx) => {
       const [order] = await tx
@@ -145,17 +139,6 @@ export async function createOrder(input: CreateOrderInput) {
 export async function updateOrderStatus(id: string, status: OrderRow["status"], user?: AuthUser) {
   if (user?.role !== "admin") throw new ApiError(403, "Permisos insuficientes");
 
-  if (!db) {
-    const index = localOrders.findIndex((order) => (order as { id?: string }).id === id);
-    if (index === -1) return null;
-    localOrders[index] = {
-      ...(localOrders[index] as Record<string, unknown>),
-      status,
-      updated_at: new Date().toISOString()
-    };
-    return localOrders[index];
-  }
-
   try {
     const [order] = await db
       .update(orders)
@@ -174,12 +157,6 @@ export async function updateOrderStatus(id: string, status: OrderRow["status"], 
 
 export async function listOrders(user?: AuthUser) {
   if (!user) throw new ApiError(401, "Sesion requerida");
-
-  if (!db) {
-    return user.role === "admin"
-      ? localOrders
-      : localOrders.filter((order) => (order as { user_id?: string }).user_id === user.id);
-  }
 
   try {
     const orderRows =
@@ -211,15 +188,6 @@ export async function listOrders(user?: AuthUser) {
 }
 
 export async function getOrderById(id: string, user?: AuthUser) {
-  if (!db) {
-    const order = localOrders.find((item) => (item as { id?: string }).id === id) as
-      | (ReturnType<typeof toOrderResponse> & { user_id?: string | null })
-      | undefined;
-    if (!order) return null;
-    if (user?.role !== "admin" && order.user_id && order.user_id !== user?.id) throw new ApiError(403, "Permisos insuficientes");
-    return order;
-  }
-
   try {
     const [order] =
       user?.role === "admin"

@@ -15,22 +15,6 @@ export type DiscountCodeInput = {
   maxUses?: number | null;
 };
 
-const localDiscountCodes: DiscountCodeRow[] = [
-  {
-    id: "local-only10",
-    code: "ONLY10",
-    type: "percent",
-    value: 10,
-    active: true,
-    startsAt: null,
-    expiresAt: null,
-    maxUses: null,
-    usedCount: 0,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  }
-];
-
 const normalizeCode = (code: string) => code.trim().toUpperCase();
 
 const toResponse = (discountCode: DiscountCodeRow) => ({
@@ -62,8 +46,6 @@ export const calculateDiscount = (discountCode: Pick<DiscountCodeRow, "type" | "
 };
 
 export async function listDiscountCodes() {
-  if (!db) return localDiscountCodes.map(toResponse);
-
   try {
     const rows = await db.select().from(discountCodes).orderBy(asc(discountCodes.code));
     return rows.map(toResponse);
@@ -76,9 +58,7 @@ export async function findUsableDiscountCode(code: string, subtotal: number) {
   const normalizedCode = normalizeCode(code);
   if (!normalizedCode) return null;
 
-  const discountCode = !db
-    ? localDiscountCodes.find((item) => item.code === normalizedCode) ?? null
-    : ((await db.select().from(discountCodes).where(eq(discountCodes.code, normalizedCode)).limit(1))[0] ?? null);
+  const discountCode = (await db.select().from(discountCodes).where(eq(discountCodes.code, normalizedCode)).limit(1))[0] ?? null;
 
   if (!discountCode || !isUsable(discountCode)) return null;
 
@@ -100,20 +80,6 @@ export async function createDiscountCode(input: DiscountCodeInput) {
     updatedAt: new Date()
   };
 
-  if (!db) {
-    if (localDiscountCodes.some((item) => item.code === values.code)) throw new ApiError(409, "El codigo ya existe");
-    const now = new Date();
-    const discountCode = {
-      id: `local-${values.code.toLowerCase()}`,
-      ...values,
-      usedCount: 0,
-      createdAt: now,
-      updatedAt: now
-    };
-    localDiscountCodes.push(discountCode);
-    return toResponse(discountCode);
-  }
-
   try {
     const [discountCode] = await db.insert(discountCodes).values(values).returning();
     return toResponse(discountCode);
@@ -134,13 +100,6 @@ export async function updateDiscountCode(id: string, input: Partial<DiscountCode
     updatedAt: new Date()
   };
 
-  if (!db) {
-    const index = localDiscountCodes.findIndex((item) => item.id === id);
-    if (index === -1) return null;
-    localDiscountCodes[index] = { ...localDiscountCodes[index], ...values };
-    return toResponse(localDiscountCodes[index]);
-  }
-
   try {
     const [discountCode] = await db.update(discountCodes).set(values).where(eq(discountCodes.id, id)).returning();
     return discountCode ? toResponse(discountCode) : null;
@@ -151,11 +110,6 @@ export async function updateDiscountCode(id: string, input: Partial<DiscountCode
 
 export async function registerDiscountUse(code: string) {
   const normalizedCode = normalizeCode(code);
-  if (!db) {
-    const discountCode = localDiscountCodes.find((item) => item.code === normalizedCode);
-    if (discountCode) discountCode.usedCount += 1;
-    return;
-  }
 
   await db
     .update(discountCodes)

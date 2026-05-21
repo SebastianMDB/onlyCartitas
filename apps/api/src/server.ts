@@ -2,7 +2,8 @@ import "dotenv/config";
 import cors from "@fastify/cors";
 import Fastify from "fastify";
 import { ZodError } from "zod";
-import { env, hasDatabaseConfig } from "./env.js";
+import { queryClient } from "./db/client.js";
+import { env } from "./env.js";
 import { ApiError } from "./http.js";
 import { authRoutes } from "./routes/auth.js";
 import { discountCodeRoutes } from "./routes/discount-codes.js";
@@ -51,11 +52,15 @@ app.setErrorHandler((error, _request, reply) => {
   });
 });
 
-app.get("/health", async () => ({
-  ok: true,
-  service: "onlycartitas-api",
-  database: hasDatabaseConfig ? "configured" : "missing"
-}));
+app.get("/health", async () => {
+  await queryClient`select 1`;
+
+  return {
+    ok: true,
+    service: "onlycartitas-api",
+    database: "connected"
+  };
+});
 
 await app.register(authRoutes);
 await app.register(discountCodeRoutes);
@@ -65,6 +70,8 @@ await app.register(productRoutes);
 await app.register(siteSettingsRoutes);
 
 try {
+  await queryClient`select 1`;
+
   await app.listen({
     port: env.PORT,
     host: "0.0.0.0"

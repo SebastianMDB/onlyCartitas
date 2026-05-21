@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { appUsers } from "../db/schema.js";
@@ -6,36 +5,7 @@ import { ApiError } from "../http.js";
 import { hashPassword, verifyPassword } from "../security/passwords.js";
 import type { AuthUser } from "../types.js";
 
-type StoredUser = AuthUser & {
-  password_hash: string;
-};
-
-const localUsers: StoredUser[] = [
-  {
-    id: "local-admin",
-    username: "admin",
-    role: "admin",
-    password_hash: hashPassword("admin1234")
-  }
-];
-
 export async function registerUser(username: string, password: string) {
-  if (!db) {
-    if (localUsers.some((user) => user.username === username)) {
-      throw new ApiError(409, "El usuario ya existe");
-    }
-
-    const user: StoredUser = {
-      id: randomUUID(),
-      username,
-      role: "customer",
-      password_hash: hashPassword(password)
-    };
-
-    localUsers.push(user);
-    return publicUser(user);
-  }
-
   try {
     const [existing] = await db
       .select({ id: appUsers.id })
@@ -66,12 +36,6 @@ export async function registerUser(username: string, password: string) {
 }
 
 export async function loginUser(username: string, password: string) {
-  if (!db) {
-    const user = localUsers.find((item) => item.username === username);
-    if (!user || !verifyPassword(password, user.password_hash)) return null;
-    return publicUser(user);
-  }
-
   try {
     const [user] = await db
       .select()
@@ -90,9 +54,3 @@ export async function loginUser(username: string, password: string) {
     throw new ApiError(500, "No se pudo iniciar sesion");
   }
 }
-
-const publicUser = (user: StoredUser): AuthUser => ({
-  id: user.id,
-  username: user.username,
-  role: user.role
-});

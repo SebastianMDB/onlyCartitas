@@ -23,10 +23,6 @@ type ProductInput = Omit<Product, "previousPrice" | "offer" | "illustrator" | "r
 };
 
 export async function listProducts(filters: ProductFilters = {}) {
-  if (!db) {
-    throw new ApiError(503, "Base de datos no configurada");
-  }
-
   const conditions: SQL[] = [];
   if (!filters.includeInactive) conditions.push(eq(products.active, true));
   if (filters.kind) conditions.push(eq(products.kind, filters.kind));
@@ -51,8 +47,6 @@ export async function listProducts(filters: ProductFilters = {}) {
 }
 
 export async function getProductById(id: string) {
-  if (!db) throw new ApiError(503, "Base de datos no configurada");
-
   try {
     const [product] = await db.select().from(products).where(eq(products.id, id)).limit(1);
 
@@ -63,10 +57,6 @@ export async function getProductById(id: string) {
 }
 
 export async function createProduct(input: ProductInput) {
-  if (!db) {
-    throw new ApiError(503, "Base de datos no configurada");
-  }
-
   try {
     const [existing] = await db.select({ id: products.id }).from(products).where(eq(products.id, input.id)).limit(1);
     if (existing) throw new ApiError(409, "El producto ya existe");
@@ -93,10 +83,6 @@ export async function createProduct(input: ProductInput) {
 }
 
 export async function updateProductInventory(id: string, input: { stock?: number; active?: boolean }) {
-  if (!db) {
-    throw new ApiError(503, "Base de datos no configurada");
-  }
-
   try {
     const [product] = await db
       .update(products)

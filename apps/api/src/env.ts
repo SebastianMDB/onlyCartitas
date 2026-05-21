@@ -8,7 +8,7 @@ const envSchema = z
     API_SECRET: z.string().default("dev-onlycartitas-secret"),
     SESSION_TTL_SECONDS: z.coerce.number().int().positive().default(60 * 60 * 24 * 7),
     AUTH_REGISTER_ENABLED: z.coerce.boolean().default(true),
-    DATABASE_URL: z.string().url().optional().or(z.literal("")),
+    DATABASE_URL: z.string().url(),
     API_PUBLIC_URL: z.string().url().optional().or(z.literal("")),
     MERCADO_PAGO_ACCESS_TOKEN: z.string().optional().or(z.literal("")),
     MERCADO_PAGO_CURRENCY_ID: z.string().default("CLP"),
@@ -16,14 +16,6 @@ const envSchema = z
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== "production") return;
-
-    if (!env.DATABASE_URL) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["DATABASE_URL"],
-        message: "DATABASE_URL es obligatorio en produccion"
-      });
-    }
 
     if (!env.API_SECRET || env.API_SECRET === "dev-onlycartitas-secret" || env.API_SECRET === "change-me") {
       ctx.addIssue({
@@ -69,5 +61,3 @@ const envSchema = z
   });
 
 export const env = envSchema.parse(process.env);
-
-export const hasDatabaseConfig = Boolean(env.DATABASE_URL);
