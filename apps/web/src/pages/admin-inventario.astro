@@ -98,17 +98,13 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
               <form class="mt-4 grid gap-4" data-product-create-form>
                 <div class="grid gap-4 lg:grid-cols-2">
                   <label class="block">
-                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">ID</span>
-                    <input data-product-create="id" type="text" placeholder="etb-prismatic" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
-                  </label>
-                  <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Tipo</span>
                     <select data-product-create="kind" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
                       <option value="sealed">Sellado</option>
                       <option value="single">Single</option>
                     </select>
                   </label>
-                  <label class="block lg:col-span-2">
+                  <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Nombre</span>
                     <input data-product-create="name" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
                   </label>
@@ -137,17 +133,23 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
                     <input data-product-create="stock" type="number" min="0" step="1" value="0" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
                   </label>
                   <label class="block">
-                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Precio</span>
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Valor ahora</span>
                     <input data-product-create="price" type="number" min="0" step="1" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
                   </label>
-                  <label class="block">
-                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Precio anterior</span>
-                    <input data-product-create="previousPrice" type="number" min="0" step="1" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  <label class="flex min-h-12 items-center gap-3 rounded-2xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 lg:col-span-2">
+                    <input data-product-offer-toggle type="checkbox" class="h-5 w-5 rounded border-slate-300 text-[color:var(--color-primary)] focus:ring-[color:var(--color-secondary)]" />
+                    Producto en oferta
                   </label>
-                  <label class="block">
-                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Etiqueta oferta</span>
-                    <input data-product-create="offer" type="text" placeholder="Oferta" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
-                  </label>
+                  <div class="hidden grid gap-4 lg:col-span-2 lg:grid-cols-2" data-product-offer-fields>
+                    <label class="block">
+                      <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Valor anterior</span>
+                      <input data-product-create="previousPrice" type="number" min="0" step="1" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                    </label>
+                    <label class="block">
+                      <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Etiqueta oferta</span>
+                      <input data-product-create="offer" type="text" value="Oferta" placeholder="Oferta" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                    </label>
+                  </div>
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Ilustrador</span>
                     <input data-product-create="illustrator" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
@@ -411,6 +413,8 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       const message = document.querySelector("[data-message]");
       const productCreateForm = document.querySelector("[data-product-create-form]");
       const productCreateInputs = Array.from(document.querySelectorAll("[data-product-create]"));
+      const productCreateOfferToggle = document.querySelector("[data-product-offer-toggle]");
+      const productCreateOfferFields = document.querySelector("[data-product-offer-fields]");
       const productCreateMessage = document.querySelector("[data-product-create-message]");
       const sealedCount = document.querySelector("[data-count-sellados]");
       const singlesCount = document.querySelector("[data-count-singles]");
@@ -582,7 +586,27 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 
         productCreateMessage.textContent = text;
         productCreateMessage.classList.remove("hidden");
-        window.setTimeout(() => productCreateMessage.classList.add("hidden"), 2200);
+        window.setTimeout(() => productCreateMessage.classList.add("hidden"), 3600);
+      };
+
+      const renderProductCreateOfferFields = () => {
+        const hasOffer = productCreateOfferToggle instanceof HTMLInputElement && productCreateOfferToggle.checked;
+        productCreateOfferFields?.classList.toggle("hidden", !hasOffer);
+
+        const offerInput = productCreateInputs.find(
+          (input) => input instanceof HTMLInputElement && input.dataset.productCreate === "offer"
+        );
+        if (hasOffer && offerInput instanceof HTMLInputElement && !offerInput.value.trim()) {
+          offerInput.value = "Oferta";
+        }
+      };
+
+      const getProductCreateError = (payload) => {
+        const issue = Array.isArray(payload?.details) ? payload.details[0] : null;
+        const field = Array.isArray(issue?.path) ? issue.path.join(".") : "";
+        if (field === "image") return "La imagen debe ser una URL http/https o una ruta local que empiece con /.";
+        if (issue?.message) return `${field ? `${field}: ` : ""}${issue.message}`;
+        return payload?.error ?? "No se pudo crear el producto.";
       };
 
       const showDiscountMessage = (text) => {
@@ -761,31 +785,38 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 
       const createProduct = async () => {
         const raw = readProductCreateForm();
+        const hasOffer = productCreateOfferToggle instanceof HTMLInputElement && productCreateOfferToggle.checked;
         const stock = Number(raw.stock ?? 0);
         const price = Number(raw.price ?? 0);
         const previousPrice = Number(raw.previousPrice ?? 0);
+        const requiredFields = ["name", "category", "set", "image"];
+        const missingField = requiredFields.find((field) => !raw[field]);
+        if (missingField) throw new Error("Completa nombre, categoria, set, imagen y valor ahora.");
+        if (!Number.isFinite(price) || price <= 0) throw new Error("El valor ahora debe ser mayor a 0.");
+        if (hasOffer && (!Number.isFinite(previousPrice) || previousPrice <= price)) {
+          throw new Error("Para oferta, el valor anterior debe ser mayor al valor ahora.");
+        }
 
         const response = await fetch(`${API_BASE_URL}/api/products`, {
           method: "POST",
           headers: authHeaders(),
           body: JSON.stringify({
-            id: raw.id,
             kind: raw.kind,
             name: raw.name,
             category: raw.category,
             set: raw.set,
             language: raw.language,
             stock: Number.isFinite(stock) ? stock : 0,
-            price: Number.isFinite(price) ? price : 0,
-            previousPrice: Number.isFinite(previousPrice) && previousPrice > 0 ? previousPrice : null,
+            price,
+            previousPrice: hasOffer ? previousPrice : null,
             image: raw.image,
-            offer: raw.offer || null,
+            offer: hasOffer ? raw.offer || "Oferta" : null,
             illustrator: raw.illustrator || null,
             active: true
           })
         });
         const payload = await response.json().catch(() => null);
-        if (!response.ok) throw new Error(payload?.error ?? "No se pudo crear el producto.");
+        if (!response.ok) throw new Error(getProductCreateError(payload));
 
         const product = payload.data;
         const adminProduct = {
@@ -801,7 +832,10 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 
         inventoryItems.unshift(adminProduct);
         productMap.set(adminProduct.id, adminProduct);
-        if (productCreateForm instanceof HTMLFormElement) productCreateForm.reset();
+        if (productCreateForm instanceof HTMLFormElement) {
+          productCreateForm.reset();
+          renderProductCreateOfferFields();
+        }
         renderProductOptions();
         updateTypeButtons();
         showProductCreateMessage("Producto creado. Ya aparece en inventario.");
@@ -1056,6 +1090,8 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
         persistSelectedProduct();
       });
 
+      productCreateOfferToggle?.addEventListener("change", renderProductCreateOfferFields);
+
       productCreateForm?.addEventListener("submit", async (event) => {
         event.preventDefault();
 
@@ -1159,6 +1195,7 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 
       updateTypeButtons();
       renderProductOptions();
+      renderProductCreateOfferFields();
       renderAdminTab();
       renderAdminSession();
     </script>

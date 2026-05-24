@@ -12,7 +12,8 @@ type ProductFilters = {
   includeInactive?: boolean;
 };
 
-type ProductInput = Omit<Product, "previousPrice" | "offer" | "illustrator" | "rarity" | "playability" | "marketPrice" | "manualSegment"> & {
+type ProductInput = Omit<Product, "id" | "previousPrice" | "offer" | "illustrator" | "rarity" | "playability" | "marketPrice" | "manualSegment"> & {
+  id?: string;
   previousPrice?: number | null;
   offer?: string | null;
   illustrator?: string | null;
@@ -21,6 +22,31 @@ type ProductInput = Omit<Product, "previousPrice" | "offer" | "illustrator" | "r
   marketPrice?: number | null;
   manualSegment?: string | null;
 };
+
+const slugifyProductId = (value: string) => {
+  const slug = value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+
+  return slug || "producto";
+};
+
+async function getAvailableProductId(name: string) {
+  const baseId = slugifyProductId(name);
+
+  for (let index = 0; index < 100; index += 1) {
+    const suffix = index === 0 ? "" : `-${index + 1}`;
+    const candidate = `${baseId.slice(0, 80 - suffix.length)}${suffix}`;
+    const [existing] = await db.select({ id: products.id }).from(products).where(eq(products.id, candidate)).limit(1);
+    if (!existing) return candidate;
+  }
+
+  return `${baseId.slice(0, 67)}-${Date.now().toString(36)}`;
+}
 
 export async function listProducts(filters: ProductFilters = {}) {
   const conditions: SQL[] = [];
@@ -58,13 +84,15 @@ export async function getProductById(id: string) {
 
 export async function createProduct(input: ProductInput) {
   try {
-    const [existing] = await db.select({ id: products.id }).from(products).where(eq(products.id, input.id)).limit(1);
+    const id = input.id ?? (await getAvailableProductId(input.name));
+    const [existing] = await db.select({ id: products.id }).from(products).where(eq(products.id, id)).limit(1);
     if (existing) throw new ApiError(409, "El producto ya existe");
 
     const [product] = await db
       .insert(products)
       .values({
         ...input,
+        id,
         previousPrice: input.previousPrice ?? null,
         offer: input.offer ?? null,
         illustrator: input.illustrator ?? null,

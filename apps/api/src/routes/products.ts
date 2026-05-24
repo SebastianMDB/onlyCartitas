@@ -28,7 +28,7 @@ const pathOrUrl = z.string().trim().min(1).max(1000).refine((value) => {
 }, "Debe ser una ruta local o URL valida");
 
 const productSchema = z.object({
-  id: z.string().trim().min(2).max(80).regex(/^[a-z0-9][a-z0-9-]*$/, "Usa solo minusculas, numeros y guiones"),
+  id: z.string().trim().min(2).max(80).regex(/^[a-z0-9][a-z0-9-]*$/, "Usa solo minusculas, numeros y guiones").optional(),
   kind: z.enum(["sealed", "single"]),
   name: z.string().trim().min(2).max(180),
   category: z.string().trim().min(2).max(120),
