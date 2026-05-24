@@ -42,6 +42,31 @@ export const productLanguages: Array<{ value: ProductLanguage; label: string }> 
   { value: "english", label: "Ingles" }
 ];
 
+export const productCategories: Record<ProductKind, string[]> = {
+  sealed: [
+    "Elite Trainer Box",
+    "Booster Box",
+    "Booster Bundle",
+    "Sobres",
+    "Cajas",
+    "Pokemon TCG Bundles",
+    "UPC",
+    "Colecciones",
+    "Latas",
+    "Accesorios"
+  ],
+  single: [
+    "Pokemon",
+    "Trainer",
+    "Energy",
+    "Full Art",
+    "Illustration Rare",
+    "Special Illustration Rare",
+    "Secret Rare",
+    "Graded"
+  ]
+};
+
 const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 
 type ProductFilters = {

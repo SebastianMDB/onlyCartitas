@@ -84,9 +84,11 @@ export async function getProductById(id: string) {
 
 export async function createProduct(input: ProductInput) {
   try {
-    const id = input.id ?? (await getAvailableProductId(input.name));
+    let id = input.id ?? (await getAvailableProductId(input.name));
     const [existing] = await db.select({ id: products.id }).from(products).where(eq(products.id, id)).limit(1);
-    if (existing) throw new ApiError(409, "El producto ya existe");
+    if (existing) {
+      id = await getAvailableProductId(input.name);
+    }
 
     const [product] = await db
       .insert(products)

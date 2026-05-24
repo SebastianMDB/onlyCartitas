@@ -2,7 +2,7 @@
 import Header from "../components/Header.astro";
 import BaseHead from "../components/BaseHead.astro";
 import Footer from "../components/Footer.astro";
-import { fetchProducts } from "../lib/catalog";
+import { fetchProducts, productCategories } from "../lib/catalog";
 import "../styles/global.css";
 
 const products = await fetchProducts({ includeInactive: true });
@@ -19,6 +19,7 @@ const inventoryItems = [
   }))
 ];
 const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+const defaultProductCategoryOptions = productCategories.sealed;
 ---
 
 <!doctype html>
@@ -110,7 +111,9 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
                   </label>
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Categoria</span>
-                    <input data-product-create="category" type="text" placeholder="Elite Trainer Box" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                    <select data-product-create="category" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                      {defaultProductCategoryOptions.map((category) => <option value={category}>{category}</option>)}
+                    </select>
                   </label>
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Set</span>
@@ -380,12 +383,13 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
     </main>
     <Footer />
 
-    <script is:inline type="application/json" id="admin-inventory-config" set:html={JSON.stringify({ inventoryItems, apiBaseUrl })}></script>
+    <script is:inline type="application/json" id="admin-inventory-config" set:html={JSON.stringify({ inventoryItems, apiBaseUrl, productCategories })}></script>
     <script is:inline>
       const STORAGE_KEY = "onlycartitas-inventory-state";
       const SESSION_KEY = "onlycartitas-auth-session";
       const adminConfig = JSON.parse(document.getElementById("admin-inventory-config")?.textContent ?? "{}");
       const inventoryItems = Array.isArray(adminConfig.inventoryItems) ? adminConfig.inventoryItems : [];
+      const productCategoryOptions = adminConfig.productCategories ?? {};
       const API_BASE_URL = adminConfig.apiBaseUrl ?? "http://localhost:3000";
 
       const adminLogin = document.querySelector("[data-admin-login]");
@@ -413,6 +417,8 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       const message = document.querySelector("[data-message]");
       const productCreateForm = document.querySelector("[data-product-create-form]");
       const productCreateInputs = Array.from(document.querySelectorAll("[data-product-create]"));
+      const productCreateKindInput = document.querySelector('[data-product-create="kind"]');
+      const productCreateCategoryInput = document.querySelector('[data-product-create="category"]');
       const productCreateOfferToggle = document.querySelector("[data-product-offer-toggle]");
       const productCreateOfferFields = document.querySelector("[data-product-offer-fields]");
       const productCreateMessage = document.querySelector("[data-product-create-message]");
@@ -609,6 +615,18 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
         return payload?.error ?? "No se pudo crear el producto.";
       };
 
+      const createProductId = (name) => {
+        const slug = String(name ?? "")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+          .slice(0, 80);
+
+        return slug || `producto-${Date.now().toString(36)}`;
+      };
+
       const showDiscountMessage = (text) => {
         if (!isElement(discountAdminMessage)) return;
 
@@ -632,6 +650,21 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
           .replaceAll(">", "&gt;")
           .replaceAll('"', "&quot;")
           .replaceAll("'", "&#039;");
+
+      const renderProductCreateCategories = () => {
+        if (!isSelect(productCreateKindInput) || !isSelect(productCreateCategoryInput)) return;
+
+        const kind = productCreateKindInput.value === "single" ? "single" : "sealed";
+        const categories = Array.isArray(productCategoryOptions[kind]) ? productCategoryOptions[kind] : [];
+        const previousValue = productCreateCategoryInput.value;
+        productCreateCategoryInput.innerHTML = categories
+          .map((category) => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`)
+          .join("");
+
+        if (categories.includes(previousValue)) {
+          productCreateCategoryInput.value = previousValue;
+        }
+      };
 
       const activeClass =
         "rounded-full bg-[color:var(--color-primary)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#173b56]";
@@ -801,6 +834,7 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
           method: "POST",
           headers: authHeaders(),
           body: JSON.stringify({
+            id: createProductId(raw.name),
             kind: raw.kind,
             name: raw.name,
             category: raw.category,
@@ -834,6 +868,7 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
         productMap.set(adminProduct.id, adminProduct);
         if (productCreateForm instanceof HTMLFormElement) {
           productCreateForm.reset();
+          renderProductCreateCategories();
           renderProductCreateOfferFields();
         }
         renderProductOptions();
@@ -1091,6 +1126,7 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       });
 
       productCreateOfferToggle?.addEventListener("change", renderProductCreateOfferFields);
+      productCreateKindInput?.addEventListener("change", renderProductCreateCategories);
 
       productCreateForm?.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -1195,6 +1231,7 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 
       updateTypeButtons();
       renderProductOptions();
+      renderProductCreateCategories();
       renderProductCreateOfferFields();
       renderAdminTab();
       renderAdminSession();
