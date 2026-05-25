@@ -78,18 +78,12 @@ import "../styles/global.css";
 
             <section class="grid gap-4">
               <h2 class="text-xl font-semibold text-[color:var(--color-primary)]">Pago</h2>
-              <div class="grid gap-3 sm:grid-cols-2">
-                <label class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-300 bg-white p-4 text-sm font-semibold text-slate-700">
-                  <input type="radio" name="payment" value="transferencia" checked class="h-4 w-4" />
-                  Transferencia bancaria
-                </label>
-                <label class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-300 bg-white p-4 text-sm font-semibold text-slate-700">
-                  <input type="radio" name="payment" value="tarjeta" class="h-4 w-4" />
-                  Tarjeta / Webpay
-                </label>
+              <div class="rounded-2xl border border-slate-300 bg-white p-4">
+                <p class="text-sm font-semibold text-slate-950">Mercado Pago</p>
+                <p class="mt-1 text-sm leading-6 text-slate-600">Paga con tarjetas, saldo o medios disponibles en Mercado Pago.</p>
               </div>
               <p class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
-                Este checkout deja el pedido preparado. La integracion real con pasarela de pago se puede conectar despues.
+                Al confirmar, crearemos el pedido y te redirigiremos a Mercado Pago para completar el pago.
               </p>
               <label class="flex items-start gap-3 text-sm leading-6 text-slate-600">
                 <input type="checkbox" class="mt-1 h-4 w-4 rounded border-slate-300" data-terms-check />
@@ -162,8 +156,9 @@ import "../styles/global.css";
           <h2 class="mt-2 text-3xl font-semibold text-[color:var(--color-primary)]">Compra registrada</h2>
           <p class="mt-2 text-lg font-semibold text-emerald-700" data-success-order></p>
           <p class="mt-3 text-sm leading-6 text-slate-600">Guardamos el pedido en el backend. El carrito quedo limpio.</p>
+          <p class="mt-2 text-sm leading-6 text-slate-600">No pudimos abrir Mercado Pago. El pedido quedo pendiente para intentar el pago nuevamente.</p>
           <p class="mt-2 hidden text-sm leading-6 text-slate-600" data-success-payment-note>
-            Mercado Pago todavia no esta configurado; el pedido quedo pendiente para coordinar pago.
+            Revisa que las credenciales de Mercado Pago esten configuradas en el API.
           </p>
           <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
             <a href="/cuenta" class="inline-flex rounded-full bg-[#071c2b] px-6 py-3 text-sm font-semibold text-white">Ver mi cuenta</a>
@@ -447,8 +442,6 @@ import "../styles/global.css";
           }
           const order = await createOrder();
           const payment = await createMercadoPagoPreference(order.id);
-          window.localStorage.removeItem(CART_STORAGE_KEY);
-          cart = [];
 
           if (payment?.checkout_url) {
             if (isHTMLElement(payButton)) payButton.textContent = "Redirigiendo a Mercado Pago...";
@@ -456,6 +449,8 @@ import "../styles/global.css";
             return;
           }
 
+          window.localStorage.removeItem(CART_STORAGE_KEY);
+          cart = [];
           renderSummary();
           checkoutForm.classList.add("hidden");
           if (isHTMLElement(successOrder)) successOrder.textContent = `Orden ${order.id}`;

@@ -163,6 +163,9 @@ export async function syncMercadoPagoPayment(providerPaymentId: string) {
     .from(payments)
     .where(eq(payments.providerPaymentId, String(payload.id)))
     .limit(1);
+  const [orderPayment] = existingPayment
+    ? []
+    : await db.select().from(payments).where(eq(payments.orderId, order.id)).limit(1);
 
   if (existingPayment) {
     await db
@@ -173,6 +176,16 @@ export async function syncMercadoPagoPayment(providerPaymentId: string) {
         updatedAt: new Date()
       })
       .where(eq(payments.id, existingPayment.id));
+  } else if (orderPayment) {
+    await db
+      .update(payments)
+      .set({
+        status,
+        providerPaymentId: String(payload.id),
+        metadata: payload as unknown as Record<string, unknown>,
+        updatedAt: new Date()
+      })
+      .where(eq(payments.id, orderPayment.id));
   } else {
     await db.insert(payments).values({
       orderId: order.id,
@@ -187,6 +200,10 @@ export async function syncMercadoPagoPayment(providerPaymentId: string) {
 
   if (status === "approved") {
     await db.update(orders).set({ status: "paid", updatedAt: new Date() }).where(eq(orders.id, order.id));
+  } else if (status === "rejected" || status === "cancelled" || status === "refunded") {
+    await db.update(orders).set({ status: "cancelled", updatedAt: new Date() }).where(eq(orders.id, order.id));
+  } else if (status === "pending") {
+    await db.update(orders).set({ status: "pending", updatedAt: new Date() }).where(eq(orders.id, order.id));
   }
 
   return {

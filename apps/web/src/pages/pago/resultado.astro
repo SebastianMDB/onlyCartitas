@@ -36,9 +36,12 @@ import "../../styles/global.css";
     <Footer />
 
     <script>
+      const CART_STORAGE_KEY = "carta-noble-cart";
+      const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       const params = new URLSearchParams(window.location.search);
       const status = params.get("status") ?? params.get("collection_status") ?? "pending";
       const orderId = params.get("order_id") ?? params.get("external_reference");
+      const paymentId = params.get("payment_id") ?? params.get("collection_id");
       const title = document.querySelector("[data-payment-title]");
       const copy = document.querySelector("[data-payment-copy]");
       const order = document.querySelector("[data-payment-order]");
@@ -46,11 +49,11 @@ import "../../styles/global.css";
       const content: Record<string, { title: string; copy: string }> = {
         success: {
           title: "Pago recibido",
-          copy: "Mercado Pago aprobo el pago. Actualizaremos el estado del pedido con la notificacion del proveedor."
+          copy: "Mercado Pago aprobo el pago. Estamos confirmando el estado del pedido."
         },
         approved: {
           title: "Pago recibido",
-          copy: "Mercado Pago aprobo el pago. Actualizaremos el estado del pedido con la notificacion del proveedor."
+          copy: "Mercado Pago aprobo el pago y el pedido quedo marcado como pagado."
         },
         failure: {
           title: "Pago no completado",
@@ -73,6 +76,36 @@ import "../../styles/global.css";
         order.textContent = `Pedido ${orderId}`;
         order.classList.remove("hidden");
       }
+
+      const syncPayment = async () => {
+        if (!paymentId || paymentId === "null") return;
+
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/api/payments/mercadopago/sync?payment_id=${encodeURIComponent(paymentId)}`
+          );
+          const payload = await response.json().catch(() => null);
+          const syncedStatus = payload?.data?.status;
+          if (!response.ok || !syncedStatus) return;
+
+          const syncedContent = content[syncedStatus] ?? content.pending;
+          if (title instanceof HTMLElement) title.textContent = syncedContent.title;
+          if (copy instanceof HTMLElement) copy.textContent = syncedContent.copy;
+          if (order instanceof HTMLElement && payload.data.order_id) {
+            order.textContent = `Pedido ${payload.data.order_id}`;
+            order.classList.remove("hidden");
+          }
+          if (syncedStatus === "approved") {
+            window.localStorage.removeItem(CART_STORAGE_KEY);
+          }
+        } catch {
+          if (copy instanceof HTMLElement) {
+            copy.textContent = "No pudimos sincronizar el pago automaticamente. El webhook de Mercado Pago lo volvera a intentar.";
+          }
+        }
+      };
+
+      syncPayment();
     </script>
   </body>
 </html>

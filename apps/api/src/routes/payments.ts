@@ -14,6 +14,11 @@ const webhookQuerySchema = z.object({
   "data.id": z.string().optional()
 });
 
+const syncQuerySchema = z.object({
+  payment_id: z.string().optional(),
+  collection_id: z.string().optional()
+});
+
 const webhookBodySchema = z
   .object({
     type: z.string().optional(),
@@ -43,6 +48,18 @@ export async function paymentRoutes(app: FastifyInstance) {
 
     if (!paymentId || notificationType !== "payment") {
       return { ok: true };
+    }
+
+    const data = await syncMercadoPagoPayment(paymentId);
+    return { ok: true, data };
+  });
+
+  app.get("/api/payments/mercadopago/sync", async (request) => {
+    const query = syncQuerySchema.parse(request.query);
+    const paymentId = query.payment_id ?? query.collection_id ?? "";
+
+    if (!paymentId || paymentId === "null") {
+      return { ok: false, data: null };
     }
 
     const data = await syncMercadoPagoPayment(paymentId);
