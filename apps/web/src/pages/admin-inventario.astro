@@ -2,22 +2,10 @@
 import Header from "../components/Header.astro";
 import BaseHead from "../components/BaseHead.astro";
 import Footer from "../components/Footer.astro";
-import { fetchProducts, productCategories } from "../lib/catalog";
+import { productCategories } from "../lib/catalog";
 import "../styles/global.css";
 
-const products = await fetchProducts({ includeInactive: true });
-const inventoryItems = [
-  ...products.map((product) => ({
-    id: product.id,
-    type: product.kind === "single" ? "single" : "sellado",
-    typeLabel: product.kind === "single" ? "Single" : "Sellado",
-    name: product.name,
-    category: product.category,
-    set: product.set,
-    stock: product.stock,
-    active: product.active
-  }))
-];
+const inventoryItems = [];
 const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 const defaultProductCategoryOptions = productCategories.sealed;
 ---
@@ -388,7 +376,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
       const STORAGE_KEY = "onlycartitas-inventory-state";
       const SESSION_KEY = "onlycartitas-auth-session";
       const adminConfig = JSON.parse(document.getElementById("admin-inventory-config")?.textContent ?? "{}");
-      const inventoryItems = Array.isArray(adminConfig.inventoryItems) ? adminConfig.inventoryItems : [];
+      let inventoryItems = Array.isArray(adminConfig.inventoryItems) ? adminConfig.inventoryItems : [];
       const productCategoryOptions = adminConfig.productCategories ?? {};
       const API_BASE_URL = adminConfig.apiBaseUrl ?? "http://localhost:3000";
 
@@ -459,11 +447,29 @@ const defaultProductCategoryOptions = productCategories.sealed;
         cancelled: "Cancelado"
       };
 
-      const productMap = new Map(inventoryItems.map((product) => [product.id, product]));
+      let productMap = new Map(inventoryItems.map((product) => [product.id, product]));
       let activeType = "sellado";
       let activeAdminTab = "inventory";
       let adminOrders = [];
       let heroSettings = null;
+
+      const mapProductForAdmin = (product) => ({
+        id: product.id,
+        type: product.kind === "single" ? "single" : "sellado",
+        typeLabel: product.kind === "single" ? "Single" : "Sellado",
+        name: product.name,
+        category: product.category,
+        set: product.set,
+        stock: product.stock,
+        active: product.active
+      });
+
+      const replaceInventoryItems = (products) => {
+        inventoryItems = Array.isArray(products) ? products.map(mapProductForAdmin) : [];
+        productMap = new Map(inventoryItems.map((product) => [product.id, product]));
+        renderProductOptions();
+        updateTypeButtons();
+      };
 
       const readSession = () => {
         try {
@@ -547,12 +553,29 @@ const defaultProductCategoryOptions = productCategories.sealed;
         };
       };
 
+      const loadInventoryProducts = async () => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/products?includeInactive=true`, {
+            headers: authHeaders()
+          });
+          const payload = await response.json().catch(() => null);
+          if (!response.ok) throw new Error(payload?.error ?? "No se pudieron cargar los productos.");
+          replaceInventoryItems(payload?.data);
+          return Array.isArray(payload?.data) ? payload.data : [];
+        } catch (error) {
+          replaceInventoryItems([]);
+          showMessage(error instanceof Error ? error.message : "No se pudieron cargar los productos.");
+          return [];
+        }
+      };
+
       const renderAdminSession = () => {
         const isLoggedIn = isAdminLoggedIn();
 
         adminLogin?.classList.toggle("hidden", isLoggedIn);
         adminContent?.classList.toggle("hidden", !isLoggedIn);
         if (isLoggedIn) {
+          loadInventoryProducts();
           loadOrders();
           loadDiscounts();
           loadHeroSettings();
@@ -850,7 +873,23 @@ const defaultProductCategoryOptions = productCategories.sealed;
           })
         });
         const payload = await response.json().catch(() => null);
-        if (!response.ok) throw new Error(getProductCreateError(payload));
+        if (!response.ok) {
+          if (response.status === 409) {
+            const products = await loadInventoryProducts();
+            const existingProduct = products.find(
+              (product) => product.id === createProductId(raw.name) || product.name?.toLowerCase() === raw.name.toLowerCase()
+            );
+            if (existingProduct) {
+              activeType = existingProduct.kind === "single" ? "single" : "sellado";
+              renderProductOptions();
+              if (isSelect(productSelect)) productSelect.value = existingProduct.id;
+              updateTypeButtons();
+              renderSelectedProduct();
+              throw new Error("Ese producto ya existe. Lo cargue en el inventario para que puedas editarlo.");
+            }
+          }
+          throw new Error(getProductCreateError(payload));
+        }
 
         const product = payload.data;
         const adminProduct = {
