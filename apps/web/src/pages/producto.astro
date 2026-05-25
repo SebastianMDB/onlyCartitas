@@ -1,0 +1,33 @@
+---
+import Header from "../components/Header.astro";
+import BaseHead from "../components/BaseHead.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/global.css";
+
+const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <BaseHead
+      title="Producto | OnlyCartitas"
+      description="Detalle de producto OnlyCartitas con precio, stock, idioma y detalles actualizados desde la base de datos."
+    />
+  </head>
+  <body class="bg-[color:var(--color-surface)] text-slate-900 antialiased">
+    <Header />
+
+    <main class="pb-20" data-product-detail>
+      <p class="mx-auto mt-8 max-w-3xl rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600">
+        Cargando producto...
+      </p>
+    </main>
+
+    <Footer />
+    <script is:inline type="application/json" data-product-detail-config set:html={JSON.stringify({ apiBaseUrl })}></script>
+    <script>
+      import "../scripts/product-detail-runtime";
+    </script>
+  </body>
+</html>

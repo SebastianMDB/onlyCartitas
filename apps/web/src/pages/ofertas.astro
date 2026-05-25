@@ -2,18 +2,14 @@
 import Header from "../components/Header.astro";
 import BaseHead from "../components/BaseHead.astro";
 import Footer from "../components/Footer.astro";
-import ProductCard from "../components/ProductCard.astro";
-import { fetchProducts, productLanguages } from "../lib/catalog";
+import { productLanguages } from "../lib/catalog";
 import "../styles/global.css";
 
-const offerProducts = await fetchProducts({ offer: true });
-const offerCategories = Array.from(new Set(offerProducts.map((product) => product.category))).sort();
-const offerSets = Array.from(new Set(offerProducts.map((product) => product.set))).sort();
-const maxDiscount = offerProducts.reduce((currentMax, product) => {
-  if (!product.previousPrice || product.previousPrice <= product.price) return currentMax;
-  const discount = Math.round(((product.previousPrice - product.price) / product.previousPrice) * 100);
-  return Math.max(currentMax, discount);
-}, 0);
+const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+const offerProducts = [];
+const offerCategories = [];
+const offerSets = [];
+const maxDiscount = 0;
 ---
 
 <!doctype html>
@@ -42,15 +38,15 @@ const maxDiscount = offerProducts.reduce((currentMax, product) => {
             <div class="grid gap-3 sm:grid-cols-3">
               <div class="rounded-[1.4rem] border border-white/10 bg-white/6 px-4 py-4 backdrop-blur-sm">
                 <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">Productos</p>
-                <p class="mt-2 text-2xl font-semibold text-white">{offerProducts.length}</p>
+                <p class="mt-2 text-2xl font-semibold text-white" data-stat="products">{offerProducts.length}</p>
               </div>
               <div class="rounded-[1.4rem] border border-white/10 bg-white/6 px-4 py-4 backdrop-blur-sm">
                 <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">Categorias</p>
-                <p class="mt-2 text-2xl font-semibold text-white">{offerCategories.length}</p>
+                <p class="mt-2 text-2xl font-semibold text-white" data-stat="categories">{offerCategories.length}</p>
               </div>
               <div class="rounded-[1.4rem] border border-white/10 bg-white/6 px-4 py-4 backdrop-blur-sm">
                 <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">Hasta</p>
-                <p class="mt-2 text-2xl font-semibold text-white">{maxDiscount}%</p>
+                <p class="mt-2 text-2xl font-semibold text-white" data-stat="max-discount">{maxDiscount}%</p>
               </div>
             </div>
           </div>
@@ -69,7 +65,7 @@ const maxDiscount = offerProducts.reduce((currentMax, product) => {
               </h2>
             </div>
 
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-2" data-category-filters>
               <button type="button" class="rounded-full bg-[color:var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#173b56]" data-category-button data-category="all" aria-pressed="true">Todas</button>
               {offerCategories.map((category) => <button type="button" class="rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900" data-category-button data-category={category.toLowerCase()} aria-pressed="false">{category}</button>)}
             </div>
@@ -98,8 +94,7 @@ const maxDiscount = offerProducts.reduce((currentMax, product) => {
             <p class="text-sm text-slate-500">Usa el buscador superior o filtra por categoria, set e idioma.</p>
           </div>
 
-          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-            {offerProducts.map((product) => <ProductCard product={product} layout="grid" />)}
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" data-products-grid>
           </div>
 
           <div class="hidden rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center" data-empty-state>
@@ -111,90 +106,9 @@ const maxDiscount = offerProducts.reduce((currentMax, product) => {
     </main>
     <Footer />
 
+    <script is:inline type="application/json" data-catalog-config set:html={JSON.stringify({ apiBaseUrl, offer: true, layout: "offers", columns: "four" })}></script>
     <script>
-      const isHTMLElement = (value: unknown) => value instanceof HTMLElement;
-      const isButtonElement = (value: unknown) => value instanceof HTMLButtonElement;
-      const productCards = Array.from(document.querySelectorAll("[data-product-card]"));
-      const categoryButtons = Array.from(document.querySelectorAll("[data-category-button]"));
-      const setFilter = document.querySelector("[data-set-filter]");
-      const languageFilter = document.querySelector("[data-language-filter]");
-      const resultsCount = document.querySelector("[data-results-count]");
-      const emptyState = document.querySelector("[data-empty-state]");
-      let activeCategory = "all";
-      let activeSet = "all";
-      let activeLanguage = "all";
-      let activeQuery = "";
-
-      const updateCategoryButtons = () => {
-        categoryButtons.forEach((button) => {
-          if (!isButtonElement(button)) return;
-          const isActive = button.dataset.category === activeCategory;
-          button.setAttribute("aria-pressed", isActive ? "true" : "false");
-          button.className = isActive
-            ? "rounded-full bg-[color:var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#173b56]"
-            : "rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900";
-        });
-      };
-
-      const updateProducts = () => {
-        let visibleCount = 0;
-        productCards.forEach((card) => {
-          if (!isHTMLElement(card)) return;
-          const productName = card.dataset.productName ?? "";
-          const productCategory = card.dataset.productCategory ?? "";
-          const productSet = card.dataset.productSet ?? "";
-          const productIllustrator = card.dataset.productIllustrator ?? "";
-          const productLanguage = card.dataset.productLanguage ?? "";
-          const productLanguageLabel = card.dataset.productLanguageLabel ?? "";
-          const matchesQuery =
-            activeQuery.length === 0 ||
-            productName.includes(activeQuery) ||
-            productCategory.includes(activeQuery) ||
-            productSet.includes(activeQuery) ||
-            productIllustrator.includes(activeQuery) ||
-            productLanguage.includes(activeQuery) ||
-            productLanguageLabel.includes(activeQuery);
-          const matchesCategory = activeCategory === "all" || productCategory === activeCategory;
-          const matchesSet = activeSet === "all" || productSet === activeSet;
-          const matchesLanguage = activeLanguage === "all" || productLanguage === activeLanguage;
-          const isVisible = matchesQuery && matchesCategory && matchesSet && matchesLanguage;
-          card.style.display = isVisible ? "" : "none";
-          if (isVisible) visibleCount += 1;
-        });
-        if (isHTMLElement(resultsCount)) resultsCount.textContent = String(visibleCount);
-        if (isHTMLElement(emptyState)) emptyState.style.display = visibleCount === 0 ? "block" : "none";
-      };
-
-      categoryButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-          if (!isButtonElement(button)) return;
-          activeCategory = button.dataset.category ?? "all";
-          updateCategoryButtons();
-          updateProducts();
-        });
-      });
-
-      if (setFilter instanceof HTMLSelectElement) {
-        setFilter.addEventListener("change", () => {
-          activeSet = setFilter.value;
-          updateProducts();
-        });
-      }
-
-      if (languageFilter instanceof HTMLSelectElement) {
-        languageFilter.addEventListener("change", () => {
-          activeLanguage = languageFilter.value;
-          updateProducts();
-        });
-      }
-
-      window.addEventListener("carta-noble:search", (event) => {
-        activeQuery = event instanceof CustomEvent && typeof event.detail === "string" ? event.detail.trim().toLowerCase() : "";
-        updateProducts();
-      });
-
-      updateCategoryButtons();
-      updateProducts();
+      import "../scripts/catalog-runtime";
     </script>
   </body>
 </html>

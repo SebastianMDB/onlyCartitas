@@ -2,13 +2,12 @@
 import Header from "../components/Header.astro";
 import BaseHead from "../components/BaseHead.astro";
 import Footer from "../components/Footer.astro";
-import ProductCard from "../components/ProductCard.astro";
-import { categoriesFromProducts, fetchProducts } from "../lib/catalog";
 import "../styles/global.css";
 
-const products = await fetchProducts();
-const productSections = categoriesFromProducts(products);
-const productSets = new Set(products.map((product) => product.set));
+const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+const products = [];
+const productSections = [];
+const productSets = new Set();
 ---
 
 <!doctype html>
@@ -37,15 +36,15 @@ const productSets = new Set(products.map((product) => product.set));
             <div class="grid gap-3 sm:grid-cols-3">
               <div class="rounded-[1.4rem] border border-white/10 bg-white/6 px-4 py-4 backdrop-blur-sm">
                 <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">Sets</p>
-                <p class="mt-2 text-2xl font-semibold text-white">{productSets.size}</p>
+                <p class="mt-2 text-2xl font-semibold text-white" data-stat="sets">{productSets.size}</p>
               </div>
               <div class="rounded-[1.4rem] border border-white/10 bg-white/6 px-4 py-4 backdrop-blur-sm">
                 <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">Productos</p>
-                <p class="mt-2 text-2xl font-semibold text-white">{products.length}</p>
+                <p class="mt-2 text-2xl font-semibold text-white" data-stat="products">{products.length}</p>
               </div>
               <div class="rounded-[1.4rem] border border-white/10 bg-white/6 px-4 py-4 backdrop-blur-sm">
                 <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">Ofertas</p>
-                <p class="mt-2 text-2xl font-semibold text-white">{products.filter((product) => product.offer).length}</p>
+                <p class="mt-2 text-2xl font-semibold text-white" data-stat="offers">0</p>
               </div>
             </div>
           </div>
@@ -101,7 +100,6 @@ const productSets = new Set(products.map((product) => product.set));
             class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3"
             data-products-grid
           >
-            {products.map((product) => <ProductCard product={product} layout="grid" />)}
           </div>
 
           <div
@@ -116,86 +114,9 @@ const productSets = new Set(products.map((product) => product.set));
     </main>
     <Footer />
 
+    <script is:inline type="application/json" data-catalog-config set:html={JSON.stringify({ apiBaseUrl, layout: "products", columns: "three" })}></script>
     <script>
-      const isHTMLElement = (value: unknown) => value instanceof HTMLElement;
-      const isButtonElement = (value: unknown) => value instanceof HTMLButtonElement;
-
-      const productCards = Array.from(document.querySelectorAll("[data-product-card]"));
-      const categoryButtons = Array.from(document.querySelectorAll("[data-category-button]"));
-      const resultsCount = document.querySelector("[data-results-count]");
-      const emptyState = document.querySelector("[data-empty-state]");
-
-      let activeCategory = "all";
-      let activeQuery = "";
-
-      const updateCategoryButtons = () => {
-        categoryButtons.forEach((button) => {
-          if (!isButtonElement(button)) {
-            return;
-          }
-
-          const isActive = button.dataset.category === activeCategory;
-          button.setAttribute("aria-pressed", isActive ? "true" : "false");
-          button.className = isActive
-            ? "rounded-full bg-[color:var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#173b56]"
-            : "rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900";
-        });
-      };
-
-      const updateProducts = () => {
-        let visibleCount = 0;
-
-        productCards.forEach((card) => {
-          if (!isHTMLElement(card)) {
-            return;
-          }
-
-          const productName = card.dataset.productName ?? "";
-          const productCategory = card.dataset.productCategory ?? "";
-          const matchesQuery =
-            activeQuery.length === 0 ||
-            productName.includes(activeQuery) ||
-            productCategory.includes(activeQuery);
-          const matchesCategory = activeCategory === "all" || productCategory === activeCategory;
-          const isVisible = matchesQuery && matchesCategory;
-
-          card.style.display = isVisible ? "" : "none";
-
-          if (isVisible) {
-            visibleCount += 1;
-          }
-        });
-
-        if (isHTMLElement(resultsCount)) {
-          resultsCount.textContent = String(visibleCount);
-        }
-
-        if (isHTMLElement(emptyState)) {
-          emptyState.style.display = visibleCount === 0 ? "block" : "none";
-        }
-      };
-
-      categoryButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-          if (!isButtonElement(button)) {
-            return;
-          }
-
-          activeCategory = button.dataset.category ?? "all";
-          updateCategoryButtons();
-          updateProducts();
-        });
-      });
-
-      window.addEventListener("carta-noble:search", (event) => {
-        activeQuery = event instanceof CustomEvent && typeof event.detail === "string"
-          ? event.detail.trim().toLowerCase()
-          : "";
-        updateProducts();
-      });
-
-      updateCategoryButtons();
-      updateProducts();
+      import "../scripts/catalog-runtime";
     </script>
   </body>
 </html>
