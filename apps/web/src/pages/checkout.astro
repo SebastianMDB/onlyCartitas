@@ -32,7 +32,7 @@ import "../styles/global.css";
                 <a href="/login" class="text-sm font-semibold text-[color:var(--color-secondary)] hover:underline">Iniciar sesion</a>
               </div>
               <label class="block">
-                <span class="sr-only">Correo electronico</span>
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Correo electronico *</span>
                 <input data-required data-checkout-email type="email" autocomplete="email" placeholder="Correo electronico" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
               </label>
               <label class="flex items-center gap-3 text-sm text-slate-600">
@@ -48,32 +48,60 @@ import "../styles/global.css";
                 <button type="button" class="rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-delivery-option="retiro" aria-pressed="false">Retiro</button>
               </div>
 
+              <div class="grid gap-3 sm:grid-cols-2">
+                <label class="block">
+                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Nombre *</span>
+                  <input data-required data-checkout-first-name type="text" autocomplete="given-name" placeholder="Nombre" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                </label>
+                <label class="block">
+                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Apellidos *</span>
+                  <input data-required data-checkout-last-name type="text" autocomplete="family-name" placeholder="Apellidos" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                </label>
+              </div>
+
               <div class="grid gap-3" data-address-fields>
-                <select data-required class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
-                  <option>Chile</option>
-                </select>
-                <div class="grid gap-3 sm:grid-cols-2">
-                  <input data-required data-checkout-first-name type="text" autocomplete="given-name" placeholder="Nombre" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
-                  <input data-required data-checkout-last-name type="text" autocomplete="family-name" placeholder="Apellidos" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
-                </div>
-                <input data-required type="text" placeholder="RUT" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
-                <input data-required data-checkout-address type="text" autocomplete="street-address" placeholder="Direccion" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
-                <input type="text" placeholder="Casa, departamento, etc. (opcional)" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
-                <input data-required type="text" placeholder="Comuna" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
-                <select data-required class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
-                  <option>Region Metropolitana</option>
-                  <option>Valparaiso</option>
-                  <option>Biobio</option>
-                  <option>La Araucania</option>
-                  <option>Los Lagos</option>
-                </select>
+                <label class="block">
+                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Pais *</span>
+                  <select data-required class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                    <option>Chile</option>
+                  </select>
+                </label>
+                <label class="block">
+                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">RUT *</span>
+                  <input data-required type="text" placeholder="RUT" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                </label>
+                <label class="block">
+                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Direccion *</span>
+                  <input data-required data-checkout-address type="text" autocomplete="street-address" placeholder="Direccion" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                </label>
+                <label class="block">
+                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Detalle direccion</span>
+                  <input type="text" placeholder="Casa, departamento, etc. (opcional)" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                </label>
+                <label class="block">
+                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Comuna *</span>
+                  <input data-required type="text" placeholder="Comuna" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                </label>
+                <label class="block">
+                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Region *</span>
+                  <select data-required class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                    <option>Region Metropolitana</option>
+                    <option>Valparaiso</option>
+                    <option>Biobio</option>
+                    <option>La Araucania</option>
+                    <option>Los Lagos</option>
+                  </select>
+                </label>
               </div>
 
               <div class="hidden rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600" data-pickup-info>
                 Retiro disponible coordinando por mensaje despues de confirmar el pedido. No se cobrara envio.
               </div>
 
-              <input data-required data-checkout-phone type="tel" autocomplete="tel" placeholder="Telefono" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Telefono *</span>
+                <input data-required data-checkout-phone type="tel" autocomplete="tel" placeholder="Telefono" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+              </label>
             </section>
 
             <section class="grid gap-4">
