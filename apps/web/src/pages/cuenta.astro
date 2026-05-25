@@ -16,7 +16,7 @@ import "../styles/global.css";
   <body class="bg-[color:var(--color-surface)] text-slate-900 antialiased">
     <Header />
 
-    <main class="pb-20">
+    <main class="hidden pb-20" data-account-content>
       <section class="mx-auto w-full max-w-5xl px-4 pt-8 sm:px-6 lg:px-8">
         <div class="rounded-[2rem] bg-[linear-gradient(135deg,#113047_0%,#173b56_100%)] p-6 text-white shadow-[0_28px_80px_rgba(17,48,71,0.24)] sm:p-8">
           <p class="text-xs font-semibold uppercase tracking-[0.24em] text-sky-200">Cuenta</p>
@@ -88,6 +88,7 @@ import "../styles/global.css";
 
       const SESSION_KEY = "onlycartitas-auth-session";
       const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+      const accountContent = document.querySelector("[data-account-content]");
       const userLabel = document.querySelector("[data-account-user]");
       const roleLabel = document.querySelector("[data-account-role]");
       const logoutButton = document.querySelector("[data-logout-button]");
@@ -118,13 +119,46 @@ import "../styles/global.css";
         }
       };
 
-      const session = readSession();
-      if (!session?.expiresAt || Date.now() > Number(session.expiresAt)) {
+      let activeSession = null;
+
+      const clearSessionAndRedirect = () => {
+        window.localStorage.removeItem(SESSION_KEY);
         window.location.href = "/login";
-      } else {
-        if (isHTMLElement(userLabel)) userLabel.textContent = session.user ?? "Cliente";
-        if (isHTMLElement(roleLabel)) roleLabel.textContent = session.role === "admin" ? "Rol admin" : "Rol cliente";
-      }
+      };
+
+      const verifySession = async () => {
+        const session = readSession();
+        if (!session?.token || !session?.expiresAt || Date.now() > Number(session.expiresAt)) {
+          clearSessionAndRedirect();
+          return null;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+            headers: {
+              Authorization: `Bearer ${session.token}`
+            }
+          });
+          const payload = await response.json().catch(() => null);
+          if (!response.ok || !payload?.user) throw new Error("Sesion invalida");
+
+          activeSession = {
+            ...session,
+            user: payload.user.username,
+            role: payload.user.role,
+            expiresAt: Number(payload.expiresAt ?? session.expiresAt)
+          };
+          window.localStorage.setItem(SESSION_KEY, JSON.stringify(activeSession));
+
+          if (isHTMLElement(userLabel)) userLabel.textContent = activeSession.user ?? "Cliente";
+          if (isHTMLElement(roleLabel)) roleLabel.textContent = activeSession.role === "admin" ? "Rol admin" : "Rol cliente";
+          accountContent?.classList.remove("hidden");
+          return activeSession;
+        } catch {
+          clearSessionAndRedirect();
+          return null;
+        }
+      };
 
       const renderOrders = (orders: AccountOrder[]) => {
         if (isHTMLElement(ordersEmpty)) ordersEmpty.classList.toggle("hidden", orders.length > 0);
@@ -149,6 +183,7 @@ import "../styles/global.css";
       };
 
       const loadOrders = async () => {
+        const session = activeSession ?? await verifySession();
         if (!session?.token) return [];
 
         const response = await fetch(`${API_BASE_URL}/api/orders`, {
@@ -165,18 +200,21 @@ import "../styles/global.css";
         return Array.isArray(payload.data) ? payload.data : [];
       };
 
-      loadOrders()
-        .then(renderOrders)
-        .catch(() => {
-          if (isHTMLElement(ordersEmpty)) ordersEmpty.classList.remove("hidden");
-          if (isHTMLElement(ordersList)) {
-            ordersList.innerHTML = `
-              <p class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
-                No se pudieron cargar los pedidos desde el backend.
-              </p>
-            `;
-          }
-        });
+      verifySession().then((session) => {
+        if (!session) return;
+        loadOrders()
+          .then(renderOrders)
+          .catch(() => {
+            if (isHTMLElement(ordersEmpty)) ordersEmpty.classList.remove("hidden");
+            if (isHTMLElement(ordersList)) {
+              ordersList.innerHTML = `
+                <p class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                  No se pudieron cargar los pedidos desde el backend.
+                </p>
+              `;
+            }
+          });
+      });
 
       logoutButton?.addEventListener("click", () => {
         window.localStorage.removeItem(SESSION_KEY);

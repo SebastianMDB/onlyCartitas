@@ -226,6 +226,14 @@ import "../styles/global.css";
           .replaceAll('"', "&quot;")
           .replaceAll("'", "&#039;");
 
+      const getApiErrorMessage = (payload: any, fallback: string) => {
+        const issue = Array.isArray(payload?.details) ? payload.details[0] : null;
+        const field = Array.isArray(issue?.path) ? issue.path.join(".") : "";
+        if (field === "customerName") return "Ingresa nombre y apellido para continuar.";
+        if (issue?.message) return `${field ? `${field}: ` : ""}${issue.message}`;
+        return payload?.error ?? fallback;
+      };
+
       const readCart = () => {
         try {
           const storedCart = window.localStorage.getItem(CART_STORAGE_KEY);
@@ -394,7 +402,7 @@ import "../styles/global.css";
 
         const payload = await response.json().catch(() => null);
         if (!response.ok) {
-          throw new Error(payload?.error ?? "No se pudo crear el pedido.");
+          throw new Error(getApiErrorMessage(payload, "No se pudo crear el pedido."));
         }
 
         return payload.data;
@@ -414,7 +422,7 @@ import "../styles/global.css";
         const payload = await response.json().catch(() => null);
         if (!response.ok) {
           if (response.status === 503) return null;
-          throw new Error(payload?.error ?? "No se pudo iniciar Mercado Pago.");
+          throw new Error(getApiErrorMessage(payload, "No se pudo iniciar Mercado Pago."));
         }
 
         return payload.data;
@@ -424,6 +432,7 @@ import "../styles/global.css";
         event.preventDefault();
         const requiredFields = Array.from(document.querySelectorAll("[data-required]")).filter((field) => {
           if (!(field instanceof HTMLInputElement || field instanceof HTMLSelectElement)) return false;
+          if (field === firstNameInput || field === lastNameInput) return true;
           return deliveryMode === "envio" || !isHTMLElement(addressFields) || !addressFields.contains(field);
         });
         const hasInvalidField = requiredFields.some((field) =>

@@ -297,6 +297,7 @@ const currentPath = Astro.url.pathname;
 
       window.localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(apiState));
       applyInventoryState();
+      reconcileCartWithInventory();
     } catch {
       // Keep the static catalog usable when the API is not running.
     }
@@ -443,8 +444,15 @@ const currentPath = Astro.url.pathname;
     applyInventoryState();
     syncInventoryFromApi();
   });
+  window.addEventListener("onlycartitas:catalog-rendered", () => {
+    applyInventoryState();
+    syncInventoryFromApi();
+  });
   window.addEventListener("storage", (event) => {
-    if (event.key === INVENTORY_STORAGE_KEY) applyInventoryState();
+    if (event.key === INVENTORY_STORAGE_KEY) {
+      applyInventoryState();
+      reconcileCartWithInventory();
+    }
   });
 
   const CART_STORAGE_KEY = "carta-noble-cart";
@@ -488,20 +496,65 @@ const currentPath = Astro.url.pathname;
 
   let cart = readCart();
 
-  const updateAuthLink = () => {
+  function refreshCartFromStorage() {
+    cart = readCart();
+  }
+
+  function reconcileCartWithInventory() {
+    const inventoryState = readInventoryState();
+    let changed = false;
+    cart = readCart()
+      .map((item) => {
+        const productState = inventoryState[item.id];
+        if (!productState) return item;
+
+        const stock = Math.max(0, Number(productState.stock ?? item.stock));
+        const quantity = Math.min(item.quantity, stock);
+        if (stock !== item.stock || quantity !== item.quantity) changed = true;
+        return { ...item, stock, quantity };
+      })
+      .filter((item) => {
+        const keep = item.stock > 0 && item.quantity > 0;
+        if (!keep) changed = true;
+        return keep;
+      });
+
+    if (changed) writeCart();
+    renderCart();
+  }
+
+  const updateAuthLink = async () => {
     if (!(authLink instanceof HTMLAnchorElement)) return;
     try {
       const storedSession = window.localStorage.getItem(AUTH_SESSION_KEY);
       const session = storedSession ? JSON.parse(storedSession) : null;
       const isValid = session?.expiresAt && Date.now() < Number(session.expiresAt);
       if (!isValid) {
+        window.localStorage.removeItem(AUTH_SESSION_KEY);
         authLink.href = "/login";
         authLink.textContent = "Iniciar sesion";
         return;
       }
-      authLink.href = session.role === "admin" ? "/admin-inventario" : "/cuenta";
-      authLink.textContent = session.role === "admin" ? "Admin" : "Mi cuenta";
+
+      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${session.token}`
+        }
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.user) throw new Error("Sesion invalida");
+
+      const verifiedSession = {
+        ...session,
+        user: payload.user.username,
+        role: payload.user.role,
+        expiresAt: Number(payload.expiresAt ?? session.expiresAt)
+      };
+      window.localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(verifiedSession));
+      authLink.href = verifiedSession.role === "admin" ? "/admin-inventario" : "/cuenta";
+      authLink.textContent = verifiedSession.role === "admin" ? "Admin" : "Mi cuenta";
     } catch {
+      window.localStorage.removeItem(AUTH_SESSION_KEY);
       authLink.href = "/login";
       authLink.textContent = "Iniciar sesion";
     }
@@ -509,6 +562,7 @@ const currentPath = Astro.url.pathname;
 
   const writeCart = () => {
     window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    window.dispatchEvent(new CustomEvent("onlycartitas:cart-updated"));
   };
 
   const getCartQuantity = () => cart.reduce((total, item) => total + item.quantity, 0);
@@ -569,6 +623,7 @@ const currentPath = Astro.url.pathname;
   };
 
   const renderCart = () => {
+    cart = cart.filter((item) => item.stock > 0 && item.quantity > 0);
     const itemCount = getCartQuantity();
     const total = getCartTotal();
 
@@ -631,6 +686,7 @@ const currentPath = Astro.url.pathname;
   };
 
   const addToCart = (product: Omit<CartItem, "quantity">) => {
+    refreshCartFromStorage();
     const existingItem = cart.find((item) => item.id === product.id);
     if (existingItem) {
       if (existingItem.quantity >= product.stock) {
@@ -700,8 +756,23 @@ const currentPath = Astro.url.pathname;
   cartCloseButton?.addEventListener("click", closeCart);
   cartOverlay?.addEventListener("click", closeCart);
   cartCheckout?.addEventListener("click", () => {
+    refreshCartFromStorage();
+    renderCart();
     if (getCartQuantity() === 0) return;
     window.location.href = "/checkout";
+  });
+  window.addEventListener("onlycartitas:cart-updated", () => {
+    refreshCartFromStorage();
+    renderCart();
+  });
+  window.addEventListener("storage", (event) => {
+    if (event.key !== CART_STORAGE_KEY) return;
+    refreshCartFromStorage();
+    renderCart();
+  });
+  document.addEventListener("astro:page-load", () => {
+    refreshCartFromStorage();
+    renderCart();
   });
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closeCart();

@@ -241,6 +241,7 @@ const initCatalog = async () => {
     grid.innerHTML = visibleProducts.map((product) => renderProductCard(product, config.columns)).join("");
     if (resultsCount instanceof HTMLElement) resultsCount.textContent = String(visibleProducts.length);
     if (emptyState instanceof HTMLElement) emptyState.style.display = visibleProducts.length === 0 ? "block" : "none";
+    window.dispatchEvent(new CustomEvent("onlycartitas:catalog-rendered"));
   };
 
   const renderFilters = () => {

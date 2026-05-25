@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { desc, eq, inArray } from "drizzle-orm";
+import { desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "../db/client.js";
-import { orderItems, orders } from "../db/schema.js";
+import { orderItems, orders, products } from "../db/schema.js";
 import { ApiError } from "../http.js";
 import { findUsableDiscountCode, registerDiscountUse } from "./discount-codes.js";
 import { getProductById } from "./products.js";
@@ -126,6 +126,16 @@ export async function createOrder(input: CreateOrderInput) {
           }))
         )
         .returning();
+
+      for (const item of items) {
+        await tx
+          .update(products)
+          .set({
+            stock: sql`${products.stock} - ${item.quantity}`,
+            updatedAt: new Date()
+          })
+          .where(eq(products.id, item.product_id));
+      }
 
       if (discountCode?.code) await registerDiscountUse(discountCode.code);
 

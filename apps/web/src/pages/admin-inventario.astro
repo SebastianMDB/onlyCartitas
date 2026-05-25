@@ -485,7 +485,25 @@ const defaultProductCategoryOptions = productCategories.sealed;
         }
       };
 
-      const isAdminLoggedIn = () => readSession()?.role === "admin";
+      const verifyAdminSession = async () => {
+        const session = readSession();
+        if (!session?.token || session.role !== "admin") return null;
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+            headers: {
+              Authorization: `Bearer ${session.token}`
+            }
+          });
+          const payload = await response.json().catch(() => null);
+          if (!response.ok || payload?.user?.role !== "admin") throw new Error("Sesion invalida");
+
+          return session;
+        } catch {
+          window.localStorage.removeItem(SESSION_KEY);
+          return null;
+        }
+      };
 
       const createAdminSession = ({ user, token, expiresAt }) => {
         window.localStorage.setItem(
@@ -569,8 +587,12 @@ const defaultProductCategoryOptions = productCategories.sealed;
         }
       };
 
-      const renderAdminSession = () => {
-        const isLoggedIn = isAdminLoggedIn();
+      const renderAdminSession = async () => {
+        adminLogin?.classList.add("hidden");
+        adminContent?.classList.add("hidden");
+
+        const session = await verifyAdminSession();
+        const isLoggedIn = Boolean(session);
 
         adminLogin?.classList.toggle("hidden", isLoggedIn);
         adminContent?.classList.toggle("hidden", !isLoggedIn);
