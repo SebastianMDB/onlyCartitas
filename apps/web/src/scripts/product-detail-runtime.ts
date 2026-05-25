@@ -43,6 +43,8 @@ const readConfig = () => {
   }
 };
 
+let productDetailAbortController: AbortController | null = null;
+
 const renderProduct = (product: Product) => {
   const languageLabel = languageLabels[product.language] ?? product.language;
   const discountPercent =
@@ -132,6 +134,9 @@ const renderProduct = (product: Product) => {
 };
 
 const initProductDetail = async () => {
+  productDetailAbortController?.abort();
+  productDetailAbortController = new AbortController();
+  const signal = productDetailAbortController.signal;
   const config = readConfig();
   const container = document.querySelector("[data-product-detail]");
   if (!(container instanceof HTMLElement)) return;
@@ -143,14 +148,17 @@ const initProductDetail = async () => {
   }
 
   try {
-    const response = await fetch(`${config.apiBaseUrl ?? "http://localhost:3000"}/api/products/${encodeURIComponent(productId)}`);
+    const response = await fetch(`${config.apiBaseUrl ?? "http://localhost:3000"}/api/products/${encodeURIComponent(productId)}`, { signal });
     const payload = await response.json().catch(() => null);
+    if (signal.aborted) return;
     if (!response.ok || !payload?.data) throw new Error("Producto no encontrado.");
     container.innerHTML = renderProduct(payload.data);
     document.title = `${payload.data.name} | OnlyCartitas`;
   } catch (error) {
+    if (signal.aborted) return;
     container.innerHTML = `<p class="mx-auto mt-8 max-w-3xl rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">${escapeHtml(error instanceof Error ? error.message : "Producto no encontrado.")}</p>`;
   }
 };
 
+document.addEventListener("astro:page-load", initProductDetail);
 initProductDetail();

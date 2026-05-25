@@ -24,6 +24,21 @@ type CatalogConfig = {
   columns?: "three" | "four";
 };
 
+type ProductsCache = {
+  apiBaseUrl: string;
+  fetchedAt: number;
+  products: Product[];
+  promise?: Promise<Product[]>;
+};
+
+declare global {
+  interface Window {
+    __onlycartitasProductsCache?: ProductsCache;
+  }
+}
+
+let catalogAbortController: AbortController | null = null;
+
 const languageLabels: Record<ProductLanguage, string> = {
   japanese: "Japones",
   spanish: "Espanol",
@@ -151,12 +166,75 @@ const renderOptions = (select: Element | null, values: string[], placeholder: st
   select.value = values.some((value) => normalize(value) === currentValue) ? currentValue : "all";
 };
 
+const fetchProductsFromApi = async (apiBaseUrl: string, signal: AbortSignal) => {
+  const cached = window.__onlycartitasProductsCache;
+  if (cached?.apiBaseUrl === apiBaseUrl && cached.promise) {
+    return cached.promise;
+  }
+
+  const url = new URL("/api/products", apiBaseUrl);
+  const promise = fetch(url, { signal })
+    .then(async (response) => {
+      const payload = await response.json().catch(() => null);
+      return response.ok && Array.isArray(payload?.data) ? (payload.data as Product[]) : [];
+    })
+    .then((products) => {
+      window.__onlycartitasProductsCache = {
+        apiBaseUrl,
+        fetchedAt: Date.now(),
+        products
+      };
+      return products;
+    })
+    .catch((error) => {
+      const fallbackProducts = cached?.products ?? [];
+      window.__onlycartitasProductsCache = {
+        apiBaseUrl,
+        fetchedAt: cached?.fetchedAt ?? 0,
+        products: fallbackProducts
+      };
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return fallbackProducts;
+      }
+      return [];
+    });
+
+  window.__onlycartitasProductsCache = {
+    apiBaseUrl,
+    fetchedAt: cached?.fetchedAt ?? 0,
+    products: cached?.products ?? [],
+    promise
+  };
+
+  return promise;
+};
+
+const loadProducts = async (apiBaseUrl: string, signal: AbortSignal) => {
+  const cached = window.__onlycartitasProductsCache;
+  if (cached?.apiBaseUrl === apiBaseUrl && cached.products.length > 0) {
+    return cached.products;
+  }
+
+  return fetchProductsFromApi(apiBaseUrl, signal);
+};
+
+const filterProductsForConfig = (products: Product[], config: CatalogConfig) =>
+  products.filter((product) => {
+    const matchesKind = !config.kind || product.kind === config.kind;
+    const hasOffer = Boolean(product.offer || product.previousPrice);
+    const matchesOffer = config.offer === undefined || hasOffer === config.offer;
+    return matchesKind && matchesOffer;
+  });
+
 const initCatalog = async () => {
+  catalogAbortController?.abort();
+  catalogAbortController = new AbortController();
+  const signal = catalogAbortController.signal;
   const config = readConfig();
   const apiBaseUrl = config.apiBaseUrl ?? "http://localhost:3000";
-  const url = new URL("/api/products", apiBaseUrl);
-  if (config.kind) url.searchParams.set("kind", config.kind);
-  if (config.offer !== undefined) url.searchParams.set("offer", String(config.offer));
+  const hadUsableCache =
+    window.__onlycartitasProductsCache?.apiBaseUrl === apiBaseUrl &&
+    window.__onlycartitasProductsCache.products.length > 0;
 
   const grid = document.querySelector("[data-products-grid]");
   const categoryContainer = document.querySelector("[data-category-filters]");
@@ -237,11 +315,18 @@ const initCatalog = async () => {
   };
 
   const renderGrid = () => {
+    if (signal.aborted) return;
     const visibleProducts = filteredProducts();
     grid.innerHTML = visibleProducts.map((product) => renderProductCard(product, config.columns)).join("");
     if (resultsCount instanceof HTMLElement) resultsCount.textContent = String(visibleProducts.length);
     if (emptyState instanceof HTMLElement) emptyState.style.display = visibleProducts.length === 0 ? "block" : "none";
-    window.dispatchEvent(new CustomEvent("onlycartitas:catalog-rendered"));
+    window.dispatchEvent(
+      new CustomEvent("onlycartitas:catalog-rendered", {
+        detail: {
+          products
+        }
+      })
+    );
   };
 
   const renderFilters = () => {
@@ -257,52 +342,61 @@ const initCatalog = async () => {
     activeCategory = target.dataset.category ?? "all";
     renderCategories();
     renderGrid();
-  });
+  }, { signal });
 
   if (setFilter instanceof HTMLSelectElement) {
     setFilter.addEventListener("change", () => {
       activeSet = setFilter.value;
       renderGrid();
-    });
+    }, { signal });
   }
 
   if (illustratorFilter instanceof HTMLSelectElement) {
     illustratorFilter.addEventListener("change", () => {
       activeIllustrator = illustratorFilter.value;
       renderGrid();
-    });
+    }, { signal });
   }
 
   if (languageFilter instanceof HTMLSelectElement) {
     languageFilter.addEventListener("change", () => {
       activeLanguage = languageFilter.value;
       renderGrid();
-    });
+    }, { signal });
   }
 
   if (pokemonFilter instanceof HTMLInputElement) {
     pokemonFilter.addEventListener("input", () => {
       activePokemonQuery = normalize(pokemonFilter.value);
       renderGrid();
-    });
+    }, { signal });
   }
 
   window.addEventListener("carta-noble:search", (event) => {
     activeQuery = event instanceof CustomEvent && typeof event.detail === "string" ? normalize(event.detail) : "";
     renderGrid();
-  });
+  }, { signal });
 
   try {
     grid.innerHTML = `<p class="col-span-full rounded-[1.5rem] border border-slate-200 bg-slate-50 px-6 py-8 text-center text-sm font-semibold text-slate-600">Cargando productos...</p>`;
-    const response = await fetch(url);
-    const payload = await response.json().catch(() => null);
-    products = response.ok && Array.isArray(payload?.data) ? payload.data : [];
+    products = filterProductsForConfig(await loadProducts(apiBaseUrl, signal), config);
   } catch {
     products = [];
   }
 
+  if (signal.aborted) return;
   renderFilters();
   renderGrid();
+
+  if (hadUsableCache) {
+    const currentSnapshot = JSON.stringify(products);
+    const freshProducts = filterProductsForConfig(await fetchProductsFromApi(apiBaseUrl, signal), config);
+    if (signal.aborted || JSON.stringify(freshProducts) === currentSnapshot) return;
+    products = freshProducts;
+    renderFilters();
+    renderGrid();
+  }
 };
 
+document.addEventListener("astro:page-load", initCatalog);
 initCatalog();

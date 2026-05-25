@@ -231,7 +231,9 @@ const currentPath = Astro.url.pathname;
   const inputs = Array.from(document.querySelectorAll("[data-search-input]"));
   const navLinks = Array.from(document.querySelectorAll("[data-nav-link]"));
   const INVENTORY_STORAGE_KEY = "onlycartitas-inventory-state";
+  const INVENTORY_SYNC_TTL_MS = 10_000;
   const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+  let lastInventorySyncAt = 0;
 
   const isInputElement = (value: unknown) => value instanceof HTMLInputElement;
 
@@ -279,7 +281,25 @@ const currentPath = Astro.url.pathname;
     }
   };
 
-  const syncInventoryFromApi = async () => {
+  const writeInventoryStateFromProducts = (products: InventoryProduct[], options: { complete: boolean }) => {
+    const baseState = options.complete ? {} : readInventoryState();
+    const apiState = products.reduce<InventoryState>((state, product) => {
+      state[product.id] = {
+        stock: Number(product.stock ?? 0),
+        status: product.active === false ? "inactive" : "active"
+      };
+      return state;
+    }, baseState);
+
+    if (options.complete) lastInventorySyncAt = Date.now();
+    window.localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(apiState));
+    applyInventoryState();
+    reconcileCartWithInventory();
+  };
+
+  const syncInventoryFromApi = async (force = false) => {
+    if (!force && Date.now() - lastInventorySyncAt < INVENTORY_SYNC_TTL_MS) return;
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/products?includeInactive=true`);
       if (!response.ok) return;
@@ -287,17 +307,7 @@ const currentPath = Astro.url.pathname;
       const payload = await response.json();
       if (!Array.isArray(payload.data)) return;
 
-      const apiState = (payload.data as InventoryProduct[]).reduce<InventoryState>((state, product) => {
-        state[product.id] = {
-          stock: Number(product.stock ?? 0),
-          status: product.active === false ? "inactive" : "active"
-        };
-        return state;
-      }, {});
-
-      window.localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(apiState));
-      applyInventoryState();
-      reconcileCartWithInventory();
+      writeInventoryStateFromProducts(payload.data as InventoryProduct[], { complete: true });
     } catch {
       // Keep the static catalog usable when the API is not running.
     }
@@ -444,7 +454,16 @@ const currentPath = Astro.url.pathname;
     applyInventoryState();
     syncInventoryFromApi();
   });
-  window.addEventListener("onlycartitas:catalog-rendered", () => {
+  window.addEventListener("onlycartitas:catalog-rendered", (event) => {
+    const products =
+      event instanceof CustomEvent && Array.isArray(event.detail?.products)
+        ? (event.detail.products as InventoryProduct[])
+        : null;
+    if (products) {
+      writeInventoryStateFromProducts(products, { complete: false });
+      return;
+    }
+
     applyInventoryState();
     syncInventoryFromApi();
   });
