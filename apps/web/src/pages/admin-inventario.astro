@@ -55,7 +55,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
     </section>
 
     <main class="hidden pb-20" data-admin-content>
-      <section class="mx-auto w-full max-w-4xl px-4 pt-6 sm:px-6 lg:px-8">
+      <section class="mx-auto w-full max-w-6xl px-4 pt-6 sm:px-6 lg:px-8">
         <div class="overflow-hidden rounded-[2rem] bg-[color:var(--color-primary)] px-6 py-8 text-white shadow-[0_28px_80px_rgba(17,48,71,0.22)] sm:px-8">
           <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-300">Admin</p>
           <h1 class="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">Panel admin</h1>
@@ -65,16 +65,17 @@ const defaultProductCategoryOptions = productCategories.sealed;
         </div>
       </section>
 
-      <section class="mx-auto mt-6 w-full max-w-4xl px-4 sm:px-6 lg:px-8">
-        <div class="grid gap-2 rounded-2xl bg-slate-100 p-1 sm:grid-cols-4" data-admin-tabs>
+      <section class="mx-auto mt-6 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div class="grid gap-2 rounded-2xl bg-slate-100 p-1 sm:grid-cols-5" data-admin-tabs>
           <button type="button" class="rounded-[1rem] bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm" data-admin-tab="inventory" aria-pressed="true">Inventario</button>
+          <button type="button" class="rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-admin-tab="users" aria-pressed="false">Usuarios</button>
           <button type="button" class="rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-admin-tab="orders" aria-pressed="false">Compras</button>
           <button type="button" class="rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-admin-tab="discounts" aria-pressed="false">Descuentos</button>
           <button type="button" class="rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-admin-tab="hero" aria-pressed="false">Hero</button>
         </div>
       </section>
 
-      <section class="mx-auto mt-8 w-full max-w-4xl px-4 sm:px-6 lg:px-8" data-admin-panel="inventory">
+      <section class="mx-auto mt-8 w-full max-w-6xl px-4 sm:px-6 lg:px-8" data-admin-panel="inventory">
         <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
           <div class="grid gap-5">
             <div>
@@ -105,7 +106,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
                   </label>
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Set</span>
-                    <input data-product-create="set" type="text" placeholder="Journey Together" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                    <input data-product-create="set" list="admin-set-options" type="text" placeholder="Journey Together" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
                   </label>
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Idioma</span>
@@ -143,7 +144,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
                   </div>
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Ilustrador</span>
-                    <input data-product-create="illustrator" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                    <input data-product-create="illustrator" list="admin-illustrator-options" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
                   </label>
                 </div>
                 <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]">
@@ -151,6 +152,29 @@ const defaultProductCategoryOptions = productCategories.sealed;
                 </button>
                 <p class="hidden rounded-[1rem] bg-white px-4 py-3 text-sm font-semibold text-[color:var(--color-primary)]" data-product-create-message></p>
               </form>
+            </details>
+
+            <datalist id="admin-set-options" data-set-options></datalist>
+            <datalist id="admin-category-options" data-category-options></datalist>
+            <datalist id="admin-illustrator-options" data-illustrator-options></datalist>
+
+            <details class="rounded-[1.5rem] border border-slate-200 bg-white p-4">
+              <summary class="cursor-pointer text-sm font-semibold text-[color:var(--color-primary)]">Opciones dinamicas</summary>
+              <div class="mt-4 grid gap-4 lg:grid-cols-3">
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Sets</p>
+                  <div class="mt-3 flex flex-wrap gap-2" data-option-list="sets"></div>
+                </div>
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Categorias</p>
+                  <div class="mt-3 flex flex-wrap gap-2" data-option-list="categories"></div>
+                </div>
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Ilustradores</p>
+                  <div class="mt-3 flex flex-wrap gap-2" data-option-list="illustrators"></div>
+                </div>
+              </div>
+              <p class="mt-4 text-sm text-slate-500">Las opciones se alimentan desde los productos. Para agregar una opcion, usala en un producto nuevo o editado; para quitarla, cambia los productos que la usan.</p>
             </details>
             <div>
               <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Tipo</span>
@@ -200,11 +224,17 @@ const defaultProductCategoryOptions = productCategories.sealed;
               </span>
             </div>
 
-            <form class="grid gap-4" data-form>
-              <div class="grid gap-4 lg:grid-cols-[1fr_1fr]">
-                <div class="rounded-[1.5rem] border border-slate-200 bg-white p-4">
-                  <span class="block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Stock</span>
-                  <div class="mt-3 grid grid-cols-[44px_1fr_44px] gap-2">
+            <div class="grid gap-4 lg:grid-cols-[0.85fr_1.15fr]">
+              <form class="rounded-[1.5rem] border border-slate-200 bg-white p-4" data-form>
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Stock</p>
+                  <h3 class="mt-2 text-xl font-semibold text-[color:var(--color-primary)]">Movimiento rapido</h3>
+                  <p class="mt-2 text-sm text-slate-500">Ajusta solo unidades y visibilidad del producto seleccionado.</p>
+                </div>
+                <div class="mt-4 grid gap-4">
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Stock exacto</span>
+                    <div class="grid grid-cols-[44px_1fr_44px] gap-2">
                     <button type="button" class="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 text-lg font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900" data-stock-minus aria-label="Restar stock">
                       -
                     </button>
@@ -212,34 +242,139 @@ const defaultProductCategoryOptions = productCategories.sealed;
                     <button type="button" class="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 text-lg font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900" data-stock-plus aria-label="Sumar stock">
                       +
                     </button>
-                  </div>
-                  <p class="mt-3 text-sm text-slate-500">Usa los botones para cambios chicos o escribe el stock exacto.</p>
-                </div>
-
-                <div class="rounded-[1.5rem] border border-slate-200 bg-white p-4">
-                  <span class="block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Visibilidad</span>
+                    </div>
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Visibilidad</span>
                   <select data-status class="mt-3 h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
                     <option value="active">Activo en tienda</option>
                     <option value="inactive">Inactivo / oculto</option>
                   </select>
+                  </label>
                   <button type="button" class="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900" data-toggle-status>
                     Cambiar estado
                   </button>
-                  <p class="mt-3 text-sm text-slate-500">Inactivo funciona como borrado falso.</p>
+                  <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]">
+                    Guardar stock
+                  </button>
                 </div>
-              </div>
+                <p class="hidden mt-4 rounded-[1rem] bg-[color:var(--color-surface)] px-4 py-3 text-sm font-semibold text-[color:var(--color-primary)]" data-message></p>
+              </form>
 
-              <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]">
-                Guardar producto
-              </button>
-
-              <p class="hidden rounded-[1rem] bg-[color:var(--color-surface)] px-4 py-3 text-sm font-semibold text-[color:var(--color-primary)]" data-message></p>
-            </form>
+              <form class="rounded-[1.5rem] border border-slate-200 bg-white p-4" data-product-edit-form>
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Producto</p>
+                  <h3 class="mt-2 text-xl font-semibold text-[color:var(--color-primary)]">Datos editables</h3>
+                  <p class="mt-2 text-sm text-slate-500">Edita nombre, set, precio, imagen y atributos sin mezclarlo con stock.</p>
+                </div>
+                <div class="mt-4 grid gap-4 lg:grid-cols-2">
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Tipo</span>
+                    <select data-product-edit="kind" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                      <option value="sealed">Sellado</option>
+                      <option value="single">Single</option>
+                    </select>
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Nombre</span>
+                    <input data-product-edit="name" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Categoria</span>
+                    <input data-product-edit="category" list="admin-category-options" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Set</span>
+                    <input data-product-edit="set" list="admin-set-options" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Idioma</span>
+                    <select data-product-edit="language" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                      <option value="english">Ingles</option>
+                      <option value="spanish">Espanol</option>
+                      <option value="japanese">Japones</option>
+                    </select>
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Precio</span>
+                    <input data-product-edit="price" type="number" min="0" step="1" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block lg:col-span-2">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Imagen URL</span>
+                    <input data-product-edit="image" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Precio anterior</span>
+                    <input data-product-edit="previousPrice" type="number" min="0" step="1" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Etiqueta oferta</span>
+                    <input data-product-edit="offer" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Ilustrador</span>
+                    <input data-product-edit="illustrator" list="admin-illustrator-options" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Rareza</span>
+                    <input data-product-edit="rarity" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Jugabilidad</span>
+                    <input data-product-edit="playability" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Precio mercado</span>
+                    <input data-product-edit="marketPrice" type="number" min="0" step="1" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block lg:col-span-2">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Segmento manual</span>
+                    <input data-product-edit="manualSegment" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                </div>
+                <button type="submit" class="mt-4 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]">
+                  Guardar datos
+                </button>
+                <p class="hidden mt-4 rounded-[1rem] bg-[color:var(--color-surface)] px-4 py-3 text-sm font-semibold text-[color:var(--color-primary)]" data-product-edit-message></p>
+              </form>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="mx-auto mt-8 hidden w-full max-w-4xl px-4 sm:px-6 lg:px-8" data-admin-panel="orders">
+      <section class="mx-auto mt-8 hidden w-full max-w-6xl px-4 sm:px-6 lg:px-8" data-admin-panel="users">
+        <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Usuarios</p>
+              <h2 class="mt-2 text-2xl font-semibold text-[color:var(--color-primary)]">Cuentas y roles</h2>
+            </div>
+            <button type="button" class="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950" data-refresh-users>
+              Actualizar
+            </button>
+          </div>
+
+          <div class="mt-5 grid gap-3 lg:grid-cols-[1fr_180px]">
+            <label class="block">
+              <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Filtrar usuario</span>
+              <input data-user-filter type="search" placeholder="Usuario o rol" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+            </label>
+            <label class="block">
+              <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Rol</span>
+              <select data-user-role-filter class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                <option value="">Todos</option>
+                <option value="admin">Admin</option>
+                <option value="customer">Cliente</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="mt-5 grid gap-3" data-admin-users></div>
+          <p class="mt-5 hidden rounded-[1rem] bg-[color:var(--color-surface)] px-4 py-3 text-sm font-semibold text-[color:var(--color-primary)]" data-user-admin-message></p>
+        </div>
+      </section>
+
+      <section class="mx-auto mt-8 hidden w-full max-w-6xl px-4 sm:px-6 lg:px-8" data-admin-panel="orders">
         <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
           <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -403,6 +538,9 @@ const defaultProductCategoryOptions = productCategories.sealed;
       const toggleButton = document.querySelector("[data-toggle-status]");
       const form = document.querySelector("[data-form]");
       const message = document.querySelector("[data-message]");
+      const productEditForm = document.querySelector("[data-product-edit-form]");
+      const productEditInputs = Array.from(document.querySelectorAll("[data-product-edit]"));
+      const productEditMessage = document.querySelector("[data-product-edit-message]");
       const productCreateForm = document.querySelector("[data-product-create-form]");
       const productCreateInputs = Array.from(document.querySelectorAll("[data-product-create]"));
       const productCreateKindInput = document.querySelector('[data-product-create="kind"]');
@@ -410,8 +548,17 @@ const defaultProductCategoryOptions = productCategories.sealed;
       const productCreateOfferToggle = document.querySelector("[data-product-offer-toggle]");
       const productCreateOfferFields = document.querySelector("[data-product-offer-fields]");
       const productCreateMessage = document.querySelector("[data-product-create-message]");
+      const setOptions = document.querySelector("[data-set-options]");
+      const categoryOptions = document.querySelector("[data-category-options]");
+      const illustratorOptions = document.querySelector("[data-illustrator-options]");
+      const optionLists = Array.from(document.querySelectorAll("[data-option-list]"));
       const sealedCount = document.querySelector("[data-count-sellados]");
       const singlesCount = document.querySelector("[data-count-singles]");
+      const usersContainer = document.querySelector("[data-admin-users]");
+      const refreshUsersButton = document.querySelector("[data-refresh-users]");
+      const userFilter = document.querySelector("[data-user-filter]");
+      const userRoleFilter = document.querySelector("[data-user-role-filter]");
+      const userAdminMessage = document.querySelector("[data-user-admin-message]");
       const ordersContainer = document.querySelector("[data-admin-orders]");
       const ordersEmpty = document.querySelector("[data-admin-orders-empty]");
       const refreshOrdersButton = document.querySelector("[data-refresh-orders]");
@@ -451,22 +598,35 @@ const defaultProductCategoryOptions = productCategories.sealed;
       let activeType = "sellado";
       let activeAdminTab = "inventory";
       let adminOrders = [];
+      let adminUsers = [];
       let heroSettings = null;
 
       const mapProductForAdmin = (product) => ({
         id: product.id,
+        kind: product.kind,
         type: product.kind === "single" ? "single" : "sellado",
         typeLabel: product.kind === "single" ? "Single" : "Sellado",
         name: product.name,
         category: product.category,
         set: product.set,
+        language: product.language,
         stock: product.stock,
-        active: product.active
+        price: product.price,
+        previousPrice: product.previousPrice ?? null,
+        image: product.image,
+        offer: product.offer ?? null,
+        active: product.active,
+        illustrator: product.illustrator ?? "",
+        rarity: product.rarity ?? "",
+        playability: product.playability ?? "",
+        marketPrice: product.marketPrice ?? null,
+        manualSegment: product.manualSegment ?? ""
       });
 
       const replaceInventoryItems = (products) => {
         inventoryItems = Array.isArray(products) ? products.map(mapProductForAdmin) : [];
         productMap = new Map(inventoryItems.map((product) => [product.id, product]));
+        renderDynamicOptions();
         renderProductOptions();
         updateTypeButtons();
       };
@@ -562,6 +722,21 @@ const defaultProductCategoryOptions = productCategories.sealed;
         return payload.data;
       };
 
+      const updateProductDetails = async (product, input) => {
+        const response = await fetch(`${API_BASE_URL}/api/products/${product.id}`, {
+          method: "PATCH",
+          headers: authHeaders(),
+          body: JSON.stringify(input)
+        });
+
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) {
+          throw new Error(getProductCreateError(payload));
+        }
+
+        return payload.data;
+      };
+
       const authHeaders = () => {
         const session = readSession();
         if (!session?.token) throw new Error("Sesion admin requerida.");
@@ -598,6 +773,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
         adminContent?.classList.toggle("hidden", !isLoggedIn);
         if (isLoggedIn) {
           loadInventoryProducts();
+          loadUsers();
           loadOrders();
           loadDiscounts();
           loadHeroSettings();
@@ -638,6 +814,22 @@ const defaultProductCategoryOptions = productCategories.sealed;
         productCreateMessage.textContent = text;
         productCreateMessage.classList.remove("hidden");
         window.setTimeout(() => productCreateMessage.classList.add("hidden"), 3600);
+      };
+
+      const showProductEditMessage = (text) => {
+        if (!isElement(productEditMessage)) return;
+
+        productEditMessage.textContent = text;
+        productEditMessage.classList.remove("hidden");
+        window.setTimeout(() => productEditMessage.classList.add("hidden"), 2600);
+      };
+
+      const showUserMessage = (text) => {
+        if (!isElement(userAdminMessage)) return;
+
+        userAdminMessage.textContent = text;
+        userAdminMessage.classList.remove("hidden");
+        window.setTimeout(() => userAdminMessage.classList.add("hidden"), 2600);
       };
 
       const renderProductCreateOfferFields = () => {
@@ -695,6 +887,40 @@ const defaultProductCategoryOptions = productCategories.sealed;
           .replaceAll(">", "&gt;")
           .replaceAll('"', "&quot;")
           .replaceAll("'", "&#039;");
+
+      const uniqueSorted = (values) =>
+        Array.from(new Set(values.map((value) => String(value ?? "").trim()).filter(Boolean))).sort((a, b) =>
+          a.localeCompare(b, "es")
+        );
+
+      const renderDatalist = (element, values) => {
+        if (!(element instanceof HTMLDataListElement)) return;
+        element.innerHTML = values.map((value) => `<option value="${escapeHtml(value)}"></option>`).join("");
+      };
+
+      const renderDynamicOptions = () => {
+        const sets = uniqueSorted(inventoryItems.map((product) => product.set));
+        const categories = uniqueSorted(inventoryItems.map((product) => product.category));
+        const illustrators = uniqueSorted(inventoryItems.map((product) => product.illustrator));
+
+        renderDatalist(setOptions, sets);
+        renderDatalist(categoryOptions, categories);
+        renderDatalist(illustratorOptions, illustrators);
+
+        const optionGroups = { sets, categories, illustrators };
+        optionLists.forEach((list) => {
+          if (!isElement(list)) return;
+          const values = optionGroups[list.dataset.optionList] ?? [];
+          list.innerHTML = values.length
+            ? values
+                .map(
+                  (value) =>
+                    `<span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700">${escapeHtml(value)}</span>`
+                )
+                .join("")
+            : `<span class="text-sm text-slate-500">Sin opciones</span>`;
+        });
+      };
 
       const renderProductCreateCategories = () => {
         if (!isSelect(productCreateKindInput) || !isSelect(productCreateCategoryInput)) return;
@@ -786,6 +1012,13 @@ const defaultProductCategoryOptions = productCategories.sealed;
         return productMap.get(productSelect.value) ?? null;
       };
 
+      const setProductEditField = (key, value) => {
+        const field = productEditInputs.find((input) => input instanceof HTMLElement && input.dataset.productEdit === key);
+        if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) {
+          field.value = value == null ? "" : String(value);
+        }
+      };
+
       const renderSelectedProduct = () => {
         const product = getSelectedProduct();
 
@@ -795,6 +1028,9 @@ const defaultProductCategoryOptions = productCategories.sealed;
           if (isElement(productMeta)) productMeta.textContent = "Cambia el filtro o busca otro producto.";
           if (isInput(stockInput)) stockInput.value = "0";
           if (isSelect(statusSelect)) statusSelect.value = "active";
+          productEditInputs.forEach((input) => {
+            if (input instanceof HTMLInputElement || input instanceof HTMLSelectElement) input.value = "";
+          });
           return;
         }
 
@@ -812,6 +1048,21 @@ const defaultProductCategoryOptions = productCategories.sealed;
             ? "w-fit rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700"
             : "w-fit rounded-full bg-red-50 px-4 py-2 text-sm font-semibold text-red-700";
         }
+
+        setProductEditField("kind", product.kind);
+        setProductEditField("name", product.name);
+        setProductEditField("category", product.category);
+        setProductEditField("set", product.set);
+        setProductEditField("language", product.language);
+        setProductEditField("price", product.price);
+        setProductEditField("image", product.image);
+        setProductEditField("previousPrice", product.previousPrice ?? "");
+        setProductEditField("offer", product.offer ?? "");
+        setProductEditField("illustrator", product.illustrator ?? "");
+        setProductEditField("rarity", product.rarity ?? "");
+        setProductEditField("playability", product.playability ?? "");
+        setProductEditField("marketPrice", product.marketPrice ?? "");
+        setProductEditField("manualSegment", product.manualSegment ?? "");
       };
 
       const syncStatusWithStock = () => {
@@ -838,7 +1089,9 @@ const defaultProductCategoryOptions = productCategories.sealed;
         };
 
         try {
-          await updateInventory(product, nextState);
+          const updatedProduct = await updateInventory(product, nextState);
+          const mappedProduct = mapProductForAdmin(updatedProduct);
+          Object.assign(product, mappedProduct);
           state[product.id] = nextState;
           saveState();
           showMessage("Producto actualizado en el backend.");
@@ -850,6 +1103,57 @@ const defaultProductCategoryOptions = productCategories.sealed;
         if (isSelect(productSelect)) productSelect.value = product.id;
         updateTypeButtons();
         renderSelectedProduct();
+      };
+
+      const readProductEditForm = () =>
+        productEditInputs.reduce((input, element) => {
+          if (!(element instanceof HTMLInputElement) && !(element instanceof HTMLSelectElement)) return input;
+          const key = element.dataset.productEdit;
+          if (!key) return input;
+          input[key] = element.value.trim();
+          return input;
+        }, {});
+
+      const saveProductDetails = async () => {
+        const product = getSelectedProduct();
+        if (!product) return;
+
+        const raw = readProductEditForm();
+        const price = Number(raw.price ?? 0);
+        const previousPrice = Number(raw.previousPrice ?? 0);
+        const marketPrice = Number(raw.marketPrice ?? 0);
+        if (!raw.name || !raw.category || !raw.set || !raw.image) {
+          throw new Error("Completa nombre, categoria, set e imagen.");
+        }
+        if (!Number.isFinite(price) || price <= 0) throw new Error("El precio debe ser mayor a 0.");
+
+        const updatedProduct = await updateProductDetails(product, {
+          kind: raw.kind === "single" ? "single" : "sealed",
+          name: raw.name,
+          category: raw.category,
+          set: raw.set,
+          language: raw.language,
+          price,
+          image: raw.image,
+          previousPrice: Number.isFinite(previousPrice) && previousPrice > 0 ? previousPrice : null,
+          offer: raw.offer || null,
+          illustrator: raw.illustrator || null,
+          rarity: raw.rarity || null,
+          playability: raw.playability || null,
+          marketPrice: Number.isFinite(marketPrice) && marketPrice > 0 ? marketPrice : null,
+          manualSegment: raw.manualSegment || null
+        });
+        const mappedProduct = mapProductForAdmin(updatedProduct);
+        const index = inventoryItems.findIndex((item) => item.id === product.id);
+        if (index >= 0) inventoryItems[index] = mappedProduct;
+        productMap.set(mappedProduct.id, mappedProduct);
+        activeType = mappedProduct.type;
+        renderDynamicOptions();
+        renderProductOptions();
+        if (isSelect(productSelect)) productSelect.value = mappedProduct.id;
+        updateTypeButtons();
+        renderSelectedProduct();
+        showProductEditMessage("Datos del producto actualizados.");
       };
 
       const readProductCreateForm = () =>
@@ -913,17 +1217,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
           throw new Error(getProductCreateError(payload));
         }
 
-        const product = payload.data;
-        const adminProduct = {
-          id: product.id,
-          type: product.kind === "single" ? "single" : "sellado",
-          typeLabel: product.kind === "single" ? "Single" : "Sellado",
-          name: product.name,
-          category: product.category,
-          set: product.set,
-          stock: product.stock,
-          active: product.active
-        };
+        const adminProduct = mapProductForAdmin(payload.data);
 
         inventoryItems.unshift(adminProduct);
         productMap.set(adminProduct.id, adminProduct);
@@ -932,9 +1226,88 @@ const defaultProductCategoryOptions = productCategories.sealed;
           renderProductCreateCategories();
           renderProductCreateOfferFields();
         }
+        renderDynamicOptions();
         renderProductOptions();
         updateTypeButtons();
         showProductCreateMessage("Producto creado. Ya aparece en inventario.");
+      };
+
+      const getFilteredUsers = () => {
+        const query = isInput(userFilter) ? userFilter.value.trim().toLowerCase() : "";
+        const role = isSelect(userRoleFilter) ? userRoleFilter.value : "";
+        return adminUsers.filter((user) => {
+          const matchesQuery =
+            !query ||
+            String(user.username ?? "").toLowerCase().includes(query) ||
+            String(user.role ?? "").toLowerCase().includes(query);
+          const matchesRole = !role || user.role === role;
+          return matchesQuery && matchesRole;
+        });
+      };
+
+      const renderUsers = () => {
+        if (!isElement(usersContainer)) return;
+        const users = getFilteredUsers();
+        usersContainer.innerHTML = users.length
+          ? users
+              .map(
+                (user) => `
+                  <article class="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[1fr_180px_120px] lg:items-end">
+                    <label class="block">
+                      <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Usuario</span>
+                      <input value="${escapeHtml(user.username)}" class="h-11 w-full rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" data-user-name="${escapeHtml(user.id)}" />
+                    </label>
+                    <label class="block">
+                      <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Rol</span>
+                      <select class="h-11 w-full rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" data-user-role="${escapeHtml(user.id)}">
+                        <option value="customer" ${user.role === "customer" ? "selected" : ""}>Cliente</option>
+                        <option value="admin" ${user.role === "admin" ? "selected" : ""}>Admin</option>
+                      </select>
+                    </label>
+                    <button type="button" class="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950" data-user-save="${escapeHtml(user.id)}">
+                      Guardar
+                    </button>
+                  </article>
+                `
+              )
+              .join("")
+          : `<p class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center text-sm font-semibold text-slate-500">No hay usuarios para ese filtro.</p>`;
+      };
+
+      const loadUsers = async () => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
+            headers: authHeaders()
+          });
+          const payload = await response.json().catch(() => null);
+          if (!response.ok) throw new Error(payload?.error ?? "No se pudieron cargar los usuarios.");
+          adminUsers = Array.isArray(payload.data) ? payload.data : [];
+          renderUsers();
+        } catch (error) {
+          if (isElement(usersContainer)) {
+            usersContainer.innerHTML = `<p class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">${escapeHtml(error instanceof Error ? error.message : "No se pudieron cargar los usuarios.")}</p>`;
+          }
+        }
+      };
+
+      const updateUser = async (id, container = document) => {
+        const usernameInput = container.querySelector(`[data-user-name="${id}"]`);
+        const roleSelect = container.querySelector(`[data-user-role="${id}"]`);
+        const username = usernameInput instanceof HTMLInputElement ? usernameInput.value.trim() : "";
+        const role = roleSelect instanceof HTMLSelectElement && roleSelect.value === "admin" ? "admin" : "customer";
+        if (!username) throw new Error("El usuario no puede quedar vacio.");
+
+        const response = await fetch(`${API_BASE_URL}/api/admin/users/${id}`, {
+          method: "PATCH",
+          headers: authHeaders(),
+          body: JSON.stringify({ username, role })
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(payload?.error ?? "No se pudo actualizar el usuario.");
+
+        adminUsers = adminUsers.map((user) => (user.id === id ? payload.data : user));
+        renderUsers();
+        showUserMessage("Usuario actualizado.");
       };
 
       const getFilteredOrders = () => {
@@ -1186,6 +1559,16 @@ const defaultProductCategoryOptions = productCategories.sealed;
         persistSelectedProduct();
       });
 
+      productEditForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        try {
+          await saveProductDetails();
+        } catch (error) {
+          showProductEditMessage(error instanceof Error ? error.message : "No se pudo guardar el producto.");
+        }
+      });
+
       productCreateOfferToggle?.addEventListener("change", renderProductCreateOfferFields);
       productCreateKindInput?.addEventListener("change", renderProductCreateCategories);
 
@@ -1209,6 +1592,20 @@ const defaultProductCategoryOptions = productCategories.sealed;
 
       orderUserFilter?.addEventListener("input", renderOrders);
       orderStatusFilter?.addEventListener("change", renderOrders);
+      userFilter?.addEventListener("input", renderUsers);
+      userRoleFilter?.addEventListener("change", renderUsers);
+      refreshUsersButton?.addEventListener("click", loadUsers);
+
+      usersContainer?.addEventListener("click", async (event) => {
+        const target = event.target instanceof HTMLElement ? event.target.closest("[data-user-save]") : null;
+        if (!(target instanceof HTMLElement) || !target.dataset.userSave) return;
+
+        try {
+          await updateUser(target.dataset.userSave, target.closest("article") ?? document);
+        } catch (error) {
+          showUserMessage(error instanceof Error ? error.message : "No se pudo actualizar el usuario.");
+        }
+      });
 
       ordersContainer?.addEventListener("change", async (event) => {
         const target = event.target;
@@ -1291,6 +1688,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
       });
 
       updateTypeButtons();
+      renderDynamicOptions();
       renderProductOptions();
       renderProductCreateCategories();
       renderProductCreateOfferFields();

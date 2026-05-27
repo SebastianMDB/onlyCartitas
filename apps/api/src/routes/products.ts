@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { ApiError } from "../http.js";
-import { createProduct, getProductById, listProducts, updateProductInventory } from "../repositories/products.js";
+import { createProduct, getProductById, listProducts, updateProduct, updateProductInventory } from "../repositories/products.js";
 import { verifySessionToken } from "../security/tokens.js";
 
 const productQuerySchema = z.object({
@@ -47,6 +47,8 @@ const productSchema = z.object({
   manualSegment: z.string().trim().max(120).nullable().optional()
 });
 
+const productUpdateSchema = productSchema.omit({ id: true }).partial();
+
 const requireAdmin = (authorization: string | undefined) => {
   const session = verifySessionToken(authorization);
   if (session?.role !== "admin") throw new ApiError(403, "Permisos insuficientes");
@@ -88,6 +90,19 @@ export async function productRoutes(app: FastifyInstance) {
     const { id } = z.object({ id: z.string() }).parse(request.params);
     const input = inventorySchema.parse(request.body);
     const product = await updateProductInventory(id, input);
+    if (!product) throw new ApiError(404, "Producto no encontrado");
+
+    return {
+      data: product
+    };
+  });
+
+  app.patch("/api/products/:id", async (request) => {
+    requireAdmin(request.headers.authorization);
+
+    const { id } = z.object({ id: z.string() }).parse(request.params);
+    const input = productUpdateSchema.parse(request.body);
+    const product = await updateProduct(id, input);
     if (!product) throw new ApiError(404, "Producto no encontrado");
 
     return {

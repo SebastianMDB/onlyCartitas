@@ -128,3 +128,27 @@ export async function updateProductInventory(id: string, input: { stock?: number
     throw new ApiError(500, "No se pudo actualizar el inventario");
   }
 }
+
+export async function updateProduct(id: string, input: Partial<ProductInput>) {
+  try {
+    const [product] = await db
+      .update(products)
+      .set({
+        ...input,
+        previousPrice: input.previousPrice === undefined ? undefined : input.previousPrice ?? null,
+        offer: input.offer === undefined ? undefined : input.offer ?? null,
+        illustrator: input.illustrator === undefined ? undefined : input.illustrator ?? null,
+        rarity: input.rarity === undefined ? undefined : input.rarity ?? null,
+        playability: input.playability === undefined ? undefined : input.playability ?? null,
+        marketPrice: input.marketPrice === undefined ? undefined : input.marketPrice ?? null,
+        manualSegment: input.manualSegment === undefined ? undefined : input.manualSegment ?? null,
+        updatedAt: new Date()
+      })
+      .where(eq(products.id, id))
+      .returning();
+
+    return (product as Product | undefined) ?? null;
+  } catch {
+    throw new ApiError(500, "No se pudo actualizar el producto");
+  }
+}

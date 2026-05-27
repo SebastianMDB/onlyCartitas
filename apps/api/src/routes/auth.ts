@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { env } from "../env.js";
 import { ApiError } from "../http.js";
-import { loginUser, registerUser } from "../repositories/users.js";
+import { listUsers, loginUser, registerUser, updateUser } from "../repositories/users.js";
 import { assertRateLimit } from "../security/rate-limit.js";
 import { createSessionToken, verifySessionToken } from "../security/tokens.js";
 
@@ -14,6 +14,17 @@ const credentialsSchema = z.object({
 const authRateLimit = {
   limit: 10,
   windowMs: 15 * 60 * 1000
+};
+
+const userUpdateSchema = z.object({
+  username: z.string().trim().min(3).max(40).optional(),
+  role: z.enum(["admin", "customer"]).optional()
+});
+
+const requireAdmin = (authorization: string | undefined) => {
+  const session = verifySessionToken(authorization);
+  if (session?.role !== "admin") throw new ApiError(403, "Permisos insuficientes");
+  return session;
 };
 
 const createAuthResponse = (user: Awaited<ReturnType<typeof loginUser>>) => {
@@ -65,6 +76,30 @@ export async function authRoutes(app: FastifyInstance) {
         role: session.role
       },
       expiresAt: session.expiresAt
+    };
+  });
+
+  app.get("/api/admin/users", async (request) => {
+    requireAdmin(request.headers.authorization);
+
+    return {
+      data: await listUsers()
+    };
+  });
+
+  app.patch("/api/admin/users/:id", async (request) => {
+    const session = requireAdmin(request.headers.authorization);
+    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const input = userUpdateSchema.parse(request.body);
+    if (id === session.id && input.role && input.role !== "admin") {
+      throw new ApiError(400, "No puedes quitarte tu propio rol admin");
+    }
+
+    const user = await updateUser(id, input);
+    if (!user) throw new ApiError(404, "Usuario no encontrado");
+
+    return {
+      data: user
     };
   });
 }
