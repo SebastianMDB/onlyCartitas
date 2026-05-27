@@ -485,7 +485,6 @@ const currentPath = Astro.url.pathname;
   const cartCount = document.querySelector("[data-cart-count]");
   const cartTotal = document.querySelector("[data-cart-total]");
   const cartCheckout = document.querySelector("[data-cart-checkout]");
-  const authLink = document.querySelector("[data-auth-link]");
 
   const currencyFormatter = new Intl.NumberFormat("es-CL", {
     style: "currency",
@@ -542,18 +541,39 @@ const currentPath = Astro.url.pathname;
     renderCart();
   }
 
+  const getAuthLink = () => document.querySelector("[data-auth-link]");
+
+  const setAuthLinkLoggedOut = () => {
+    const currentAuthLink = getAuthLink();
+    if (!(currentAuthLink instanceof HTMLAnchorElement)) return;
+
+    currentAuthLink.href = "/login";
+    currentAuthLink.textContent = "Iniciar sesion";
+  };
+
+  const setAuthLinkFromSession = (session: { role?: string }) => {
+    const currentAuthLink = getAuthLink();
+    if (!(currentAuthLink instanceof HTMLAnchorElement)) return;
+
+    currentAuthLink.href = session.role === "admin" ? "/admin-inventario" : "/cuenta";
+    currentAuthLink.textContent = session.role === "admin" ? "Admin" : "Mi cuenta";
+  };
+
+  let latestAuthUpdateId = 0;
+
   const updateAuthLink = async () => {
-    if (!(authLink instanceof HTMLAnchorElement)) return;
+    const authUpdateId = ++latestAuthUpdateId;
     try {
       const storedSession = window.localStorage.getItem(AUTH_SESSION_KEY);
       const session = storedSession ? JSON.parse(storedSession) : null;
       const isValid = session?.expiresAt && Date.now() < Number(session.expiresAt);
       if (!isValid) {
         window.localStorage.removeItem(AUTH_SESSION_KEY);
-        authLink.href = "/login";
-        authLink.textContent = "Iniciar sesion";
+        setAuthLinkLoggedOut();
         return;
       }
+
+      setAuthLinkFromSession(session);
 
       const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
         headers: {
@@ -562,6 +582,7 @@ const currentPath = Astro.url.pathname;
       });
       const payload = await response.json().catch(() => null);
       if (!response.ok || !payload?.user) throw new Error("Sesion invalida");
+      if (authUpdateId !== latestAuthUpdateId) return;
 
       const verifiedSession = {
         ...session,
@@ -570,12 +591,11 @@ const currentPath = Astro.url.pathname;
         expiresAt: Number(payload.expiresAt ?? session.expiresAt)
       };
       window.localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(verifiedSession));
-      authLink.href = verifiedSession.role === "admin" ? "/admin-inventario" : "/cuenta";
-      authLink.textContent = verifiedSession.role === "admin" ? "Admin" : "Mi cuenta";
+      setAuthLinkFromSession(verifiedSession);
     } catch {
+      if (authUpdateId !== latestAuthUpdateId) return;
       window.localStorage.removeItem(AUTH_SESSION_KEY);
-      authLink.href = "/login";
-      authLink.textContent = "Iniciar sesion";
+      setAuthLinkLoggedOut();
     }
   };
 
@@ -793,8 +813,15 @@ const currentPath = Astro.url.pathname;
     refreshCartFromStorage();
     renderCart();
   });
+  document.addEventListener("astro:page-load", updateAuthLink);
+  window.addEventListener("pageshow", updateAuthLink);
+  window.addEventListener("focus", updateAuthLink);
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closeCart();
+  });
+  window.addEventListener("storage", (event) => {
+    if (event.key !== AUTH_SESSION_KEY) return;
+    updateAuthLink();
   });
 
   renderCart();

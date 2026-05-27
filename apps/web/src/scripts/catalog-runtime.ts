@@ -29,6 +29,7 @@ type ProductsCache = {
   fetchedAt: number;
   products: Product[];
   promise?: Promise<Product[]>;
+  signal?: AbortSignal;
 };
 
 declare global {
@@ -168,7 +169,7 @@ const renderOptions = (select: Element | null, values: string[], placeholder: st
 
 const fetchProductsFromApi = async (apiBaseUrl: string, signal: AbortSignal) => {
   const cached = window.__onlycartitasProductsCache;
-  if (cached?.apiBaseUrl === apiBaseUrl && cached.promise) {
+  if (cached?.apiBaseUrl === apiBaseUrl && cached.promise && !cached.signal?.aborted) {
     return cached.promise;
   }
 
@@ -203,7 +204,8 @@ const fetchProductsFromApi = async (apiBaseUrl: string, signal: AbortSignal) => 
     apiBaseUrl,
     fetchedAt: cached?.fetchedAt ?? 0,
     products: cached?.products ?? [],
-    promise
+    promise,
+    signal
   };
 
   return promise;
