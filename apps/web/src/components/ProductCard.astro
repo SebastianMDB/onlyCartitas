@@ -27,6 +27,7 @@ const languageLabels = {
   english: "Ingles"
 };
 const productUrl = `/producto/${product.id}`;
+const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
 ---
 
 <article
@@ -96,21 +97,29 @@ const productUrl = `/producto/${product.id}`;
       </div>
     </div>
 
-    <button
-      type="button"
-      class="mt-5 inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-full bg-[#071c2b] px-4 py-3 text-center text-sm font-semibold text-white shadow-[0_10px_22px_rgba(17,48,71,0.14)] transition hover:bg-[#0d2a3f] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none"
-      data-cart-add
-      data-cart-id={product.id}
-      data-cart-name={product.name}
-      data-cart-category={product.category}
-      data-cart-set={product.set}
-      data-cart-language={languageLabels[product.language]}
-      data-cart-price={String(product.price)}
-      data-cart-stock={String(product.stock)}
-      data-cart-image={product.image}
-      disabled={product.stock <= 0}
-    >
-      {product.stock > 0 ? "Agregar al carrito" : "Sin stock"}
-    </button>
+    {
+      hasVariants && product.stock > 0 ? (
+        <a href={productUrl} class="mt-5 inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-full bg-[#071c2b] px-4 py-3 text-center text-sm font-semibold text-white shadow-[0_10px_22px_rgba(17,48,71,0.14)] transition hover:bg-[#0d2a3f]">
+          Elegir diseño
+        </a>
+      ) : (
+        <button
+          type="button"
+          class="mt-5 inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-full bg-[#071c2b] px-4 py-3 text-center text-sm font-semibold text-white shadow-[0_10px_22px_rgba(17,48,71,0.14)] transition hover:bg-[#0d2a3f] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none"
+          data-cart-add
+          data-cart-id={product.id}
+          data-cart-name={product.name}
+          data-cart-category={product.category}
+          data-cart-set={product.set}
+          data-cart-language={languageLabels[product.language]}
+          data-cart-price={String(product.price)}
+          data-cart-stock={String(product.stock)}
+          data-cart-image={product.image}
+          disabled={product.stock <= 0}
+        >
+          {product.stock > 0 ? "Agregar al carrito" : "Sin stock"}
+        </button>
+      )
+    }
   </div>
 </article>

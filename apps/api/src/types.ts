@@ -1,6 +1,13 @@
 export type ProductLanguage = "japanese" | "spanish" | "english";
 export type ProductKind = "sealed" | "single";
 
+export type ProductVariant = {
+  id: string;
+  name: string;
+  stock: number;
+  active: boolean;
+};
+
 export type Product = {
   id: string;
   kind: ProductKind;
@@ -9,6 +16,7 @@ export type Product = {
   set: string;
   language: ProductLanguage;
   stock: number;
+  variants?: ProductVariant[] | null;
   price: number;
   previousPrice?: number;
   image: string;
@@ -25,6 +33,8 @@ export type CartItem = Pick<
   Product,
   "id" | "name" | "category" | "set" | "language" | "stock" | "price" | "image"
 > & {
+  variantId?: string;
+  variantName?: string;
   quantity: number;
 };
 

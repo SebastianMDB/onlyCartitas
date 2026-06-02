@@ -14,6 +14,7 @@ const createOrderSchema = z.object({
     .array(
       z.object({
         id: z.string().trim().min(1),
+        variantId: z.string().trim().min(1).optional(),
         quantity: z.number().int().positive()
       })
     )

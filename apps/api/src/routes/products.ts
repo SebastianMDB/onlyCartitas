@@ -17,6 +17,13 @@ const inventorySchema = z.object({
   active: z.boolean().optional()
 });
 
+const productVariantSchema = z.object({
+  id: z.string().trim().min(1).max(80).regex(/^[a-z0-9][a-z0-9-]*$/, "Usa solo minusculas, numeros y guiones"),
+  name: z.string().trim().min(1).max(120),
+  stock: z.number().int().min(0),
+  active: z.boolean().default(true)
+});
+
 const pathOrUrl = z.string().trim().min(1).max(1000).refine((value) => {
   if (value.startsWith("/")) return true;
   try {
@@ -35,6 +42,7 @@ const productSchema = z.object({
   set: z.string().trim().min(2).max(120),
   language: z.enum(["japanese", "spanish", "english"]),
   stock: z.number().int().min(0),
+  variants: z.array(productVariantSchema).max(40).nullable().optional(),
   price: z.number().min(0),
   previousPrice: z.number().min(0).nullable().optional(),
   image: pathOrUrl,
@@ -47,7 +55,24 @@ const productSchema = z.object({
   manualSegment: z.string().trim().max(120).nullable().optional()
 });
 
-const productUpdateSchema = productSchema.omit({ id: true }).partial();
+const productUpdateSchema = z.object({
+  kind: z.enum(["sealed", "single"]).optional(),
+  name: z.string().trim().min(2).max(180).optional(),
+  category: z.string().trim().min(2).max(120).optional(),
+  set: z.string().trim().min(2).max(120).optional(),
+  language: z.enum(["japanese", "spanish", "english"]).optional(),
+  variants: z.array(productVariantSchema).max(40).nullable().optional(),
+  price: z.number().min(0).optional(),
+  previousPrice: z.number().min(0).nullable().optional(),
+  image: pathOrUrl.optional(),
+  offer: z.string().trim().max(80).nullable().optional(),
+  active: z.boolean().optional(),
+  illustrator: z.string().trim().max(120).nullable().optional(),
+  rarity: z.string().trim().max(120).nullable().optional(),
+  playability: z.string().trim().max(120).nullable().optional(),
+  marketPrice: z.number().min(0).nullable().optional(),
+  manualSegment: z.string().trim().max(120).nullable().optional()
+});
 
 const requireAdmin = (authorization: string | undefined) => {
   const session = verifySessionToken(authorization);

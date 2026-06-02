@@ -9,6 +9,7 @@ type Product = {
   set: string;
   language: ProductLanguage;
   stock: number;
+  variants?: Array<{ id: string; name: string; stock: number; active: boolean }> | null;
   price: number;
   previousPrice?: number | null;
   image: string;
@@ -87,6 +88,7 @@ const renderProductCard = (product: Product, columns: CatalogConfig["columns"] =
   const languageLabel = languageLabels[product.language] ?? product.language;
   const productUrl = getProductUrl(product);
   const titleClass = columns === "four" ? "mt-2 min-h-[3.5rem]" : "mt-2 min-h-[3.5rem]";
+  const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
 
   return `
     <article
@@ -131,22 +133,26 @@ const renderProductCard = (product: Product, columns: CatalogConfig["columns"] =
           </div>
         </div>
 
-        <button
-          type="button"
-          class="mt-5 inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-full bg-[#071c2b] px-4 py-3 text-center text-sm font-semibold text-white shadow-[0_10px_22px_rgba(17,48,71,0.14)] transition hover:bg-[#0d2a3f] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none"
-          data-cart-add
-          data-cart-id="${escapeHtml(product.id)}"
-          data-cart-name="${escapeHtml(product.name)}"
-          data-cart-category="${escapeHtml(product.category)}"
-          data-cart-set="${escapeHtml(product.set)}"
-          data-cart-language="${escapeHtml(languageLabel)}"
-          data-cart-price="${escapeHtml(product.price)}"
-          data-cart-stock="${escapeHtml(product.stock)}"
-          data-cart-image="${escapeHtml(product.image)}"
-          ${product.stock <= 0 ? "disabled" : ""}
-        >
-          ${product.stock > 0 ? "Agregar al carrito" : "Sin stock"}
-        </button>
+        ${
+          hasVariants && product.stock > 0
+            ? `<a href="${productUrl}" class="mt-5 inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-full bg-[#071c2b] px-4 py-3 text-center text-sm font-semibold text-white shadow-[0_10px_22px_rgba(17,48,71,0.14)] transition hover:bg-[#0d2a3f]">Elegir diseno</a>`
+            : `<button
+                type="button"
+                class="mt-5 inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-full bg-[#071c2b] px-4 py-3 text-center text-sm font-semibold text-white shadow-[0_10px_22px_rgba(17,48,71,0.14)] transition hover:bg-[#0d2a3f] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none"
+                data-cart-add
+                data-cart-id="${escapeHtml(product.id)}"
+                data-cart-name="${escapeHtml(product.name)}"
+                data-cart-category="${escapeHtml(product.category)}"
+                data-cart-set="${escapeHtml(product.set)}"
+                data-cart-language="${escapeHtml(languageLabel)}"
+                data-cart-price="${escapeHtml(product.price)}"
+                data-cart-stock="${escapeHtml(product.stock)}"
+                data-cart-image="${escapeHtml(product.image)}"
+                ${product.stock <= 0 ? "disabled" : ""}
+              >
+                ${product.stock > 0 ? "Agregar al carrito" : "Sin stock"}
+              </button>`
+        }
       </div>
     </article>
   `;

@@ -23,6 +23,13 @@ type ProductInput = Omit<Product, "id" | "previousPrice" | "offer" | "illustrato
   manualSegment?: string | null;
 };
 
+const normalizeProduct = (product: Product) => ({
+  ...product,
+  stock: Array.isArray(product.variants) && product.variants.length > 0
+    ? product.variants.reduce((total, variant) => total + (variant.active === false ? 0 : Number(variant.stock ?? 0)), 0)
+    : product.stock
+});
+
 const slugifyProductId = (value: string) => {
   const slug = value
     .normalize("NFD")
@@ -66,7 +73,7 @@ export async function listProducts(filters: ProductFilters = {}) {
       .where(conditions.length ? and(...conditions) : undefined)
       .orderBy(desc(products.createdAt));
 
-    return rows as Product[];
+    return (rows as Product[]).map(normalizeProduct);
   } catch {
     throw new ApiError(500, "No se pudieron obtener los productos");
   }
@@ -76,7 +83,7 @@ export async function getProductById(id: string) {
   try {
     const [product] = await db.select().from(products).where(eq(products.id, id)).limit(1);
 
-    return (product as Product | undefined) ?? null;
+    return product ? normalizeProduct(product as Product) : null;
   } catch {
     throw new ApiError(500, "No se pudo obtener el producto");
   }
@@ -101,11 +108,12 @@ export async function createProduct(input: ProductInput) {
         rarity: input.rarity ?? null,
         playability: input.playability ?? null,
         marketPrice: input.marketPrice ?? null,
-        manualSegment: input.manualSegment ?? null
+        manualSegment: input.manualSegment ?? null,
+        variants: input.variants ?? null
       })
       .returning();
 
-    return product as Product;
+    return normalizeProduct(product as Product);
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new ApiError(500, "No se pudo crear el producto");
@@ -123,7 +131,7 @@ export async function updateProductInventory(id: string, input: { stock?: number
       .where(eq(products.id, id))
       .returning();
 
-    return (product as Product | undefined) ?? null;
+    return product ? normalizeProduct(product as Product) : null;
   } catch {
     throw new ApiError(500, "No se pudo actualizar el inventario");
   }
@@ -142,12 +150,13 @@ export async function updateProduct(id: string, input: Partial<ProductInput>) {
         playability: input.playability === undefined ? undefined : input.playability ?? null,
         marketPrice: input.marketPrice === undefined ? undefined : input.marketPrice ?? null,
         manualSegment: input.manualSegment === undefined ? undefined : input.manualSegment ?? null,
+        variants: input.variants === undefined ? undefined : input.variants ?? null,
         updatedAt: new Date()
       })
       .where(eq(products.id, id))
       .returning();
 
-    return (product as Product | undefined) ?? null;
+    return product ? normalizeProduct(product as Product) : null;
   } catch {
     throw new ApiError(500, "No se pudo actualizar el producto");
   }

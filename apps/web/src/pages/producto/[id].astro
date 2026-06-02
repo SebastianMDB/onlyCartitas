@@ -34,6 +34,9 @@ const discountPercent =
   product.previousPrice && product.previousPrice > product.price
     ? Math.round(((product.previousPrice - product.price) / product.previousPrice) * 100)
     : null;
+const variants = Array.isArray(product.variants) ? product.variants.filter((variant) => variant.active !== false) : [];
+const selectedVariant = variants.find((variant) => variant.stock > 0) ?? variants[0] ?? null;
+const selectedStock = selectedVariant ? selectedVariant.stock : product.stock;
 ---
 
 <!doctype html>
@@ -91,6 +94,32 @@ const discountPercent =
               {product.previousPrice ? <p class="pb-1 text-lg text-slate-400 line-through">{currencyFormatter.format(product.previousPrice)}</p> : null}
             </div>
 
+            {
+              variants.length > 0 ? (
+                <div class="mt-6" data-variant-picker>
+                  <p class="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Diseño</p>
+                  <div class="flex flex-wrap gap-2">
+                    {variants.map((variant) => (
+                      <button
+                        type="button"
+                        class={`rounded-full border px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-45 ${
+                          variant.id === selectedVariant?.id
+                            ? "border-slate-950 bg-slate-950 text-white"
+                            : "border-slate-300 bg-white text-slate-700 hover:border-slate-500"
+                        }`}
+                        data-product-variant={variant.id}
+                        data-variant-name={variant.name}
+                        data-variant-stock={String(variant.stock)}
+                        disabled={variant.stock <= 0}
+                      >
+                        {variant.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null
+            }
+
             <button
               type="button"
               class="mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none sm:w-auto"
@@ -101,11 +130,13 @@ const discountPercent =
               data-cart-set={product.set}
               data-cart-language={languageLabel}
               data-cart-price={String(product.price)}
-              data-cart-stock={String(product.stock)}
+              data-cart-stock={String(selectedStock)}
+              data-cart-variant-id={selectedVariant?.id ?? ""}
+              data-cart-variant-name={selectedVariant?.name ?? ""}
               data-cart-image={product.image}
-              disabled={product.stock <= 0}
+              disabled={selectedStock <= 0}
             >
-              {product.stock > 0 ? "Agregar al carrito" : "Sin stock"}
+              {selectedStock > 0 ? "Agregar al carrito" : "Sin stock"}
             </button>
           </div>
 
@@ -149,5 +180,31 @@ const discountPercent =
     </main>
 
     <Footer />
+    <script>
+      document.addEventListener("click", (event) => {
+        const button = event.target instanceof HTMLElement ? event.target.closest("[data-product-variant]") : null;
+        if (!(button instanceof HTMLButtonElement)) return;
+        const section = button.closest("[data-product-id]");
+        const cartButton = section?.querySelector("[data-cart-add]");
+        if (!(cartButton instanceof HTMLButtonElement)) return;
+
+        section?.querySelectorAll("[data-product-variant]").forEach((item) => {
+          if (!(item instanceof HTMLButtonElement)) return;
+          const isActive = item === button;
+          item.className = isActive
+            ? "rounded-full border px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-45 border-slate-950 bg-slate-950 text-white"
+            : "rounded-full border px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-45 border-slate-300 bg-white text-slate-700 hover:border-slate-500";
+        });
+
+        const stock = Number(button.dataset.variantStock ?? 0);
+        cartButton.dataset.cartVariantId = button.dataset.productVariant ?? "";
+        cartButton.dataset.cartVariantName = button.dataset.variantName ?? "";
+        cartButton.dataset.cartStock = String(stock);
+        cartButton.disabled = stock <= 0;
+        cartButton.textContent = stock > 0 ? "Agregar al carrito" : "Sin stock";
+        const stockLabel = section?.querySelector("[data-product-stock-label]");
+        if (stockLabel instanceof HTMLElement) stockLabel.textContent = `Stock ${stock}`;
+      });
+    </script>
   </body>
 </html>

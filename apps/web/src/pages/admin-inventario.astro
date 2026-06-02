@@ -146,6 +146,11 @@ const defaultProductCategoryOptions = productCategories.sealed;
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Ilustrador</span>
                     <input data-product-create="illustrator" list="admin-illustrator-options" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
                   </label>
+                  <label class="block lg:col-span-2">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Diseños con stock</span>
+                    <textarea data-product-create="variants" rows="4" placeholder="Salamence | 3 | activo&#10;Meganium | 2 | activo&#10;Feraligatr | 0 | inactivo" class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"></textarea>
+                    <span class="mt-2 block text-xs text-slate-500">Opcional. Si agregas diseños, el stock del producto se calcula desde estas lineas.</span>
+                  </label>
                 </div>
                 <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]">
                   Crear producto
@@ -330,6 +335,11 @@ const defaultProductCategoryOptions = productCategories.sealed;
                   <label class="block lg:col-span-2">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Segmento manual</span>
                     <input data-product-edit="manualSegment" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block lg:col-span-2">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Diseños con stock</span>
+                    <textarea data-product-edit="variants" rows="5" placeholder="Salamence | 3 | activo&#10;Meganium | 2 | activo&#10;Feraligatr | 0 | inactivo" class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"></textarea>
+                    <span class="mt-2 block text-xs text-slate-500">Una linea por diseño: nombre, stock y estado separados por |.</span>
                   </label>
                 </div>
                 <button type="submit" class="mt-4 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]">
@@ -620,7 +630,8 @@ const defaultProductCategoryOptions = productCategories.sealed;
         rarity: product.rarity ?? "",
         playability: product.playability ?? "",
         marketPrice: product.marketPrice ?? null,
-        manualSegment: product.manualSegment ?? ""
+        manualSegment: product.manualSegment ?? "",
+        variants: Array.isArray(product.variants) ? product.variants : []
       });
 
       const replaceInventoryItems = (products) => {
@@ -848,6 +859,10 @@ const defaultProductCategoryOptions = productCategories.sealed;
         const issue = Array.isArray(payload?.details) ? payload.details[0] : null;
         const field = Array.isArray(issue?.path) ? issue.path.join(".") : "";
         if (field === "image") return "La imagen debe ser una URL http/https o una ruta local que empiece con /.";
+        if (field === "price") return "El precio debe ser un numero valido mayor o igual a 0.";
+        if (field === "previousPrice") return "El precio anterior debe quedar vacio o ser un numero valido.";
+        if (field === "marketPrice") return "El precio mercado debe quedar vacio o ser un numero valido.";
+        if (field.startsWith("variants")) return "Revisa los disenos: cada linea necesita nombre y stock valido.";
         if (issue?.message) return `${field ? `${field}: ` : ""}${issue.message}`;
         return payload?.error ?? "No se pudo crear el producto.";
       };
@@ -863,6 +878,52 @@ const defaultProductCategoryOptions = productCategories.sealed;
 
         return slug || `producto-${Date.now().toString(36)}`;
       };
+
+      const createVariantId = (name, index) => {
+        const slug = String(name ?? "")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+          .slice(0, 70);
+
+        return slug || `diseno-${index + 1}`;
+      };
+
+      const parseVariants = (value) => {
+        const lines = String(value ?? "")
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean);
+
+        if (lines.length === 0) return null;
+
+        const usedIds = new Set();
+        return lines.map((line, index) => {
+          const [rawName, rawStock = "0", rawStatus = "activo"] = line.split("|").map((part) => part.trim());
+          const stock = Number(rawStock);
+          if (!rawName || !Number.isFinite(stock) || stock < 0) {
+            throw new Error("Revisa los disenos: usa Nombre | stock | activo/inactivo.");
+          }
+          let id = createVariantId(rawName, index);
+          while (usedIds.has(id)) id = `${id}-${index + 1}`;
+          usedIds.add(id);
+          return {
+            id,
+            name: rawName,
+            stock: Math.floor(stock),
+            active: !["inactivo", "inactive", "oculto", "false", "0"].includes(rawStatus.toLowerCase())
+          };
+        });
+      };
+
+      const variantsToText = (variants) =>
+        Array.isArray(variants)
+          ? variants
+              .map((variant) => `${variant.name} | ${Number(variant.stock ?? 0)} | ${variant.active === false ? "inactivo" : "activo"}`)
+              .join("\n")
+          : "";
 
       const showDiscountMessage = (text) => {
         if (!isElement(discountAdminMessage)) return;
@@ -1014,7 +1075,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
 
       const setProductEditField = (key, value) => {
         const field = productEditInputs.find((input) => input instanceof HTMLElement && input.dataset.productEdit === key);
-        if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) {
+        if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement) {
           field.value = value == null ? "" : String(value);
         }
       };
@@ -1029,7 +1090,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
           if (isInput(stockInput)) stockInput.value = "0";
           if (isSelect(statusSelect)) statusSelect.value = "active";
           productEditInputs.forEach((input) => {
-            if (input instanceof HTMLInputElement || input instanceof HTMLSelectElement) input.value = "";
+            if (input instanceof HTMLInputElement || input instanceof HTMLSelectElement || input instanceof HTMLTextAreaElement) input.value = "";
           });
           return;
         }
@@ -1063,6 +1124,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
         setProductEditField("playability", product.playability ?? "");
         setProductEditField("marketPrice", product.marketPrice ?? "");
         setProductEditField("manualSegment", product.manualSegment ?? "");
+        setProductEditField("variants", variantsToText(product.variants));
       };
 
       const syncStatusWithStock = () => {
@@ -1107,7 +1169,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
 
       const readProductEditForm = () =>
         productEditInputs.reduce((input, element) => {
-          if (!(element instanceof HTMLInputElement) && !(element instanceof HTMLSelectElement)) return input;
+          if (!(element instanceof HTMLInputElement) && !(element instanceof HTMLSelectElement) && !(element instanceof HTMLTextAreaElement)) return input;
           const key = element.dataset.productEdit;
           if (!key) return input;
           input[key] = element.value.trim();
@@ -1120,12 +1182,19 @@ const defaultProductCategoryOptions = productCategories.sealed;
 
         const raw = readProductEditForm();
         const price = Number(raw.price ?? 0);
-        const previousPrice = Number(raw.previousPrice ?? 0);
-        const marketPrice = Number(raw.marketPrice ?? 0);
+        const previousPrice =
+          raw.previousPrice === "" || raw.previousPrice == null ? null : Number(raw.previousPrice);
+        const marketPrice = raw.marketPrice === "" || raw.marketPrice == null ? null : Number(raw.marketPrice);
         if (!raw.name || !raw.category || !raw.set || !raw.image) {
           throw new Error("Completa nombre, categoria, set e imagen.");
         }
         if (!Number.isFinite(price) || price <= 0) throw new Error("El precio debe ser mayor a 0.");
+        if (previousPrice !== null && !Number.isFinite(previousPrice)) {
+          throw new Error("El precio anterior debe quedar vacio o ser un numero valido.");
+        }
+        if (marketPrice !== null && !Number.isFinite(marketPrice)) {
+          throw new Error("El precio mercado debe quedar vacio o ser un numero valido.");
+        }
 
         const updatedProduct = await updateProductDetails(product, {
           kind: raw.kind === "single" ? "single" : "sealed",
@@ -1135,13 +1204,14 @@ const defaultProductCategoryOptions = productCategories.sealed;
           language: raw.language,
           price,
           image: raw.image,
-          previousPrice: Number.isFinite(previousPrice) && previousPrice > 0 ? previousPrice : null,
+          previousPrice: previousPrice !== null && previousPrice > 0 ? previousPrice : null,
           offer: raw.offer || null,
           illustrator: raw.illustrator || null,
           rarity: raw.rarity || null,
           playability: raw.playability || null,
-          marketPrice: Number.isFinite(marketPrice) && marketPrice > 0 ? marketPrice : null,
-          manualSegment: raw.manualSegment || null
+          marketPrice: marketPrice !== null && marketPrice > 0 ? marketPrice : null,
+          manualSegment: raw.manualSegment || null,
+          variants: parseVariants(raw.variants)
         });
         const mappedProduct = mapProductForAdmin(updatedProduct);
         const index = inventoryItems.findIndex((item) => item.id === product.id);
@@ -1158,7 +1228,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
 
       const readProductCreateForm = () =>
         productCreateInputs.reduce((input, element) => {
-          if (!(element instanceof HTMLInputElement) && !(element instanceof HTMLSelectElement)) return input;
+          if (!(element instanceof HTMLInputElement) && !(element instanceof HTMLSelectElement) && !(element instanceof HTMLTextAreaElement)) return input;
           const key = element.dataset.productCreate;
           if (!key) return input;
           input[key] = element.value.trim();
@@ -1169,6 +1239,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
         const raw = readProductCreateForm();
         const hasOffer = productCreateOfferToggle instanceof HTMLInputElement && productCreateOfferToggle.checked;
         const stock = Number(raw.stock ?? 0);
+        const variants = parseVariants(raw.variants);
         const price = Number(raw.price ?? 0);
         const previousPrice = Number(raw.previousPrice ?? 0);
         const requiredFields = ["name", "category", "set", "image"];
@@ -1189,7 +1260,8 @@ const defaultProductCategoryOptions = productCategories.sealed;
             category: raw.category,
             set: raw.set,
             language: raw.language,
-            stock: Number.isFinite(stock) ? stock : 0,
+            stock: variants ? variants.reduce((total, variant) => total + (variant.active === false ? 0 : variant.stock), 0) : Number.isFinite(stock) ? stock : 0,
+            variants,
             price,
             previousPrice: hasOffer ? previousPrice : null,
             image: raw.image,

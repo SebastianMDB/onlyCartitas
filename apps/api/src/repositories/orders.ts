@@ -14,7 +14,7 @@ type CreateOrderInput = {
   customerPhone?: string;
   deliveryMode: "retiro" | "envio";
   address?: string;
-  items: Array<Pick<CartItem, "id" | "quantity">>;
+  items: Array<Pick<CartItem, "id" | "quantity" | "variantId">>;
   discountCode?: string;
 };
 
@@ -34,6 +34,8 @@ const toOrderResponse = (order: OrderRow, items: OrderItemRow[] = []) => ({
   items: items.map((item) => ({
     id: item.id,
     product_id: item.productId,
+    variant_id: item.variantId,
+    variant_name: item.variantName,
     name: item.name,
     quantity: item.quantity,
     unit_price: item.unitPrice,
@@ -54,13 +56,21 @@ export async function createOrder(input: CreateOrderInput) {
     input.items.map(async (item) => {
       const product = await getProductById(item.id);
       if (!product || !product.active) throw new ApiError(400, `Producto no disponible: ${item.id}`);
-      if (item.quantity < 1 || item.quantity > product.stock) {
+      const variant = item.variantId ? product.variants?.find((candidate) => candidate.id === item.variantId) : null;
+      const availableStock = variant ? (variant.active === false ? 0 : variant.stock) : product.stock;
+      if (product.variants?.length && !variant) {
+        throw new ApiError(400, `Selecciona un diseno para ${product.name}`);
+      }
+      if (item.quantity < 1 || item.quantity > availableStock) {
         throw new ApiError(400, `Stock insuficiente para ${product.name}`);
       }
 
       return {
         product_id: product.id,
-        name: product.name,
+        variantId: variant?.id,
+        variantName: variant?.name,
+        variants: product.variants ?? null,
+        name: variant ? `${product.name} - ${variant.name}` : product.name,
         quantity: item.quantity,
         unit_price: product.price,
         subtotal: product.price * item.quantity
@@ -119,6 +129,8 @@ export async function createOrder(input: CreateOrderInput) {
           items.map((item) => ({
             orderId: order.id,
             productId: item.product_id,
+            variantId: item.variantId ?? null,
+            variantName: item.variantName ?? null,
             name: item.name,
             quantity: item.quantity,
             unitPrice: item.unit_price,
@@ -128,6 +140,19 @@ export async function createOrder(input: CreateOrderInput) {
         .returning();
 
       for (const item of items) {
+        if (item.variantId && item.variants?.length) {
+          await tx
+            .update(products)
+            .set({
+              variants: item.variants.map((variant) =>
+                variant.id === item.variantId ? { ...variant, stock: Math.max(0, Number(variant.stock) - item.quantity) } : variant
+              ),
+              updatedAt: new Date()
+            })
+            .where(eq(products.id, item.product_id));
+          continue;
+        }
+
         await tx
           .update(products)
           .set({

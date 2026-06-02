@@ -332,6 +332,7 @@ import "../styles/global.css";
                 </div>
                 <div class="min-w-0">
                   <p class="line-clamp-2 text-sm font-semibold text-slate-950">${escapeHtml(item.name ?? "")}</p>
+                  ${item.variantName ? `<p class="mt-1 text-xs font-semibold text-slate-700">Diseno: ${escapeHtml(item.variantName)}</p>` : ""}
                   <p class="mt-1 text-xs text-slate-500">${escapeHtml(item.set ?? "")} - ${escapeHtml(item.language ?? "")}</p>
                 </div>
                 <p class="text-sm font-semibold text-slate-950">${currencyFormatter.format(item.price * item.quantity)}</p>
@@ -423,6 +424,7 @@ import "../styles/global.css";
             discountCode: appliedDiscount?.code,
             items: cart.map((item) => ({
               id: item.id,
+              variantId: item.variantId,
               quantity: item.quantity
             }))
           })

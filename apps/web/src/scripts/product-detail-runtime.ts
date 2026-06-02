@@ -7,6 +7,7 @@ type Product = {
   set: string;
   language: ProductLanguage;
   stock: number;
+  variants?: Array<{ id: string; name: string; stock: number; active: boolean }> | null;
   price: number;
   previousPrice?: number | null;
   image: string;
@@ -47,6 +48,9 @@ let productDetailAbortController: AbortController | null = null;
 
 const renderProduct = (product: Product) => {
   const languageLabel = languageLabels[product.language] ?? product.language;
+  const variants = Array.isArray(product.variants) ? product.variants.filter((variant) => variant.active !== false) : [];
+  const selectedVariant = variants.find((variant) => variant.stock > 0) ?? variants[0] ?? null;
+  const selectedStock = selectedVariant ? selectedVariant.stock : product.stock;
   const discountPercent =
     product.previousPrice && product.previousPrice > product.price
       ? Math.round(((product.previousPrice - product.price) / product.previousPrice) * 100)
@@ -89,6 +93,22 @@ const renderProduct = (product: Product) => {
             ${product.previousPrice ? `<p class="pb-1 text-lg text-slate-400 line-through">${currencyFormatter.format(product.previousPrice)}</p>` : ""}
           </div>
 
+          ${
+            variants.length
+              ? `<div class="mt-6" data-variant-picker>
+                  <p class="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Diseno</p>
+                  <div class="flex flex-wrap gap-2">
+                    ${variants
+                      .map(
+                        (variant) =>
+                          `<button type="button" class="rounded-full border px-4 py-2 text-sm font-semibold transition ${variant.id === selectedVariant?.id ? "border-slate-950 bg-slate-950 text-white" : "border-slate-300 bg-white text-slate-700 hover:border-slate-500"} disabled:cursor-not-allowed disabled:opacity-45" data-product-variant="${escapeHtml(variant.id)}" data-variant-name="${escapeHtml(variant.name)}" data-variant-stock="${escapeHtml(variant.stock)}" ${variant.stock <= 0 ? "disabled" : ""}>${escapeHtml(variant.name)}</button>`
+                      )
+                      .join("")}
+                  </div>
+                </div>`
+              : ""
+          }
+
           <button
             type="button"
             class="mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none sm:w-auto"
@@ -99,11 +119,13 @@ const renderProduct = (product: Product) => {
             data-cart-set="${escapeHtml(product.set)}"
             data-cart-language="${escapeHtml(languageLabel)}"
             data-cart-price="${escapeHtml(product.price)}"
-            data-cart-stock="${escapeHtml(product.stock)}"
+            data-cart-stock="${escapeHtml(selectedStock)}"
+            data-cart-variant-id="${escapeHtml(selectedVariant?.id ?? "")}"
+            data-cart-variant-name="${escapeHtml(selectedVariant?.name ?? "")}"
             data-cart-image="${escapeHtml(product.image)}"
-            ${product.stock <= 0 ? "disabled" : ""}
+            ${selectedStock <= 0 ? "disabled" : ""}
           >
-            ${product.stock > 0 ? "Agregar al carrito" : "Sin stock"}
+            ${selectedStock > 0 ? "Agregar al carrito" : "Sin stock"}
           </button>
         </div>
 
@@ -132,6 +154,31 @@ const renderProduct = (product: Product) => {
     </section>
   `;
 };
+
+document.addEventListener("click", (event) => {
+  const button = event.target instanceof HTMLElement ? event.target.closest("[data-product-variant]") : null;
+  if (!(button instanceof HTMLButtonElement)) return;
+  const section = button.closest("[data-product-id]");
+  const cartButton = section?.querySelector("[data-cart-add]");
+  if (!(cartButton instanceof HTMLButtonElement)) return;
+
+  section?.querySelectorAll("[data-product-variant]").forEach((item) => {
+    if (!(item instanceof HTMLButtonElement)) return;
+    const isActive = item === button;
+    item.className = isActive
+      ? "rounded-full border px-4 py-2 text-sm font-semibold transition border-slate-950 bg-slate-950 text-white disabled:cursor-not-allowed disabled:opacity-45"
+      : "rounded-full border px-4 py-2 text-sm font-semibold transition border-slate-300 bg-white text-slate-700 hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-45";
+  });
+
+  const stock = Number(button.dataset.variantStock ?? 0);
+  cartButton.dataset.cartVariantId = button.dataset.productVariant ?? "";
+  cartButton.dataset.cartVariantName = button.dataset.variantName ?? "";
+  cartButton.dataset.cartStock = String(stock);
+  cartButton.disabled = stock <= 0;
+  cartButton.textContent = stock > 0 ? "Agregar al carrito" : "Sin stock";
+  const stockLabel = section?.querySelector("[data-product-stock-label]");
+  if (stockLabel instanceof HTMLElement) stockLabel.textContent = `Stock ${stock}`;
+});
 
 const initProductDetail = async () => {
   productDetailAbortController?.abort();
