@@ -61,6 +61,7 @@ create table if not exists public.products (
   kind public.product_kind not null,
   name text not null,
   category text not null,
+  description text,
   "set" text not null,
   language public.product_language not null,
   stock integer not null default 0 check (stock >= 0),

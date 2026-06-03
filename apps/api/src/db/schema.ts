@@ -29,6 +29,7 @@ export const products = pgTable(
     kind: productKindEnum("kind").notNull(),
     name: text("name").notNull(),
     category: text("category").notNull(),
+    description: text("description"),
     set: text("set").notNull(),
     language: productLanguageEnum("language").notNull(),
     stock: integer("stock").notNull().default(0),

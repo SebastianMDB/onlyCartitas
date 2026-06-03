@@ -14,6 +14,7 @@ type ProductFilters = {
 
 type ProductInput = Omit<Product, "id" | "previousPrice" | "offer" | "illustrator" | "rarity" | "playability" | "marketPrice" | "manualSegment"> & {
   id?: string;
+  description?: string | null;
   previousPrice?: number | null;
   offer?: string | null;
   illustrator?: string | null;
@@ -102,6 +103,7 @@ export async function createProduct(input: ProductInput) {
       .values({
         ...input,
         id,
+        description: input.description ?? null,
         previousPrice: input.previousPrice ?? null,
         offer: input.offer ?? null,
         illustrator: input.illustrator ?? null,
@@ -143,6 +145,7 @@ export async function updateProduct(id: string, input: Partial<ProductInput>) {
       .update(products)
       .set({
         ...input,
+        description: input.description === undefined ? undefined : input.description ?? null,
         previousPrice: input.previousPrice === undefined ? undefined : input.previousPrice ?? null,
         offer: input.offer === undefined ? undefined : input.offer ?? null,
         illustrator: input.illustrator === undefined ? undefined : input.illustrator ?? null,

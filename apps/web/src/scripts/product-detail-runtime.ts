@@ -4,6 +4,7 @@ type Product = {
   kind: "sealed" | "single";
   name: string;
   category: string;
+  description?: string | null;
   set: string;
   language: ProductLanguage;
   stock: number;
@@ -70,7 +71,7 @@ const renderProduct = (product: Product) => {
           <p class="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--color-secondary)]">${escapeHtml(product.category)}</p>
           <h1 class="mt-3 text-3xl font-semibold tracking-tight text-[color:var(--color-primary)] sm:text-5xl">${escapeHtml(product.name)}</h1>
           <p class="mt-4 text-base leading-7 text-slate-600">
-            Producto del set ${escapeHtml(product.set)}, disponible en idioma ${escapeHtml(languageLabel)}. Ideal para coleccion, juego o reposicion de inventario.
+            ${escapeHtml(product.description || `Producto del set ${product.set}, disponible en idioma ${languageLabel}. Ideal para coleccion, juego o reposicion de inventario.`)}
           </p>
 
           <div class="mt-6 grid gap-3 sm:grid-cols-3">

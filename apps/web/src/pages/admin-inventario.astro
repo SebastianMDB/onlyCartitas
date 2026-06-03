@@ -100,9 +100,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
                   </label>
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Categoria</span>
-                    <select data-product-create="category" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
-                      {defaultProductCategoryOptions.map((category) => <option value={category}>{category}</option>)}
-                    </select>
+                    <input data-product-create="category" list="admin-category-options" type="text" value={defaultProductCategoryOptions[0]} class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
                   </label>
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Set</span>
@@ -145,6 +143,10 @@ const defaultProductCategoryOptions = productCategories.sealed;
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Ilustrador</span>
                     <input data-product-create="illustrator" list="admin-illustrator-options" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block lg:col-span-2">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Descripcion</span>
+                    <textarea data-product-create="description" rows="4" placeholder="Texto que vera el cliente en la ficha del producto." class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"></textarea>
                   </label>
                   <label class="block lg:col-span-2">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Diseños con stock</span>
@@ -331,6 +333,10 @@ const defaultProductCategoryOptions = productCategories.sealed;
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Precio mercado</span>
                     <input data-product-edit="marketPrice" type="number" min="0" step="1" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  </label>
+                  <label class="block lg:col-span-2">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Descripcion</span>
+                    <textarea data-product-edit="description" rows="4" placeholder="Texto que vera el cliente en la ficha del producto." class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"></textarea>
                   </label>
                   <label class="block lg:col-span-2">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Segmento manual</span>
@@ -618,6 +624,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
         typeLabel: product.kind === "single" ? "Single" : "Sellado",
         name: product.name,
         category: product.category,
+        description: product.description ?? "",
         set: product.set,
         language: product.language,
         stock: product.stock,
@@ -961,7 +968,10 @@ const defaultProductCategoryOptions = productCategories.sealed;
 
       const renderDynamicOptions = () => {
         const sets = uniqueSorted(inventoryItems.map((product) => product.set));
-        const categories = uniqueSorted(inventoryItems.map((product) => product.category));
+        const categories = uniqueSorted([
+          ...inventoryItems.map((product) => product.category),
+          ...Object.values(productCategoryOptions).flat()
+        ]);
         const illustrators = uniqueSorted(inventoryItems.map((product) => product.illustrator));
 
         renderDatalist(setOptions, sets);
@@ -984,17 +994,14 @@ const defaultProductCategoryOptions = productCategories.sealed;
       };
 
       const renderProductCreateCategories = () => {
-        if (!isSelect(productCreateKindInput) || !isSelect(productCreateCategoryInput)) return;
+        if (!isSelect(productCreateKindInput) || !(productCreateCategoryInput instanceof HTMLInputElement)) return;
 
         const kind = productCreateKindInput.value === "single" ? "single" : "sealed";
         const categories = Array.isArray(productCategoryOptions[kind]) ? productCategoryOptions[kind] : [];
         const previousValue = productCreateCategoryInput.value;
-        productCreateCategoryInput.innerHTML = categories
-          .map((category) => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`)
-          .join("");
 
-        if (categories.includes(previousValue)) {
-          productCreateCategoryInput.value = previousValue;
+        if (!previousValue.trim() || Object.values(productCategoryOptions).flat().includes(previousValue)) {
+          productCreateCategoryInput.value = categories[0] ?? previousValue;
         }
       };
 
@@ -1113,6 +1120,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
         setProductEditField("kind", product.kind);
         setProductEditField("name", product.name);
         setProductEditField("category", product.category);
+        setProductEditField("description", product.description ?? "");
         setProductEditField("set", product.set);
         setProductEditField("language", product.language);
         setProductEditField("price", product.price);
@@ -1200,6 +1208,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
           kind: raw.kind === "single" ? "single" : "sealed",
           name: raw.name,
           category: raw.category,
+          description: raw.description || null,
           set: raw.set,
           language: raw.language,
           price,
@@ -1258,6 +1267,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
             kind: raw.kind,
             name: raw.name,
             category: raw.category,
+            description: raw.description || null,
             set: raw.set,
             language: raw.language,
             stock: variants ? variants.reduce((total, variant) => total + (variant.active === false ? 0 : variant.stock), 0) : Number.isFinite(stock) ? stock : 0,

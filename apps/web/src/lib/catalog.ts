@@ -13,6 +13,7 @@ export type Product = {
   kind: ProductKind;
   name: string;
   category: string;
+  description?: string | null;
   set: string;
   language: ProductLanguage;
   stock: number;
