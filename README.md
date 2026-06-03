@@ -65,6 +65,8 @@ Render mantiene web services Node.js en plan gratis, con límites mensuales y su
 
 La integracion esta preparada para Checkout Pro sin guardar credenciales en el repo. Mientras `MERCADO_PAGO_ACCESS_TOKEN` este vacio, el checkout crea el pedido y deja el pago pendiente. Cuando agregues el access token, el backend creara una preferencia en Mercado Pago y redirigira al cliente.
 
+Para pruebas usa cuentas de prueba de Mercado Pago: vendedor y comprador del mismo pais. Configura el backend con el access token del vendedor de prueba y paga entrando con el comprador de prueba en una ventana incognita. El backend redirige a `init_point`; `sandbox_init_point` queda solo como respaldo porque el checkout sandbox antiguo puede fallar al tokenizar tarjetas en secure fields.
+
 Endpoints preparados:
 
 - `POST /api/payments/mercadopago/preferences`: crea preferencia para un pedido.

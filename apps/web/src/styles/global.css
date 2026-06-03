@@ -114,7 +114,8 @@ html[data-theme="dark"] .bg-amber-300 {
 }
 
 html[data-theme="dark"] input,
-html[data-theme="dark"] select {
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
   background-color: rgba(5, 22, 33, 0.94) !important;
   border-color: rgba(134, 175, 201, 0.28) !important;
   color: #eaf3f8 !important;

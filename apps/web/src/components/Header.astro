@@ -328,8 +328,30 @@ const currentPath = Astro.url.pathname;
       const productState = productId ? inventoryState[productId] : null;
       const cartButton = card.querySelector("[data-cart-add]");
       const stockLabel = card.querySelector("[data-product-stock-label]");
-      const stock = Number(productState?.stock ?? (cartButton instanceof HTMLElement ? cartButton.dataset.cartStock : 0));
+      const selectedVariantId = cartButton instanceof HTMLElement ? cartButton.dataset.cartVariantId : "";
+      const selectedVariant =
+        selectedVariantId && Array.isArray(productState?.variants)
+          ? productState.variants.find((variant) => variant.id === selectedVariantId)
+          : null;
+      const stock = Number(
+        selectedVariant
+          ? selectedVariant.active === false
+            ? 0
+            : selectedVariant.stock
+          : productState?.stock ?? (cartButton instanceof HTMLElement ? cartButton.dataset.cartStock : 0)
+      );
       const isInactive = productState?.status === "inactive" || stock <= 0;
+
+      if (Array.isArray(productState?.variants)) {
+        card.querySelectorAll("[data-product-variant]").forEach((variantButton) => {
+          if (!(variantButton instanceof HTMLButtonElement)) return;
+          const variant = productState.variants?.find((candidate) => candidate.id === variantButton.dataset.productVariant);
+          if (!variant) return;
+          const variantStock = variant.active === false ? 0 : Number(variant.stock ?? 0);
+          variantButton.dataset.variantStock = String(variantStock);
+          variantButton.disabled = variantStock <= 0;
+        });
+      }
 
       if (card.hasAttribute("data-product-card")) {
         card.classList.toggle("inventory-hidden", isInactive);

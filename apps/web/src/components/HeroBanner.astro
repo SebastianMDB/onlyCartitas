@@ -46,13 +46,13 @@ const currencyFormatter = new Intl.NumberFormat("es-CL", {
       <img
         src={hero.backgroundImageUrl}
         alt=""
-        class="absolute inset-0 h-full w-full object-cover opacity-95"
+        class="absolute -inset-px h-[calc(100%+2px)] w-[calc(100%+2px)] object-cover opacity-95"
         loading="eager"
         decoding="async"
         fetchpriority="high"
       />
     ) : (
-    <svg class="absolute inset-0 h-full w-full object-cover opacity-95" viewBox="0 0 1200 520" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+    <svg class="absolute -inset-px h-[calc(100%+2px)] w-[calc(100%+2px)] object-cover opacity-95" viewBox="0 0 1200 520" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
       <defs>
         <radialGradient id="launchGlowA" cx="70%" cy="45%" r="42%">
           <stop offset="0" stop-color="#8bd7ff" stop-opacity=".95" />
@@ -102,7 +102,7 @@ const currencyFormatter = new Intl.NumberFormat("es-CL", {
       </g>
     </svg>
     )}
-    <div class="absolute inset-0 bg-gradient-to-r from-[#04131d]/95 via-[#071c2b]/72 to-[#04131d]/12"></div>
+    <div class="absolute -inset-px bg-gradient-to-r from-[#04131d]/95 via-[#071c2b]/72 to-[#04131d]/12"></div>
 
     <div class="relative grid min-h-[520px] gap-8 px-6 py-8 sm:px-8 lg:grid-cols-[0.92fr_1.08fr] lg:px-10 lg:py-10">
       <div class="flex flex-col justify-between gap-8">

@@ -122,8 +122,10 @@ export async function createMercadoPagoPreference(orderId: string, user?: AuthUs
     throw new ApiError(502, payload && "message" in payload && payload.message ? payload.message : "No se pudo crear el pago");
   }
 
-  const checkoutUrl =
-    env.MERCADO_PAGO_CHECKOUT_MODE === "production" ? payload.init_point : payload.sandbox_init_point ?? payload.init_point;
+  const checkoutUrl = payload.init_point ?? payload.sandbox_init_point;
+  if (!checkoutUrl) {
+    throw new ApiError(502, "Mercado Pago no devolvio una URL de checkout");
+  }
 
   const [payment] = await db
     .insert(payments)
