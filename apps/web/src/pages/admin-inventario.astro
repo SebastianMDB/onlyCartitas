@@ -174,22 +174,34 @@ const defaultProductCategoryOptions = productCategories.sealed;
             <datalist id="admin-illustrator-options" data-illustrator-options></datalist>
 
             <details class="rounded-[1.5rem] border border-slate-200 bg-white p-4">
-              <summary class="cursor-pointer text-sm font-semibold text-[color:var(--color-primary)]">Opciones dinamicas</summary>
+              <summary class="cursor-pointer text-sm font-semibold text-[color:var(--color-primary)]">Listas del catalogo</summary>
               <div class="mt-4 grid gap-4 lg:grid-cols-3">
-                <div>
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Sets</p>
+                  <div class="mt-3 grid grid-cols-[1fr_auto] gap-2">
+                    <input data-option-input="sets" type="text" placeholder="Journey Together" class="h-11 min-w-0 rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                    <button type="button" class="rounded-full border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950" data-option-add="sets">Agregar</button>
+                  </div>
                   <div class="mt-3 flex flex-wrap gap-2" data-option-list="sets"></div>
                 </div>
-                <div>
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Categorias</p>
+                  <div class="mt-3 grid grid-cols-[1fr_auto] gap-2">
+                    <input data-option-input="categories" type="text" placeholder="Latas" class="h-11 min-w-0 rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                    <button type="button" class="rounded-full border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950" data-option-add="categories">Agregar</button>
+                  </div>
                   <div class="mt-3 flex flex-wrap gap-2" data-option-list="categories"></div>
                 </div>
-                <div>
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Ilustradores</p>
+                  <div class="mt-3 grid grid-cols-[1fr_auto] gap-2">
+                    <input data-option-input="illustrators" type="text" placeholder="Mitsuhiro Arita" class="h-11 min-w-0 rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                    <button type="button" class="rounded-full border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950" data-option-add="illustrators">Agregar</button>
+                  </div>
                   <div class="mt-3 flex flex-wrap gap-2" data-option-list="illustrators"></div>
                 </div>
               </div>
-              <p class="mt-4 text-sm text-slate-500">Las opciones se alimentan desde los productos. Para agregar una opcion, usala en un producto nuevo o editado; para quitarla, cambia los productos que la usan.</p>
+              <p class="mt-4 hidden rounded-[1rem] bg-[color:var(--color-surface)] px-4 py-3 text-sm font-semibold text-[color:var(--color-primary)]" data-options-message></p>
             </details>
             <div>
               <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Tipo</span>
@@ -584,6 +596,8 @@ const defaultProductCategoryOptions = productCategories.sealed;
       const categoryOptions = document.querySelector("[data-category-options]");
       const illustratorOptions = document.querySelector("[data-illustrator-options]");
       const optionLists = Array.from(document.querySelectorAll("[data-option-list]"));
+      const optionInputs = Array.from(document.querySelectorAll("[data-option-input]"));
+      const optionsMessage = document.querySelector("[data-options-message]");
       const sealedCount = document.querySelector("[data-count-sellados]");
       const singlesCount = document.querySelector("[data-count-singles]");
       const usersContainer = document.querySelector("[data-admin-users]");
@@ -632,6 +646,11 @@ const defaultProductCategoryOptions = productCategories.sealed;
       let adminOrders = [];
       let adminUsers = [];
       let heroSettings = null;
+      let catalogOptions = {
+        sets: [],
+        categories: Object.values(productCategoryOptions).flat(),
+        illustrators: []
+      };
 
       const mapProductForAdmin = (product) => ({
         id: product.id,
@@ -811,6 +830,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
           loadOrders();
           loadDiscounts();
           loadHeroSettings();
+          loadCatalogOptions();
         }
       };
 
@@ -964,6 +984,14 @@ const defaultProductCategoryOptions = productCategories.sealed;
         window.setTimeout(() => heroMessage.classList.add("hidden"), 2200);
       };
 
+      const showOptionsMessage = (text) => {
+        if (!isElement(optionsMessage)) return;
+
+        optionsMessage.textContent = text;
+        optionsMessage.classList.remove("hidden");
+        window.setTimeout(() => optionsMessage.classList.add("hidden"), 2200);
+      };
+
       const escapeHtml = (value) =>
         String(value ?? "")
           .replaceAll("&", "&amp;")
@@ -1046,18 +1074,29 @@ const defaultProductCategoryOptions = productCategories.sealed;
       };
 
       const renderDynamicOptions = () => {
-        const sets = uniqueSorted(inventoryItems.map((product) => product.set));
+        const sets = uniqueSorted([
+          ...inventoryItems.map((product) => product.set),
+          ...catalogOptions.sets
+        ]);
         const categories = uniqueSorted([
           ...inventoryItems.map((product) => product.category),
+          ...catalogOptions.categories,
           ...Object.values(productCategoryOptions).flat()
         ]);
-        const illustrators = uniqueSorted(inventoryItems.map((product) => product.illustrator));
+        const illustrators = uniqueSorted([
+          ...inventoryItems.map((product) => product.illustrator),
+          ...catalogOptions.illustrators
+        ]);
 
         renderDatalist(setOptions, sets);
         renderDatalist(categoryOptions, categories);
         renderDatalist(illustratorOptions, illustrators);
 
-        const optionGroups = { sets, categories, illustrators };
+        const optionGroups = {
+          sets: catalogOptions.sets,
+          categories: catalogOptions.categories,
+          illustrators: catalogOptions.illustrators
+        };
         optionLists.forEach((list) => {
           if (!isElement(list)) return;
           const values = optionGroups[list.dataset.optionList] ?? [];
@@ -1065,11 +1104,60 @@ const defaultProductCategoryOptions = productCategories.sealed;
             ? values
                 .map(
                   (value) =>
-                    `<span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700">${escapeHtml(value)}</span>`
+                    `<button type="button" class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-red-50 hover:text-red-700" data-option-remove="${escapeHtml(list.dataset.optionList)}" data-option-value="${escapeHtml(value)}" title="Quitar ${escapeHtml(value)}">${escapeHtml(value)} X</button>`
                 )
                 .join("")
             : `<span class="text-sm text-slate-500">Sin opciones</span>`;
         });
+      };
+
+      const saveCatalogOptions = async () => {
+        const response = await fetch(`${API_BASE_URL}/api/admin/site-settings/catalog-options`, {
+          method: "PATCH",
+          headers: authHeaders(),
+          body: JSON.stringify(catalogOptions)
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(payload?.error ?? "No se pudieron guardar las listas.");
+        catalogOptions = {
+          sets: Array.isArray(payload.data?.sets) ? payload.data.sets : [],
+          categories: Array.isArray(payload.data?.categories) ? payload.data.categories : [],
+          illustrators: Array.isArray(payload.data?.illustrators) ? payload.data.illustrators : []
+        };
+        renderDynamicOptions();
+      };
+
+      const loadCatalogOptions = async () => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/site-settings/catalog-options`);
+          const payload = await response.json().catch(() => null);
+          if (!response.ok) throw new Error(payload?.error ?? "No se pudieron cargar las listas.");
+          catalogOptions = {
+            sets: Array.isArray(payload.data?.sets) ? payload.data.sets : [],
+            categories: Array.isArray(payload.data?.categories) ? payload.data.categories : [],
+            illustrators: Array.isArray(payload.data?.illustrators) ? payload.data.illustrators : []
+          };
+          renderDynamicOptions();
+        } catch (error) {
+          showOptionsMessage(error instanceof Error ? error.message : "No se pudieron cargar las listas.");
+        }
+      };
+
+      const addCatalogOption = async (group) => {
+        const input = optionInputs.find((element) => element instanceof HTMLInputElement && element.dataset.optionInput === group);
+        const value = input instanceof HTMLInputElement ? input.value.trim() : "";
+        if (!value || !Array.isArray(catalogOptions[group])) return;
+        catalogOptions[group] = uniqueSorted([...catalogOptions[group], value]);
+        if (input instanceof HTMLInputElement) input.value = "";
+        await saveCatalogOptions();
+        showOptionsMessage("Lista actualizada.");
+      };
+
+      const removeCatalogOption = async (group, value) => {
+        if (!Array.isArray(catalogOptions[group])) return;
+        catalogOptions[group] = catalogOptions[group].filter((item) => item !== value);
+        await saveCatalogOptions();
+        showOptionsMessage("Opcion quitada.");
       };
 
       const renderProductCreateCategories = () => {
@@ -1780,6 +1868,42 @@ const defaultProductCategoryOptions = productCategories.sealed;
         } catch (error) {
           showProductCreateMessage(error instanceof Error ? error.message : "No se pudo crear el producto.");
         }
+      });
+
+      document.addEventListener("click", async (event) => {
+        const target = event.target instanceof HTMLElement ? event.target : null;
+        const addButton = target?.closest("[data-option-add]");
+        if (addButton instanceof HTMLElement && addButton.dataset.optionAdd) {
+          try {
+            await addCatalogOption(addButton.dataset.optionAdd);
+          } catch (error) {
+            showOptionsMessage(error instanceof Error ? error.message : "No se pudo agregar la opcion.");
+          }
+          return;
+        }
+
+        const removeButton = target?.closest("[data-option-remove]");
+        if (removeButton instanceof HTMLElement && removeButton.dataset.optionRemove && removeButton.dataset.optionValue) {
+          try {
+            await removeCatalogOption(removeButton.dataset.optionRemove, removeButton.dataset.optionValue);
+          } catch (error) {
+            showOptionsMessage(error instanceof Error ? error.message : "No se pudo quitar la opcion.");
+          }
+        }
+      });
+
+      optionInputs.forEach((input) => {
+        input.addEventListener("keydown", async (event) => {
+          if (!(input instanceof HTMLInputElement) || event.key !== "Enter") return;
+          event.preventDefault();
+          const group = input.dataset.optionInput;
+          if (!group) return;
+          try {
+            await addCatalogOption(group);
+          } catch (error) {
+            showOptionsMessage(error instanceof Error ? error.message : "No se pudo agregar la opcion.");
+          }
+        });
       });
 
       adminTabs.forEach((tab) => {

@@ -45,6 +45,12 @@ export type HeroSettings = {
   backgroundImageUrl: string;
 };
 
+export type CatalogOptions = {
+  sets: string[];
+  categories: string[];
+  illustrators: string[];
+};
+
 export const productLanguages: Array<{ value: ProductLanguage; label: string }> = [
   { value: "japanese", label: "Japones" },
   { value: "spanish", label: "Espanol" },
