@@ -83,8 +83,8 @@ const defaultProductCategoryOptions = productCategories.sealed;
               <h2 class="mt-2 text-2xl font-semibold text-[color:var(--color-primary)]">Stock y visibilidad</h2>
             </div>
 
-            <details class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
-              <summary class="cursor-pointer text-sm font-semibold text-[color:var(--color-primary)]">Nuevo producto</summary>
+            <details class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4" open>
+              <summary class="cursor-pointer text-sm font-semibold text-[color:var(--color-primary)]">Crear producto</summary>
               <form class="mt-4 grid gap-4" data-product-create-form>
                 <div class="grid gap-4 lg:grid-cols-2">
                   <label class="block">
@@ -146,13 +146,21 @@ const defaultProductCategoryOptions = productCategories.sealed;
                   </label>
                   <label class="block lg:col-span-2">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Descripcion</span>
-                    <textarea data-product-create="description" rows="4" placeholder="Texto que vera el cliente en la ficha del producto." class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"></textarea>
+                    <textarea data-product-create="description" rows="3" placeholder="Texto que vera el cliente en la ficha del producto." class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"></textarea>
                   </label>
-                  <label class="block lg:col-span-2">
-                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Diseños con stock</span>
-                    <textarea data-product-create="variants" rows="4" placeholder="Salamence | 3 | activo&#10;Meganium | 2 | activo&#10;Feraligatr | 0 | inactivo" class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"></textarea>
-                    <span class="mt-2 block text-xs text-slate-500">Opcional. Si agregas diseños, el stock del producto se calcula desde estas lineas.</span>
-                  </label>
+                  <div class="rounded-2xl border border-slate-200 bg-white p-4 lg:col-span-2" data-variant-builder="create">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <span class="block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Disenos y stock</span>
+                      </div>
+                      <button type="button" class="inline-flex min-h-10 items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950" data-variant-add="create">
+                        Agregar diseno
+                      </button>
+                    </div>
+                    <div class="mt-4 grid gap-3" data-variant-list="create"></div>
+                    <p class="mt-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-500" data-variant-empty="create">Sin disenos. El producto se vendera como una sola opcion.</p>
+                    <textarea data-product-create="variants" class="hidden" aria-hidden="true"></textarea>
+                  </div>
                 </div>
                 <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]">
                   Crear producto
@@ -336,17 +344,25 @@ const defaultProductCategoryOptions = productCategories.sealed;
                   </label>
                   <label class="block lg:col-span-2">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Descripcion</span>
-                    <textarea data-product-edit="description" rows="4" placeholder="Texto que vera el cliente en la ficha del producto." class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"></textarea>
+                    <textarea data-product-edit="description" rows="3" placeholder="Texto que vera el cliente en la ficha del producto." class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"></textarea>
                   </label>
                   <label class="block lg:col-span-2">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Segmento manual</span>
                     <input data-product-edit="manualSegment" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
                   </label>
-                  <label class="block lg:col-span-2">
-                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Diseños con stock</span>
-                    <textarea data-product-edit="variants" rows="5" placeholder="Salamence | 3 | activo&#10;Meganium | 2 | activo&#10;Feraligatr | 0 | inactivo" class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"></textarea>
-                    <span class="mt-2 block text-xs text-slate-500">Una linea por diseño: nombre, stock y estado separados por |.</span>
-                  </label>
+                  <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:col-span-2" data-variant-builder="edit">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <span class="block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Disenos y stock</span>
+                      </div>
+                      <button type="button" class="inline-flex min-h-10 items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950" data-variant-add="edit">
+                        Agregar diseno
+                      </button>
+                    </div>
+                    <div class="mt-4 grid gap-3" data-variant-list="edit"></div>
+                    <p class="mt-3 rounded-2xl bg-white px-4 py-3 text-sm text-slate-500" data-variant-empty="edit">Este producto no tiene disenos configurados.</p>
+                    <textarea data-product-edit="variants" class="hidden" aria-hidden="true"></textarea>
+                  </div>
                 </div>
                 <button type="submit" class="mt-4 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]">
                   Guardar datos
@@ -956,6 +972,69 @@ const defaultProductCategoryOptions = productCategories.sealed;
           .replaceAll('"', "&quot;")
           .replaceAll("'", "&#039;");
 
+      const getVariantHiddenInput = (scope) =>
+        document.querySelector(`[data-product-${scope === "create" ? "create" : "edit"}="variants"]`);
+
+      const collectVariantRows = (scope) =>
+        Array.from(document.querySelectorAll(`[data-variant-builder="${scope}"] [data-variant-row]`)).map((row) => {
+          const nameInput = row.querySelector("[data-variant-name]");
+          const stockInput = row.querySelector("[data-variant-stock]");
+          const statusInput = row.querySelector("[data-variant-status]");
+          return {
+            name: nameInput instanceof HTMLInputElement ? nameInput.value.trim() : "",
+            stock: stockInput instanceof HTMLInputElement ? Number(stockInput.value) : 0,
+            active: statusInput instanceof HTMLSelectElement ? statusInput.value !== "inactive" : true
+          };
+        });
+
+      const syncVariantText = (scope) => {
+        const hiddenInput = getVariantHiddenInput(scope);
+        if (!(hiddenInput instanceof HTMLTextAreaElement)) return;
+        hiddenInput.value = collectVariantRows(scope)
+          .filter((variant) => variant.name || Number(variant.stock) > 0)
+          .map((variant) => `${variant.name} | ${Number.isFinite(variant.stock) ? Math.max(0, Math.floor(variant.stock)) : 0} | ${variant.active ? "activo" : "inactivo"}`)
+          .join("\n");
+      };
+
+      const renderVariantRows = (scope, variants = []) => {
+        const list = document.querySelector(`[data-variant-list="${scope}"]`);
+        const empty = document.querySelector(`[data-variant-empty="${scope}"]`);
+        if (!isElement(list)) return;
+
+        list.innerHTML = variants
+          .map(
+            (variant) => `
+              <article class="grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 md:grid-cols-[minmax(0,1fr)_120px_150px_44px] md:items-end" data-variant-row>
+                <label class="block">
+                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Diseno</span>
+                  <input data-variant-name type="text" value="${escapeHtml(variant.name ?? "")}" placeholder="Salamence" class="h-11 w-full rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                </label>
+                <label class="block">
+                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Stock</span>
+                  <input data-variant-stock type="number" min="0" step="1" value="${escapeHtml(Number(variant.stock ?? 0))}" class="h-11 w-full rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                </label>
+                <label class="block">
+                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Estado</span>
+                  <select data-variant-status class="h-11 w-full rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                    <option value="active" ${variant.active === false ? "" : "selected"}>Activo</option>
+                    <option value="inactive" ${variant.active === false ? "selected" : ""}>Inactivo</option>
+                  </select>
+                </label>
+                <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-300 text-sm font-semibold text-slate-600 transition hover:border-red-300 hover:text-red-600" data-variant-remove aria-label="Quitar diseno">X</button>
+              </article>
+            `
+          )
+          .join("");
+
+        if (isElement(empty)) empty.classList.toggle("hidden", variants.length > 0);
+        syncVariantText(scope);
+      };
+
+      const addVariantRow = (scope) => {
+        const variants = collectVariantRows(scope);
+        renderVariantRows(scope, [...variants, { name: "", stock: 0, active: true }]);
+      };
+
       const uniqueSorted = (values) =>
         Array.from(new Set(values.map((value) => String(value ?? "").trim()).filter(Boolean))).sort((a, b) =>
           a.localeCompare(b, "es")
@@ -1099,6 +1178,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
           productEditInputs.forEach((input) => {
             if (input instanceof HTMLInputElement || input instanceof HTMLSelectElement || input instanceof HTMLTextAreaElement) input.value = "";
           });
+          renderVariantRows("edit", []);
           return;
         }
 
@@ -1132,7 +1212,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
         setProductEditField("playability", product.playability ?? "");
         setProductEditField("marketPrice", product.marketPrice ?? "");
         setProductEditField("manualSegment", product.manualSegment ?? "");
-        setProductEditField("variants", variantsToText(product.variants));
+        renderVariantRows("edit", product.variants);
       };
 
       const syncStatusWithStock = () => {
@@ -1176,13 +1256,13 @@ const defaultProductCategoryOptions = productCategories.sealed;
       };
 
       const readProductEditForm = () =>
-        productEditInputs.reduce((input, element) => {
+        (syncVariantText("edit"), productEditInputs.reduce((input, element) => {
           if (!(element instanceof HTMLInputElement) && !(element instanceof HTMLSelectElement) && !(element instanceof HTMLTextAreaElement)) return input;
           const key = element.dataset.productEdit;
           if (!key) return input;
           input[key] = element.value.trim();
           return input;
-        }, {});
+        }, {}));
 
       const saveProductDetails = async () => {
         const product = getSelectedProduct();
@@ -1236,13 +1316,13 @@ const defaultProductCategoryOptions = productCategories.sealed;
       };
 
       const readProductCreateForm = () =>
-        productCreateInputs.reduce((input, element) => {
+        (syncVariantText("create"), productCreateInputs.reduce((input, element) => {
           if (!(element instanceof HTMLInputElement) && !(element instanceof HTMLSelectElement) && !(element instanceof HTMLTextAreaElement)) return input;
           const key = element.dataset.productCreate;
           if (!key) return input;
           input[key] = element.value.trim();
           return input;
-        }, {});
+        }, {}));
 
       const createProduct = async () => {
         const raw = readProductCreateForm();
@@ -1307,6 +1387,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
           productCreateForm.reset();
           renderProductCreateCategories();
           renderProductCreateOfferFields();
+          renderVariantRows("create", []);
         }
         renderDynamicOptions();
         renderProductOptions();
@@ -1651,6 +1732,43 @@ const defaultProductCategoryOptions = productCategories.sealed;
         }
       });
 
+      document.addEventListener("click", (event) => {
+        const target = event.target instanceof HTMLElement ? event.target : null;
+        const addButton = target?.closest("[data-variant-add]");
+        if (addButton instanceof HTMLElement && addButton.dataset.variantAdd) {
+          addVariantRow(addButton.dataset.variantAdd);
+          return;
+        }
+
+        const removeButton = target?.closest("[data-variant-remove]");
+        if (!(removeButton instanceof HTMLElement)) return;
+        const builder = removeButton.closest("[data-variant-builder]");
+        const scope = builder instanceof HTMLElement ? builder.dataset.variantBuilder : "";
+        removeButton.closest("[data-variant-row]")?.remove();
+        if (scope === "create" || scope === "edit") {
+          syncVariantText(scope);
+          const empty = document.querySelector(`[data-variant-empty="${scope}"]`);
+          const hasRows = Boolean(document.querySelector(`[data-variant-builder="${scope}"] [data-variant-row]`));
+          if (isElement(empty)) empty.classList.toggle("hidden", hasRows);
+        }
+      });
+
+      document.addEventListener("input", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement) || !target.closest("[data-variant-row]")) return;
+        const builder = target.closest("[data-variant-builder]");
+        const scope = builder instanceof HTMLElement ? builder.dataset.variantBuilder : "";
+        if (scope === "create" || scope === "edit") syncVariantText(scope);
+      });
+
+      document.addEventListener("change", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement) || !target.closest("[data-variant-row]")) return;
+        const builder = target.closest("[data-variant-builder]");
+        const scope = builder instanceof HTMLElement ? builder.dataset.variantBuilder : "";
+        if (scope === "create" || scope === "edit") syncVariantText(scope);
+      });
+
       productCreateOfferToggle?.addEventListener("change", renderProductCreateOfferFields);
       productCreateKindInput?.addEventListener("change", renderProductCreateCategories);
 
@@ -1774,6 +1892,8 @@ const defaultProductCategoryOptions = productCategories.sealed;
       renderProductOptions();
       renderProductCreateCategories();
       renderProductCreateOfferFields();
+      renderVariantRows("create", []);
+      renderVariantRows("edit", []);
       renderAdminTab();
       renderAdminSession();
     </script>
