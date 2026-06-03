@@ -645,6 +645,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
       let activeAdminTab = "inventory";
       let adminOrders = [];
       let adminUsers = [];
+      let usersReadOnly = false;
       let heroSettings = null;
       let catalogOptions = {
         sets: [],
@@ -1506,18 +1507,20 @@ const defaultProductCategoryOptions = productCategories.sealed;
                   <article class="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[1fr_180px_120px] lg:items-end">
                     <label class="block">
                       <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Usuario</span>
-                      <input value="${escapeHtml(user.username)}" class="h-11 w-full rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" data-user-name="${escapeHtml(user.id)}" />
+                      <input value="${escapeHtml(user.username)}" class="h-11 w-full rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition disabled:cursor-not-allowed disabled:opacity-70 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" data-user-name="${escapeHtml(user.id)}" ${usersReadOnly ? "disabled" : ""} />
                     </label>
                     <label class="block">
                       <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Rol</span>
-                      <select class="h-11 w-full rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" data-user-role="${escapeHtml(user.id)}">
+                      <select class="h-11 w-full rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition disabled:cursor-not-allowed disabled:opacity-70 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" data-user-role="${escapeHtml(user.id)}" ${usersReadOnly ? "disabled" : ""}>
                         <option value="customer" ${user.role === "customer" ? "selected" : ""}>Cliente</option>
                         <option value="admin" ${user.role === "admin" ? "selected" : ""}>Admin</option>
                       </select>
                     </label>
-                    <button type="button" class="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950" data-user-save="${escapeHtml(user.id)}">
-                      Guardar
-                    </button>
+                    ${
+                      usersReadOnly
+                        ? `<span class="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-500">Solo lectura</span>`
+                        : `<button type="button" class="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950" data-user-save="${escapeHtml(user.id)}">Guardar</button>`
+                    }
                   </article>
                 `
               )
@@ -1527,16 +1530,33 @@ const defaultProductCategoryOptions = productCategories.sealed;
 
       const loadUsers = async () => {
         try {
+          usersReadOnly = false;
           const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
             headers: authHeaders()
           });
           const payload = await response.json().catch(() => null);
+          if (response.status === 404) {
+            const session = readSession();
+            if (!session?.token) throw new Error("Sesion admin requerida.");
+            const meResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+              headers: {
+                Authorization: `Bearer ${session.token}`
+              }
+            });
+            const mePayload = await meResponse.json().catch(() => null);
+            if (!meResponse.ok || !mePayload?.user) throw new Error("No se pudo cargar la sesion actual.");
+            usersReadOnly = true;
+            adminUsers = [mePayload.user];
+            renderUsers();
+            showUserMessage("Gestion completa de usuarios no disponible en este API.");
+            return;
+          }
           if (!response.ok) throw new Error(payload?.error ?? "No se pudieron cargar los usuarios.");
           adminUsers = Array.isArray(payload.data) ? payload.data : [];
           renderUsers();
         } catch (error) {
           if (isElement(usersContainer)) {
-            usersContainer.innerHTML = `<p class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">${escapeHtml(error instanceof Error ? error.message : "No se pudieron cargar los usuarios.")}</p>`;
+            usersContainer.innerHTML = `<p class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">${escapeHtml(error instanceof Error ? error.message : "No se pudieron cargar los usuarios.")}</p>`;
           }
         }
       };
