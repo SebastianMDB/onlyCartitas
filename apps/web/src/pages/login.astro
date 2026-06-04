@@ -73,11 +73,7 @@ import "../styles/global.css";
 
       const SESSION_KEY = "onlycartitas-auth-session";
       const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
-
-      const form = document.querySelector("[data-login-form]");
-      const userInput = document.querySelector("[data-login-user]");
-      const passwordInput = document.querySelector("[data-login-password]");
-      const errorMessage = document.querySelector("[data-login-error]");
+      let loginAbortController: AbortController | null = null;
 
       const isInput = (value: unknown) => value instanceof HTMLInputElement;
 
@@ -91,6 +87,7 @@ import "../styles/global.css";
             expiresAt: new Date(expiresAt).getTime()
           })
         );
+        window.dispatchEvent(new CustomEvent("onlycartitas:auth-updated"));
       };
 
       const login = async (username: string, password: string): Promise<AuthSessionResponse> => {
@@ -109,20 +106,33 @@ import "../styles/global.css";
         return response.json();
       };
 
-      form?.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const username = isInput(userInput) ? userInput.value.trim() : "";
-        const password = isInput(passwordInput) ? passwordInput.value : "";
+      const initLoginForm = () => {
+        loginAbortController?.abort();
+        loginAbortController = new AbortController();
+        const signal = loginAbortController.signal;
+        const form = document.querySelector("[data-login-form]");
+        const userInput = document.querySelector("[data-login-user]");
+        const passwordInput = document.querySelector("[data-login-password]");
+        const errorMessage = document.querySelector("[data-login-error]");
 
-        try {
-          const session = await login(username, password);
-          createSession(session);
-          errorMessage?.classList.add("hidden");
-          window.location.href = session.user.role === "admin" ? "/admin-inventario" : "/";
-        } catch {
-          errorMessage?.classList.remove("hidden");
-        }
-      });
+        form?.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const username = isInput(userInput) ? userInput.value.trim() : "";
+          const password = isInput(passwordInput) ? passwordInput.value : "";
+
+          try {
+            const session = await login(username, password);
+            createSession(session);
+            errorMessage?.classList.add("hidden");
+            window.location.assign(session.user.role === "admin" ? "/admin-inventario" : "/");
+          } catch {
+            errorMessage?.classList.remove("hidden");
+          }
+        }, { signal });
+      };
+
+      document.addEventListener("astro:page-load", initLoginForm);
+      initLoginForm();
     </script>
   </body>
 </html>

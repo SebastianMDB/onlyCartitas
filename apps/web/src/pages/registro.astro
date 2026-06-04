@@ -71,15 +71,12 @@ import "../styles/global.css";
 
       const SESSION_KEY = "onlycartitas-auth-session";
       const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
-
-      const form = document.querySelector("[data-register-form]");
-      const userInput = document.querySelector("[data-register-user]");
-      const passwordInput = document.querySelector("[data-register-password]");
-      const errorMessage = document.querySelector("[data-register-error]");
+      let registerAbortController: AbortController | null = null;
 
       const isInput = (value: unknown) => value instanceof HTMLInputElement;
 
       const showError = (message: string) => {
+        const errorMessage = document.querySelector("[data-register-error]");
         if (!(errorMessage instanceof HTMLElement)) return;
 
         errorMessage.textContent = message;
@@ -96,6 +93,7 @@ import "../styles/global.css";
             expiresAt: new Date(expiresAt).getTime()
           })
         );
+        window.dispatchEvent(new CustomEvent("onlycartitas:auth-updated"));
       };
 
       const register = async (username: string, password: string): Promise<AuthSessionResponse> => {
@@ -115,29 +113,41 @@ import "../styles/global.css";
         return payload;
       };
 
-      form?.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const username = isInput(userInput) ? userInput.value.trim() : "";
-        const password = isInput(passwordInput) ? passwordInput.value : "";
+      const initRegisterForm = () => {
+        registerAbortController?.abort();
+        registerAbortController = new AbortController();
+        const signal = registerAbortController.signal;
+        const form = document.querySelector("[data-register-form]");
+        const userInput = document.querySelector("[data-register-user]");
+        const passwordInput = document.querySelector("[data-register-password]");
 
-        if (username.length < 3) {
-          showError("El usuario debe tener al menos 3 caracteres.");
-          return;
-        }
+        form?.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const username = isInput(userInput) ? userInput.value.trim() : "";
+          const password = isInput(passwordInput) ? passwordInput.value : "";
 
-        if (password.length < 8) {
-          showError("La clave debe tener al menos 8 caracteres.");
-          return;
-        }
+          if (username.length < 3) {
+            showError("El usuario debe tener al menos 3 caracteres.");
+            return;
+          }
 
-        try {
-          const session = await register(username, password);
-          createSession(session);
-          window.location.href = "/";
-        } catch (error) {
-          showError(error instanceof Error ? error.message : "No se pudo crear la cuenta.");
-        }
-      });
+          if (password.length < 8) {
+            showError("La clave debe tener al menos 8 caracteres.");
+            return;
+          }
+
+          try {
+            const session = await register(username, password);
+            createSession(session);
+            window.location.assign("/");
+          } catch (error) {
+            showError(error instanceof Error ? error.message : "No se pudo crear la cuenta.");
+          }
+        }, { signal });
+      };
+
+      document.addEventListener("astro:page-load", initRegisterForm);
+      initRegisterForm();
     </script>
   </body>
 </html>

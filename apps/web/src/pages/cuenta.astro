@@ -123,7 +123,8 @@ import "../styles/global.css";
 
       const clearSessionAndRedirect = () => {
         window.localStorage.removeItem(SESSION_KEY);
-        window.location.href = "/login";
+        window.dispatchEvent(new CustomEvent("onlycartitas:auth-updated"));
+        window.location.assign("/login");
       };
 
       const verifySession = async () => {
@@ -218,7 +219,8 @@ import "../styles/global.css";
 
       logoutButton?.addEventListener("click", () => {
         window.localStorage.removeItem(SESSION_KEY);
-        window.location.href = "/";
+        window.dispatchEvent(new CustomEvent("onlycartitas:auth-updated"));
+        window.location.assign("/");
       });
     </script>
   </body>

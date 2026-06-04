@@ -2062,6 +2062,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
         try {
           const session = await loginAdmin(user, password);
           createAdminSession(session);
+          window.dispatchEvent(new CustomEvent("onlycartitas:auth-updated"));
           adminLoginError?.classList.add("hidden");
           if (isInput(adminUser)) adminUser.value = "";
           if (isInput(adminPassword)) adminPassword.value = "";
@@ -2076,6 +2077,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
 
       adminLogout?.addEventListener("click", () => {
         window.localStorage.removeItem(SESSION_KEY);
+        window.dispatchEvent(new CustomEvent("onlycartitas:auth-updated"));
         renderAdminSession();
       });
 

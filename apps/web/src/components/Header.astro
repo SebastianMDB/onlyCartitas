@@ -621,23 +621,34 @@ const currentPath = Astro.url.pathname;
     currentAuthLink.textContent = session.role === "admin" ? "Admin" : "Mi cuenta";
   };
 
+  const syncAuthLinkFromStorage = () => {
+    try {
+      const storedSession = window.localStorage.getItem(AUTH_SESSION_KEY);
+      const session = storedSession ? JSON.parse(storedSession) : null;
+      if (session?.expiresAt && Date.now() < Number(session.expiresAt)) {
+        setAuthLinkFromSession(session);
+        return session;
+      }
+      setAuthLinkLoggedOut();
+      return null;
+    } catch {
+      setAuthLinkLoggedOut();
+      return null;
+    }
+  };
+
   let latestAuthUpdateId = 0;
 
   const updateAuthLink = async () => {
     const authUpdateId = ++latestAuthUpdateId;
     try {
-      const storedSession = window.localStorage.getItem(AUTH_SESSION_KEY);
-      const session = storedSession ? JSON.parse(storedSession) : null;
-      const isValid = session?.expiresAt && Date.now() < Number(session.expiresAt);
-      if (!isValid) {
+      const session = syncAuthLinkFromStorage();
+      if (!session) {
         window.localStorage.removeItem(AUTH_SESSION_KEY);
-        setAuthLinkLoggedOut();
         refreshCartFromStorage();
         renderCart();
         return;
       }
-
-      setAuthLinkFromSession(session);
 
       const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
         headers: {
@@ -891,12 +902,19 @@ const currentPath = Astro.url.pathname;
     refreshCartFromStorage();
     renderCart();
   }, { signal: headerRuntimeSignal });
+  window.addEventListener("onlycartitas:auth-updated", () => {
+    syncAuthLinkFromStorage();
+    refreshCartFromStorage();
+    renderCart();
+    updateAuthLink();
+  }, { signal: headerRuntimeSignal });
   window.addEventListener("storage", (event) => {
     if (!event.key?.startsWith(CART_STORAGE_PREFIX)) return;
     refreshCartFromStorage();
     renderCart();
   }, { signal: headerRuntimeSignal });
   document.addEventListener("astro:page-load", () => {
+    syncAuthLinkFromStorage();
     refreshCartFromStorage();
     renderCart();
   }, { signal: headerRuntimeSignal });
@@ -913,6 +931,7 @@ const currentPath = Astro.url.pathname;
     updateAuthLink();
   }, { signal: headerRuntimeSignal });
 
+  syncAuthLinkFromStorage();
   renderCart();
   updateAuthLink();
 </script>
