@@ -507,15 +507,15 @@ const currentPath = Astro.url.pathname;
 
   const CART_STORAGE_PREFIX = "carta-noble-cart";
   const AUTH_SESSION_KEY = "onlycartitas-auth-session";
-  const cartOpenButton = document.querySelector("[data-cart-open]");
-  const cartCloseButton = document.querySelector("[data-cart-close]");
-  const cartOverlay = document.querySelector("[data-cart-overlay]");
-  const cartPanel = document.querySelector("[data-cart-panel]");
-  const cartItemsContainer = document.querySelector("[data-cart-items]");
-  const cartEmptyState = document.querySelector("[data-cart-empty]");
-  const cartCount = document.querySelector("[data-cart-count]");
-  const cartTotal = document.querySelector("[data-cart-total]");
-  const cartCheckout = document.querySelector("[data-cart-checkout]");
+  const getCartOpenButton = () => document.querySelector("[data-cart-open]");
+  const getCartCloseButton = () => document.querySelector("[data-cart-close]");
+  const getCartOverlay = () => document.querySelector("[data-cart-overlay]");
+  const getCartPanel = () => document.querySelector("[data-cart-panel]");
+  const getCartItemsContainer = () => document.querySelector("[data-cart-items]");
+  const getCartEmptyState = () => document.querySelector("[data-cart-empty]");
+  const getCartCount = () => document.querySelector("[data-cart-count]");
+  const getCartTotalElement = () => document.querySelector("[data-cart-total]");
+  const getCartCheckout = () => document.querySelector("[data-cart-checkout]");
 
   const currencyFormatter = new Intl.NumberFormat("es-CL", {
     style: "currency",
@@ -685,6 +685,10 @@ const currentPath = Astro.url.pathname;
   const getCartTotal = () => cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
   const openCart = () => {
+    const cartOpenButton = getCartOpenButton();
+    const cartCloseButton = getCartCloseButton();
+    const cartOverlay = getCartOverlay();
+    const cartPanel = getCartPanel();
     isCartOpen = true;
     if (isCartItemElement(cartOverlay)) {
       cartOverlay.classList.remove("pointer-events-none", "bg-slate-950/0", "opacity-0");
@@ -707,6 +711,9 @@ const currentPath = Astro.url.pathname;
 
   const closeCart = () => {
     if (!isCartOpen) return;
+    const cartOpenButton = getCartOpenButton();
+    const cartOverlay = getCartOverlay();
+    const cartPanel = getCartPanel();
     isCartOpen = false;
     if (isCartItemElement(cartOverlay)) {
       cartOverlay.classList.add("pointer-events-none", "bg-slate-950/0", "opacity-0");
@@ -726,6 +733,8 @@ const currentPath = Astro.url.pathname;
   };
 
   document.addEventListener("astro:before-swap", () => {
+    const cartOverlay = getCartOverlay();
+    const cartPanel = getCartPanel();
     document.body.style.overflow = "";
     if (isCartItemElement(cartOverlay)) {
       cartOverlay.classList.add("pointer-events-none", "bg-slate-950/0", "opacity-0");
@@ -755,6 +764,11 @@ const currentPath = Astro.url.pathname;
   };
 
   const renderCart = () => {
+    const cartCount = getCartCount();
+    const cartTotal = getCartTotalElement();
+    const cartCheckout = getCartCheckout();
+    const cartEmptyState = getCartEmptyState();
+    const cartItemsContainer = getCartItemsContainer();
     cart = cart.filter((item) => item.stock > 0 && item.quantity > 0);
     const itemCount = getCartQuantity();
     const total = getCartTotal();
@@ -844,7 +858,55 @@ const currentPath = Astro.url.pathname;
 
   document.addEventListener("click", (event) => {
     const target = event.target;
-    const button = target instanceof HTMLElement ? target.closest("[data-cart-add]") : null;
+    const element = target instanceof HTMLElement ? target : null;
+    const openButton = element?.closest("[data-cart-open]");
+    if (openButton instanceof HTMLElement) {
+      refreshCartFromStorage();
+      renderCart();
+      openCart();
+      return;
+    }
+
+    const closeButton = element?.closest("[data-cart-close]");
+    if (closeButton instanceof HTMLElement || element?.closest("[data-cart-overlay]")) {
+      closeCart();
+      return;
+    }
+
+    const checkoutButton = element?.closest("[data-cart-checkout]");
+    if (checkoutButton instanceof HTMLElement) {
+      refreshCartFromStorage();
+      renderCart();
+      if (getCartQuantity() === 0) return;
+      window.location.href = "/checkout";
+      return;
+    }
+
+    const increaseButton = element?.closest("[data-cart-increase]");
+    const decreaseButton = element?.closest("[data-cart-decrease]");
+    const removeButton = element?.closest("[data-cart-remove]");
+    const increaseId = increaseButton instanceof HTMLElement ? increaseButton.dataset.cartIncrease : "";
+    const decreaseId = decreaseButton instanceof HTMLElement ? decreaseButton.dataset.cartDecrease : "";
+    const removeId = removeButton instanceof HTMLElement ? removeButton.dataset.cartRemove : "";
+
+    if (increaseId) {
+      const item = cart.find((cartItem) => getCartItemKey(cartItem) === increaseId);
+      if (item) setCartQuantity(increaseId, item.quantity + 1);
+      return;
+    }
+
+    if (decreaseId) {
+      const item = cart.find((cartItem) => getCartItemKey(cartItem) === decreaseId);
+      if (item) setCartQuantity(decreaseId, item.quantity - 1);
+      return;
+    }
+
+    if (removeId) {
+      setCartQuantity(removeId, 0);
+      return;
+    }
+
+    const button = element?.closest("[data-cart-add]");
 
     if (button instanceof HTMLElement) {
       const price = Number(button.dataset.cartPrice ?? 0);
@@ -864,39 +926,6 @@ const currentPath = Astro.url.pathname;
         image: button.dataset.cartImage ?? ""
       });
     }
-  }, { signal: headerRuntimeSignal });
-
-  cartItemsContainer?.addEventListener("click", (event) => {
-    const target = event.target;
-    if (!(target instanceof HTMLElement)) return;
-
-    const increaseId = target.dataset.cartIncrease;
-    const decreaseId = target.dataset.cartDecrease;
-    const removeId = target.dataset.cartRemove;
-
-    if (increaseId) {
-      const item = cart.find((cartItem) => getCartItemKey(cartItem) === increaseId);
-      if (item) setCartQuantity(increaseId, item.quantity + 1);
-    }
-
-    if (decreaseId) {
-      const item = cart.find((cartItem) => getCartItemKey(cartItem) === decreaseId);
-      if (item) setCartQuantity(decreaseId, item.quantity - 1);
-    }
-
-    if (removeId) {
-      setCartQuantity(removeId, 0);
-    }
-  }, { signal: headerRuntimeSignal });
-
-  cartOpenButton?.addEventListener("click", openCart, { signal: headerRuntimeSignal });
-  cartCloseButton?.addEventListener("click", closeCart, { signal: headerRuntimeSignal });
-  cartOverlay?.addEventListener("click", closeCart, { signal: headerRuntimeSignal });
-  cartCheckout?.addEventListener("click", () => {
-    refreshCartFromStorage();
-    renderCart();
-    if (getCartQuantity() === 0) return;
-    window.location.href = "/checkout";
   }, { signal: headerRuntimeSignal });
   window.addEventListener("onlycartitas:cart-updated", () => {
     refreshCartFromStorage();
