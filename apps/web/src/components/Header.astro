@@ -621,6 +621,13 @@ const currentPath = Astro.url.pathname;
     currentAuthLink.textContent = session.role === "admin" ? "Admin" : "Mi cuenta";
   };
 
+  const clearAuthSession = () => {
+    window.localStorage.removeItem(AUTH_SESSION_KEY);
+    setAuthLinkLoggedOut();
+    refreshCartFromStorage();
+    renderCart();
+  };
+
   const syncAuthLinkFromStorage = () => {
     try {
       const storedSession = window.localStorage.getItem(AUTH_SESSION_KEY);
@@ -644,9 +651,7 @@ const currentPath = Astro.url.pathname;
     try {
       const session = syncAuthLinkFromStorage();
       if (!session) {
-        window.localStorage.removeItem(AUTH_SESSION_KEY);
-        refreshCartFromStorage();
-        renderCart();
+        clearAuthSession();
         return;
       }
 
@@ -656,7 +661,11 @@ const currentPath = Astro.url.pathname;
         }
       });
       const payload = await response.json().catch(() => null);
-      if (!response.ok || !payload?.user) throw new Error("Sesion invalida");
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) clearAuthSession();
+        return;
+      }
+      if (!payload?.user) return;
       if (authUpdateId !== latestAuthUpdateId) return;
 
       const verifiedSession = {
@@ -669,10 +678,7 @@ const currentPath = Astro.url.pathname;
       setAuthLinkFromSession(verifiedSession);
     } catch {
       if (authUpdateId !== latestAuthUpdateId) return;
-      window.localStorage.removeItem(AUTH_SESSION_KEY);
-      setAuthLinkLoggedOut();
-      refreshCartFromStorage();
-      renderCart();
+      syncAuthLinkFromStorage();
     }
   };
 

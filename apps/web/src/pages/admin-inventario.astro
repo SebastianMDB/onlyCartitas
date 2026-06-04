@@ -712,12 +712,21 @@ const defaultProductCategoryOptions = productCategories.sealed;
             }
           });
           const payload = await response.json().catch(() => null);
-          if (!response.ok || payload?.user?.role !== "admin") throw new Error("Sesion invalida");
+          if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+              window.localStorage.removeItem(SESSION_KEY);
+              return null;
+            }
+            return session;
+          }
+          if (payload?.user?.role !== "admin") {
+            window.localStorage.removeItem(SESSION_KEY);
+            return null;
+          }
 
           return session;
         } catch {
-          window.localStorage.removeItem(SESSION_KEY);
-          return null;
+          return session;
         }
       };
 
@@ -818,23 +827,32 @@ const defaultProductCategoryOptions = productCategories.sealed;
         }
       };
 
+      let latestAdminSessionRenderId = 0;
+      const loadAdminData = () => {
+        loadInventoryProducts();
+        loadUsers();
+        loadOrders();
+        loadDiscounts();
+        loadHeroSettings();
+        loadCatalogOptions();
+      };
+
       const renderAdminSession = async () => {
-        adminLogin?.classList.add("hidden");
-        adminContent?.classList.add("hidden");
+        const renderId = ++latestAdminSessionRenderId;
+        const localSession = readSession();
+        const hasLocalAdminSession = Boolean(localSession?.token && localSession.role === "admin");
+
+        adminLogin?.classList.toggle("hidden", hasLocalAdminSession);
+        adminContent?.classList.toggle("hidden", !hasLocalAdminSession);
 
         const session = await verifyAdminSession();
+        if (renderId !== latestAdminSessionRenderId) return;
+
         const isLoggedIn = Boolean(session);
 
         adminLogin?.classList.toggle("hidden", isLoggedIn);
         adminContent?.classList.toggle("hidden", !isLoggedIn);
-        if (isLoggedIn) {
-          loadInventoryProducts();
-          loadUsers();
-          loadOrders();
-          loadDiscounts();
-          loadHeroSettings();
-          loadCatalogOptions();
-        }
+        if (isLoggedIn) loadAdminData();
       };
 
       const readState = () => {
