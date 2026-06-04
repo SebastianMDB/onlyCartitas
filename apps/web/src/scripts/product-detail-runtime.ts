@@ -45,6 +45,22 @@ const readConfig = () => {
   }
 };
 
+const readInventoryState = () => {
+  try {
+    const storedInventory = window.localStorage.getItem("onlycartitas-inventory-state");
+    return storedInventory ? JSON.parse(storedInventory) : {};
+  } catch {
+    return {};
+  }
+};
+
+const withInventoryVariants = (product: Product): Product => {
+  if (Array.isArray(product.variants) && product.variants.length > 0) return product;
+  const inventoryState = readInventoryState();
+  const variants = inventoryState?.[product.id]?.variants;
+  return Array.isArray(variants) && variants.length > 0 ? { ...product, variants } : product;
+};
+
 let productDetailAbortController: AbortController | null = null;
 
 const renderProduct = (product: Product) => {
@@ -203,8 +219,9 @@ const initProductDetail = async () => {
     const payload = await response.json().catch(() => null);
     if (signal.aborted) return;
     if (!response.ok || !payload?.data) throw new Error("Producto no encontrado.");
-    container.innerHTML = renderProduct(payload.data);
-    document.title = `${payload.data.name} | OnlyCartitas`;
+    const product = withInventoryVariants(payload.data);
+    container.innerHTML = renderProduct(product);
+    document.title = `${product.name} | OnlyCartitas`;
   } catch (error) {
     if (signal.aborted) return;
     container.innerHTML = `<p class="mx-auto mt-8 max-w-3xl rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">${escapeHtml(error instanceof Error ? error.message : "Producto no encontrado.")}</p>`;

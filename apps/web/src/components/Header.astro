@@ -236,6 +236,12 @@ const currentPath = Astro.url.pathname;
   const INVENTORY_STORAGE_KEY = "onlycartitas-inventory-state";
   const INVENTORY_SYNC_TTL_MS = 10_000;
   const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+  const headerRuntimeKey = "__onlycartitasHeaderRuntimeAbortController";
+  const previousHeaderRuntime = (window as any)[headerRuntimeKey];
+  if (previousHeaderRuntime instanceof AbortController) previousHeaderRuntime.abort();
+  const headerRuntimeAbortController = new AbortController();
+  (window as any)[headerRuntimeKey] = headerRuntimeAbortController;
+  const headerRuntimeSignal = headerRuntimeAbortController.signal;
   let lastInventorySyncAt = 0;
 
   const isInputElement = (value: unknown) => value instanceof HTMLInputElement;
@@ -446,14 +452,14 @@ const currentPath = Astro.url.pathname;
       // Ignore storage failures; the current page can still switch theme.
     }
     applyTheme(nextTheme);
-  });
+  }, { signal: headerRuntimeSignal });
 
   window.addEventListener("storage", (event) => {
     if (event.key !== THEME_STORAGE_KEY) return;
     if (event.newValue !== "dark" && event.newValue !== "light") return;
 
     applyTheme(event.newValue);
-  });
+  }, { signal: headerRuntimeSignal });
 
   inputs.forEach((input) => {
     input.addEventListener("input", (event) => {
@@ -467,19 +473,19 @@ const currentPath = Astro.url.pathname;
       });
 
       emitSearch(value);
-    });
+    }, { signal: headerRuntimeSignal });
   });
 
   emitSearch("");
   updateNavState();
   applyInventoryState();
   syncInventoryFromApi();
-  document.addEventListener("astro:page-load", updateNavState);
-  document.addEventListener("astro:page-load", () => applyTheme(getPreferredTheme()));
+  document.addEventListener("astro:page-load", updateNavState, { signal: headerRuntimeSignal });
+  document.addEventListener("astro:page-load", () => applyTheme(getPreferredTheme()), { signal: headerRuntimeSignal });
   document.addEventListener("astro:page-load", () => {
     applyInventoryState();
     syncInventoryFromApi();
-  });
+  }, { signal: headerRuntimeSignal });
   window.addEventListener("onlycartitas:catalog-rendered", (event) => {
     const products =
       event instanceof CustomEvent && Array.isArray(event.detail?.products)
@@ -492,13 +498,13 @@ const currentPath = Astro.url.pathname;
 
     applyInventoryState();
     syncInventoryFromApi();
-  });
+  }, { signal: headerRuntimeSignal });
   window.addEventListener("storage", (event) => {
     if (event.key === INVENTORY_STORAGE_KEY) {
       applyInventoryState();
       reconcileCartWithInventory();
     }
-  });
+  }, { signal: headerRuntimeSignal });
 
   const CART_STORAGE_KEY = "carta-noble-cart";
   const AUTH_SESSION_KEY = "onlycartitas-auth-session";
@@ -682,6 +688,20 @@ const currentPath = Astro.url.pathname;
     document.body.style.overflow = "";
   };
 
+  document.addEventListener("astro:before-swap", () => {
+    document.body.style.overflow = "";
+    if (isCartItemElement(cartOverlay)) {
+      cartOverlay.classList.add("pointer-events-none", "bg-slate-950/0", "opacity-0");
+      cartOverlay.classList.remove("bg-slate-950/45", "opacity-100");
+    }
+    if (isCartItemElement(cartPanel)) {
+      cartPanel.dataset.open = "false";
+      cartPanel.setAttribute("aria-hidden", "true");
+      cartPanel.setAttribute("inert", "");
+      cartPanel.classList.add("translate-x-full");
+    }
+  }, { signal: headerRuntimeSignal });
+
   const getCartItemKey = (item: Pick<CartItem, "id" | "variantId">) => `${item.id}::${item.variantId ?? ""}`;
 
   const setCartQuantity = (key: string, quantity: number) => {
@@ -807,7 +827,7 @@ const currentPath = Astro.url.pathname;
         image: button.dataset.cartImage ?? ""
       });
     }
-  });
+  }, { signal: headerRuntimeSignal });
 
   cartItemsContainer?.addEventListener("click", (event) => {
     const target = event.target;
@@ -830,40 +850,40 @@ const currentPath = Astro.url.pathname;
     if (removeId) {
       setCartQuantity(removeId, 0);
     }
-  });
+  }, { signal: headerRuntimeSignal });
 
-  cartOpenButton?.addEventListener("click", openCart);
-  cartCloseButton?.addEventListener("click", closeCart);
-  cartOverlay?.addEventListener("click", closeCart);
+  cartOpenButton?.addEventListener("click", openCart, { signal: headerRuntimeSignal });
+  cartCloseButton?.addEventListener("click", closeCart, { signal: headerRuntimeSignal });
+  cartOverlay?.addEventListener("click", closeCart, { signal: headerRuntimeSignal });
   cartCheckout?.addEventListener("click", () => {
     refreshCartFromStorage();
     renderCart();
     if (getCartQuantity() === 0) return;
     window.location.href = "/checkout";
-  });
+  }, { signal: headerRuntimeSignal });
   window.addEventListener("onlycartitas:cart-updated", () => {
     refreshCartFromStorage();
     renderCart();
-  });
+  }, { signal: headerRuntimeSignal });
   window.addEventListener("storage", (event) => {
     if (event.key !== CART_STORAGE_KEY) return;
     refreshCartFromStorage();
     renderCart();
-  });
+  }, { signal: headerRuntimeSignal });
   document.addEventListener("astro:page-load", () => {
     refreshCartFromStorage();
     renderCart();
-  });
-  document.addEventListener("astro:page-load", updateAuthLink);
-  window.addEventListener("pageshow", updateAuthLink);
-  window.addEventListener("focus", updateAuthLink);
+  }, { signal: headerRuntimeSignal });
+  document.addEventListener("astro:page-load", updateAuthLink, { signal: headerRuntimeSignal });
+  window.addEventListener("pageshow", updateAuthLink, { signal: headerRuntimeSignal });
+  window.addEventListener("focus", updateAuthLink, { signal: headerRuntimeSignal });
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closeCart();
-  });
+  }, { signal: headerRuntimeSignal });
   window.addEventListener("storage", (event) => {
     if (event.key !== AUTH_SESSION_KEY) return;
     updateAuthLink();
-  });
+  }, { signal: headerRuntimeSignal });
 
   renderCart();
   updateAuthLink();
