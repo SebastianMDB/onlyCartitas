@@ -553,7 +553,15 @@ const defaultProductCategoryOptions = productCategories.sealed;
     <Footer />
 
     <script is:inline type="application/json" id="admin-inventory-config" set:html={JSON.stringify({ inventoryItems, apiBaseUrl, productCategories })}></script>
-    <script is:inline>
+    <script is:inline data-astro-rerun>
+      (() => {
+      const adminRuntimeKey = "__onlycartitasAdminRuntimeAbortController";
+      const previousAdminRuntime = window[adminRuntimeKey];
+      if (previousAdminRuntime instanceof AbortController) previousAdminRuntime.abort();
+      const adminRuntimeAbortController = new AbortController();
+      window[adminRuntimeKey] = adminRuntimeAbortController;
+      const adminRuntimeSignal = adminRuntimeAbortController.signal;
+
       const STORAGE_KEY = "onlycartitas-inventory-state";
       const SESSION_KEY = "onlycartitas-auth-session";
       const adminConfig = JSON.parse(document.getElementById("admin-inventory-config")?.textContent ?? "{}");
@@ -1925,7 +1933,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
           const hasRows = Boolean(document.querySelector(`[data-variant-builder="${scope}"] [data-variant-row]`));
           if (isElement(empty)) empty.classList.toggle("hidden", hasRows);
         }
-      });
+      }, { signal: adminRuntimeSignal });
 
       document.addEventListener("input", (event) => {
         const target = event.target;
@@ -1933,7 +1941,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
         const builder = target.closest("[data-variant-builder]");
         const scope = builder instanceof HTMLElement ? builder.dataset.variantBuilder : "";
         if (scope === "create" || scope === "edit") syncVariantText(scope);
-      });
+      }, { signal: adminRuntimeSignal });
 
       document.addEventListener("change", (event) => {
         const target = event.target;
@@ -1941,7 +1949,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
         const builder = target.closest("[data-variant-builder]");
         const scope = builder instanceof HTMLElement ? builder.dataset.variantBuilder : "";
         if (scope === "create" || scope === "edit") syncVariantText(scope);
-      });
+      }, { signal: adminRuntimeSignal });
 
       productCreateOfferToggle?.addEventListener("change", renderProductCreateOfferFields);
       productCreateKindInput?.addEventListener("change", renderProductCreateCategories);
@@ -1976,7 +1984,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
             showOptionsMessage(error instanceof Error ? error.message : "No se pudo quitar la opcion.");
           }
         }
-      });
+      }, { signal: adminRuntimeSignal });
 
       optionInputs.forEach((input) => {
         input.addEventListener("keydown", async (event) => {
@@ -2108,6 +2116,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
       renderVariantRows("edit", []);
       renderAdminTab();
       renderAdminSession();
+      })();
     </script>
   </body>
 </html>
