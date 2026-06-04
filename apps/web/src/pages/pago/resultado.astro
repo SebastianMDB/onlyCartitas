@@ -36,7 +36,8 @@ import "../../styles/global.css";
     <Footer />
 
     <script>
-      const CART_STORAGE_KEY = "carta-noble-cart";
+      const CART_STORAGE_PREFIX = "carta-noble-cart";
+      const SESSION_STORAGE_KEY = "onlycartitas-auth-session";
       const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       const params = new URLSearchParams(window.location.search);
       const status = params.get("status") ?? params.get("collection_status") ?? "pending";
@@ -45,6 +46,29 @@ import "../../styles/global.css";
       const title = document.querySelector("[data-payment-title]");
       const copy = document.querySelector("[data-payment-copy]");
       const order = document.querySelector("[data-payment-order]");
+
+      const readSession = () => {
+        try {
+          const storedSession = window.localStorage.getItem(SESSION_STORAGE_KEY);
+          const session = storedSession ? JSON.parse(storedSession) : null;
+          if (!session?.expiresAt || Date.now() > Number(session.expiresAt)) return null;
+          return session;
+        } catch {
+          return null;
+        }
+      };
+
+      const getCartStorageKey = () => {
+        const session = readSession();
+        const user = session?.user ? String(session.user).trim().toLowerCase() : "";
+        return user ? `${CART_STORAGE_PREFIX}:user:${user}` : `${CART_STORAGE_PREFIX}:anon`;
+      };
+
+      try {
+        window.localStorage.removeItem(CART_STORAGE_PREFIX);
+      } catch {
+        // Ignore storage failures; session-scoped cart keys still work when storage is available.
+      }
 
       const content: Record<string, { title: string; copy: string }> = {
         success: {
@@ -96,7 +120,7 @@ import "../../styles/global.css";
             order.classList.remove("hidden");
           }
           if (syncedStatus === "approved") {
-            window.localStorage.removeItem(CART_STORAGE_KEY);
+            window.localStorage.removeItem(getCartStorageKey());
           }
         } catch {
           if (copy instanceof HTMLElement) {

@@ -154,10 +154,9 @@ const currentPath = Astro.url.pathname;
   </div>
 </header>
 
-{!adminMode ? <div transition:persist="cart-overlay" class="pointer-events-none fixed inset-0 z-[80] bg-slate-950/0 opacity-0 transition-opacity duration-200 ease-out" data-cart-overlay></div> : null}
+{!adminMode ? <div class="pointer-events-none fixed inset-0 z-[80] bg-slate-950/0 opacity-0 transition-opacity duration-200 ease-out" data-cart-overlay></div> : null}
 {!adminMode ? (
 <aside
-  transition:persist="cart-panel"
   id="cart-panel"
   class="fixed inset-y-0 right-0 z-[90] flex w-full max-w-md translate-x-full transform-gpu flex-col border-l border-slate-200 bg-white shadow-[0_30px_90px_rgba(17,48,71,0.22)] transition-transform duration-[250ms] ease-out will-change-transform [contain:layout_paint] data-[open=true]:translate-x-0"
   data-cart-panel
@@ -506,7 +505,7 @@ const currentPath = Astro.url.pathname;
     }
   }, { signal: headerRuntimeSignal });
 
-  const CART_STORAGE_KEY = "carta-noble-cart";
+  const CART_STORAGE_PREFIX = "carta-noble-cart";
   const AUTH_SESSION_KEY = "onlycartitas-auth-session";
   const cartOpenButton = document.querySelector("[data-cart-open]");
   const cartCloseButton = document.querySelector("[data-cart-close]");
@@ -535,9 +534,32 @@ const currentPath = Astro.url.pathname;
       .replaceAll("'", "&#039;");
   let isCartOpen = false;
 
+  const readActiveSession = () => {
+    try {
+      const storedSession = window.localStorage.getItem(AUTH_SESSION_KEY);
+      const session = storedSession ? JSON.parse(storedSession) : null;
+      if (!session?.user || !session?.expiresAt || Date.now() > Number(session.expiresAt)) return null;
+      return session;
+    } catch {
+      return null;
+    }
+  };
+
+  const getCartStorageKey = () => {
+    const session = readActiveSession();
+    const user = session?.user ? String(session.user).trim().toLowerCase() : "";
+    return user ? `${CART_STORAGE_PREFIX}:user:${user}` : `${CART_STORAGE_PREFIX}:anon`;
+  };
+
+  try {
+    window.localStorage.removeItem(CART_STORAGE_PREFIX);
+  } catch {
+    // Ignore storage failures; session-scoped cart keys still work when storage is available.
+  }
+
   const readCart = (): CartItem[] => {
     try {
-      const storedCart = window.localStorage.getItem(CART_STORAGE_KEY);
+      const storedCart = window.localStorage.getItem(getCartStorageKey());
       const parsedCart = storedCart ? JSON.parse(storedCart) : [];
       return Array.isArray(parsedCart)
         ? parsedCart.map((item) => ({
@@ -610,6 +632,8 @@ const currentPath = Astro.url.pathname;
       if (!isValid) {
         window.localStorage.removeItem(AUTH_SESSION_KEY);
         setAuthLinkLoggedOut();
+        refreshCartFromStorage();
+        renderCart();
         return;
       }
 
@@ -636,11 +660,13 @@ const currentPath = Astro.url.pathname;
       if (authUpdateId !== latestAuthUpdateId) return;
       window.localStorage.removeItem(AUTH_SESSION_KEY);
       setAuthLinkLoggedOut();
+      refreshCartFromStorage();
+      renderCart();
     }
   };
 
   const writeCart = () => {
-    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    window.localStorage.setItem(getCartStorageKey(), JSON.stringify(cart));
     window.dispatchEvent(new CustomEvent("onlycartitas:cart-updated"));
   };
 
@@ -866,7 +892,7 @@ const currentPath = Astro.url.pathname;
     renderCart();
   }, { signal: headerRuntimeSignal });
   window.addEventListener("storage", (event) => {
-    if (event.key !== CART_STORAGE_KEY) return;
+    if (!event.key?.startsWith(CART_STORAGE_PREFIX)) return;
     refreshCartFromStorage();
     renderCart();
   }, { signal: headerRuntimeSignal });
@@ -882,6 +908,8 @@ const currentPath = Astro.url.pathname;
   }, { signal: headerRuntimeSignal });
   window.addEventListener("storage", (event) => {
     if (event.key !== AUTH_SESSION_KEY) return;
+    refreshCartFromStorage();
+    renderCart();
     updateAuthLink();
   }, { signal: headerRuntimeSignal });
 

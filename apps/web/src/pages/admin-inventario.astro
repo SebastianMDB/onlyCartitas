@@ -1018,6 +1018,21 @@ const defaultProductCategoryOptions = productCategories.sealed;
           };
         });
 
+      const hasVariantRows = (scope) =>
+        collectVariantRows(scope).some((variant) => variant.name || Number(variant.stock) > 0);
+
+      const syncStockFromVariantRows = (scope) => {
+        if (scope !== "edit" || !isInput(stockInput)) return;
+        const variants = collectVariantRows(scope).filter((variant) => variant.name || Number(variant.stock) > 0);
+        if (variants.length === 0) return;
+        const total = variants.reduce(
+          (sum, variant) => sum + (variant.active === false ? 0 : Math.max(0, Math.floor(Number(variant.stock) || 0))),
+          0
+        );
+        stockInput.value = String(total);
+        syncStatusWithStock();
+      };
+
       const syncVariantText = (scope) => {
         const hiddenInput = getVariantHiddenInput(scope);
         if (!(hiddenInput instanceof HTMLTextAreaElement)) return;
@@ -1025,6 +1040,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
           .filter((variant) => variant.name || Number(variant.stock) > 0)
           .map((variant) => `${variant.name} | ${Number.isFinite(variant.stock) ? Math.max(0, Math.floor(variant.stock)) : 0} | ${variant.active ? "activo" : "inactivo"}`)
           .join("\n");
+        syncStockFromVariantRows(scope);
       };
 
       const renderVariantRows = (scope, variants = []) => {
@@ -1342,6 +1358,15 @@ const defaultProductCategoryOptions = productCategories.sealed;
       const persistSelectedProduct = async () => {
         const product = getSelectedProduct();
         if (!product || !isInput(stockInput) || !isSelect(statusSelect)) return;
+
+        if (hasVariantRows("edit") || (Array.isArray(product.variants) && product.variants.length > 0)) {
+          try {
+            await saveProductDetails();
+          } catch (error) {
+            showMessage(error instanceof Error ? error.message : "No se pudieron guardar los diseños.");
+            return;
+          }
+        }
 
         syncStatusWithStock();
         const stock = Number(stockInput.value);

@@ -205,7 +205,7 @@ import "../styles/global.css";
         discount: number;
       };
 
-      const CART_STORAGE_KEY = "carta-noble-cart";
+      const CART_STORAGE_PREFIX = "carta-noble-cart";
       const SESSION_STORAGE_KEY = "onlycartitas-auth-session";
       const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       const SHIPPING_PRICE = 4990;
@@ -262,9 +262,32 @@ import "../styles/global.css";
         return payload?.error ?? fallback;
       };
 
+      const readSession = () => {
+        try {
+          const storedSession = window.localStorage.getItem(SESSION_STORAGE_KEY);
+          const session = storedSession ? JSON.parse(storedSession) : null;
+          if (!session?.expiresAt || Date.now() > Number(session.expiresAt)) return null;
+          return session;
+        } catch {
+          return null;
+        }
+      };
+
+      const getCartStorageKey = () => {
+        const session = readSession();
+        const user = session?.user ? String(session.user).trim().toLowerCase() : "";
+        return user ? `${CART_STORAGE_PREFIX}:user:${user}` : `${CART_STORAGE_PREFIX}:anon`;
+      };
+
+      try {
+        window.localStorage.removeItem(CART_STORAGE_PREFIX);
+      } catch {
+        // Ignore storage failures; session-scoped cart keys still work when storage is available.
+      }
+
       const readCart = () => {
         try {
-          const storedCart = window.localStorage.getItem(CART_STORAGE_KEY);
+          const storedCart = window.localStorage.getItem(getCartStorageKey());
           const parsedCart = storedCart ? JSON.parse(storedCart) : [];
           return Array.isArray(parsedCart)
             ? parsedCart.map((item) => ({
@@ -275,17 +298,6 @@ import "../styles/global.css";
             : [];
         } catch {
           return [];
-        }
-      };
-
-      const readSession = () => {
-        try {
-          const storedSession = window.localStorage.getItem(SESSION_STORAGE_KEY);
-          const session = storedSession ? JSON.parse(storedSession) : null;
-          if (!session?.expiresAt || Date.now() > Number(session.expiresAt)) return null;
-          return session;
-        } catch {
-          return null;
         }
       };
 
@@ -488,7 +500,7 @@ import "../styles/global.css";
             return;
           }
 
-          window.localStorage.removeItem(CART_STORAGE_KEY);
+          window.localStorage.removeItem(getCartStorageKey());
           cart = [];
           renderSummary();
           checkoutForm.classList.add("hidden");
