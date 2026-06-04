@@ -5,8 +5,8 @@ import Footer from "../components/Footer.astro";
 import { productCategories } from "../lib/catalog";
 import "../styles/global.css";
 
-const inventoryItems = [];
-const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+const inventoryItems: any[] = [];
+const apiBaseUrl = import.meta.env.PUBLIC_API_URL;
 const defaultProductCategoryOptions = productCategories.sealed;
 ---
 
@@ -100,7 +100,9 @@ const defaultProductCategoryOptions = productCategories.sealed;
                   </label>
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Categoria</span>
-                    <input data-product-create="category" list="admin-category-options" type="text" value={defaultProductCategoryOptions[0]} class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                    <select data-product-create="category" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                      {defaultProductCategoryOptions.map((category) => <option value={category}>{category}</option>)}
+                    </select>
                   </label>
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Set</span>
@@ -308,7 +310,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
                   </label>
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Categoria</span>
-                    <input data-product-edit="category" list="admin-category-options" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                    <select data-product-edit="category" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"></select>
                   </label>
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Set</span>
@@ -1074,16 +1076,26 @@ const defaultProductCategoryOptions = productCategories.sealed;
         element.innerHTML = values.map((value) => `<option value="${escapeHtml(value)}"></option>`).join("");
       };
 
+      const renderSelectOptions = (element, values, selectedValue = "") => {
+        if (!(element instanceof HTMLSelectElement)) return;
+        const options = selectedValue ? uniqueSorted([...values, selectedValue]) : uniqueSorted(values);
+        element.innerHTML = options.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("");
+        if (selectedValue) element.value = selectedValue;
+      };
+
+      const getAllProductCategories = () =>
+        uniqueSorted([
+          ...inventoryItems.map((product) => product.category),
+          ...catalogOptions.categories,
+          ...Object.values(productCategoryOptions).flat()
+        ]);
+
       const renderDynamicOptions = () => {
         const sets = uniqueSorted([
           ...inventoryItems.map((product) => product.set),
           ...catalogOptions.sets
         ]);
-        const categories = uniqueSorted([
-          ...inventoryItems.map((product) => product.category),
-          ...catalogOptions.categories,
-          ...Object.values(productCategoryOptions).flat()
-        ]);
+        const categories = getAllProductCategories();
         const illustrators = uniqueSorted([
           ...inventoryItems.map((product) => product.illustrator),
           ...catalogOptions.illustrators
@@ -1092,6 +1104,12 @@ const defaultProductCategoryOptions = productCategories.sealed;
         renderDatalist(setOptions, sets);
         renderDatalist(categoryOptions, categories);
         renderDatalist(illustratorOptions, illustrators);
+        renderSelectOptions(
+          productEditInputs.find((input) => input instanceof HTMLElement && input.dataset.productEdit === "category"),
+          categories,
+          productEditInputs.find((input) => input instanceof HTMLSelectElement && input.dataset.productEdit === "category")?.value ?? ""
+        );
+        renderProductCreateCategories();
 
         const optionGroups = {
           sets: catalogOptions.sets,
@@ -1162,15 +1180,17 @@ const defaultProductCategoryOptions = productCategories.sealed;
       };
 
       const renderProductCreateCategories = () => {
-        if (!isSelect(productCreateKindInput) || !(productCreateCategoryInput instanceof HTMLInputElement)) return;
+        if (!isSelect(productCreateKindInput) || !isSelect(productCreateCategoryInput)) return;
 
         const kind = productCreateKindInput.value === "single" ? "single" : "sealed";
-        const categories = Array.isArray(productCategoryOptions[kind]) ? productCategoryOptions[kind] : [];
+        const categories = uniqueSorted([
+          ...(Array.isArray(productCategoryOptions[kind]) ? productCategoryOptions[kind] : []),
+          ...inventoryItems.filter((product) => product.kind === kind).map((product) => product.category),
+          ...catalogOptions.categories
+        ]);
         const previousValue = productCreateCategoryInput.value;
 
-        if (!previousValue.trim() || Object.values(productCategoryOptions).flat().includes(previousValue)) {
-          productCreateCategoryInput.value = categories[0] ?? previousValue;
-        }
+        renderSelectOptions(productCreateCategoryInput, categories, categories.includes(previousValue) ? previousValue : categories[0]);
       };
 
       const activeClass =
@@ -1251,6 +1271,9 @@ const defaultProductCategoryOptions = productCategories.sealed;
       const setProductEditField = (key, value) => {
         const field = productEditInputs.find((input) => input instanceof HTMLElement && input.dataset.productEdit === key);
         if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement) {
+          if (field instanceof HTMLSelectElement && key === "category" && value && !Array.from(field.options).some((option) => option.value === String(value))) {
+            field.append(new Option(String(value), String(value)));
+          }
           field.value = value == null ? "" : String(value);
         }
       };
