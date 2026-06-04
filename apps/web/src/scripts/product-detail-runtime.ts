@@ -97,7 +97,7 @@ const renderProduct = (product: Product) => {
           ${
             variants.length
               ? `<div class="mt-6" data-variant-picker>
-                  <p class="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Diseno</p>
+                  <p class="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Diseño</p>
                   <div class="flex flex-wrap gap-2">
                     ${variants
                       .map(
@@ -189,7 +189,10 @@ const initProductDetail = async () => {
   const container = document.querySelector("[data-product-detail]");
   if (!(container instanceof HTMLElement)) return;
 
-  const productId = new URLSearchParams(window.location.search).get("id");
+  const productId =
+    new URLSearchParams(window.location.search).get("id") ??
+    container.dataset.productId ??
+    decodeURIComponent(window.location.pathname.split("/").filter(Boolean).pop() ?? "");
   if (!productId) {
     container.innerHTML = `<p class="mx-auto mt-8 max-w-3xl rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">Producto no encontrado.</p>`;
     return;

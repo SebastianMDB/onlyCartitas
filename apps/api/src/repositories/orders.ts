@@ -59,7 +59,7 @@ export async function createOrder(input: CreateOrderInput) {
       const variant = item.variantId ? product.variants?.find((candidate) => candidate.id === item.variantId) : null;
       const availableStock = variant ? (variant.active === false ? 0 : variant.stock) : product.stock;
       if (product.variants?.length && !variant) {
-        throw new ApiError(400, `Selecciona un diseno para ${product.name}`);
+        throw new ApiError(400, `Selecciona un diseño para ${product.name}`);
       }
       if (item.quantity < 1 || item.quantity > availableStock) {
         throw new ApiError(400, `Stock insuficiente para ${product.name}`);

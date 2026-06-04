@@ -51,7 +51,7 @@ const selectedStock = selectedVariant ? selectedVariant.stock : product.stock;
   <body class="bg-[color:var(--color-surface)] text-slate-900 antialiased">
     <Header />
 
-    <main class="pb-20">
+    <main class="pb-20" data-product-detail data-product-id={product.id}>
       <section class="mx-auto grid w-full max-w-7xl gap-8 px-4 pt-8 sm:px-6 lg:grid-cols-[minmax(0,520px)_1fr] lg:px-8" data-product-id={product.id}>
         <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)]">
           <div class="relative flex aspect-[4/5] items-center justify-center rounded-[1.6rem] bg-[color:var(--color-surface)] p-5">
@@ -180,6 +180,10 @@ const selectedStock = selectedVariant ? selectedVariant.stock : product.stock;
     </main>
 
     <Footer />
+    <script is:inline type="application/json" data-product-detail-config set:html={JSON.stringify({ apiBaseUrl: import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000" })}></script>
+    <script>
+      import "../../scripts/product-detail-runtime";
+    </script>
     <script>
       document.addEventListener("click", (event) => {
         const button = event.target instanceof HTMLElement ? event.target.closest("[data-product-variant]") : null;

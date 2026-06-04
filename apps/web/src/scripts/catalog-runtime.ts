@@ -136,7 +136,7 @@ const renderProductCard = (product: Product, columns: CatalogConfig["columns"] =
 
         ${
           hasVariants && product.stock > 0
-            ? `<a href="${productUrl}" class="mt-5 inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-full bg-[#071c2b] px-4 py-3 text-center text-sm font-semibold text-white shadow-[0_10px_22px_rgba(17,48,71,0.14)] transition hover:bg-[#0d2a3f]">Elegir diseno</a>`
+            ? `<a href="${productUrl}" class="mt-5 inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-full bg-[#071c2b] px-4 py-3 text-center text-sm font-semibold text-white shadow-[0_10px_22px_rgba(17,48,71,0.14)] transition hover:bg-[#0d2a3f]">Elegir diseño</a>`
             : `<button
                 type="button"
                 class="mt-5 inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-full bg-[#071c2b] px-4 py-3 text-center text-sm font-semibold text-white shadow-[0_10px_22px_rgba(17,48,71,0.14)] transition hover:bg-[#0d2a3f] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none"
