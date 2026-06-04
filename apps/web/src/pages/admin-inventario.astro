@@ -795,14 +795,37 @@ const defaultProductCategoryOptions = productCategories.sealed;
         return payload.data;
       };
 
-      const updateProductDetails = async (product, input) => {
-        const response = await fetch(`${API_BASE_URL}/api/products/${product.id}`, {
-          method: "PATCH",
-          headers: authHeaders(),
-          body: JSON.stringify(input)
-        });
+      const sameProductIdentity = (product, input) =>
+        String(product?.kind ?? "") === String(input.kind ?? "") &&
+        String(product?.name ?? "").trim().toLowerCase() === String(input.name ?? "").trim().toLowerCase() &&
+        String(product?.category ?? "").trim().toLowerCase() === String(input.category ?? "").trim().toLowerCase() &&
+        String(product?.set ?? "").trim().toLowerCase() === String(input.set ?? "").trim().toLowerCase();
 
-        const payload = await response.json().catch(() => null);
+      const updateProductDetails = async (product, input) => {
+        const patchProduct = async (targetProduct) => {
+          const response = await fetch(`${API_BASE_URL}/api/products/${targetProduct.id}`, {
+            method: "PATCH",
+            headers: authHeaders(),
+            body: JSON.stringify(input)
+          });
+          const payload = await response.json().catch(() => null);
+          return { response, payload };
+        };
+
+        let { response, payload } = await patchProduct(product);
+
+        if (response.status === 404) {
+          const products = await loadInventoryProducts();
+          const fallbackProduct = products
+            .map(mapProductForAdmin)
+            .find((candidate) => sameProductIdentity(candidate, input) || sameProductIdentity(candidate, product));
+          if (fallbackProduct && fallbackProduct.id !== product.id) {
+            productMap.set(fallbackProduct.id, fallbackProduct);
+            if (isSelect(productSelect)) productSelect.value = fallbackProduct.id;
+            ({ response, payload } = await patchProduct(fallbackProduct));
+          }
+        }
+
         if (!response.ok) {
           throw new Error(getProductCreateError(payload));
         }
@@ -1446,6 +1469,11 @@ const defaultProductCategoryOptions = productCategories.sealed;
         if (marketPrice !== null && !Number.isFinite(marketPrice)) {
           throw new Error("El precio mercado debe quedar vacio o ser un numero valido.");
         }
+        const variants = parseVariants(raw.variants);
+        const variantStock = Array.isArray(variants)
+          ? variants.reduce((total, variant) => total + (variant.active === false ? 0 : Number(variant.stock ?? 0)), 0)
+          : null;
+        const currentStock = Number(product.stock ?? 0);
 
         const updatedProduct = await updateProductDetails(product, {
           kind: raw.kind === "single" ? "single" : "sealed",
@@ -1454,6 +1482,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
           description: raw.description || null,
           set: raw.set,
           language: raw.language,
+          stock: variantStock ?? (Number.isFinite(currentStock) ? currentStock : 0),
           price,
           image: raw.image,
           previousPrice: previousPrice !== null && previousPrice > 0 ? previousPrice : null,
@@ -1463,7 +1492,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
           playability: raw.playability || null,
           marketPrice: marketPrice !== null && marketPrice > 0 ? marketPrice : null,
           manualSegment: raw.manualSegment || null,
-          variants: parseVariants(raw.variants)
+          variants
         });
         const mappedProduct = mapProductForAdmin(updatedProduct);
         const index = inventoryItems.findIndex((item) => item.id === product.id);

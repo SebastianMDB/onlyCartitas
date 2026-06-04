@@ -63,6 +63,7 @@ const productUpdateSchema = z.object({
   description: z.string().trim().max(800).nullable().optional(),
   set: z.string().trim().min(2).max(120).optional(),
   language: z.enum(["japanese", "spanish", "english"]).optional(),
+  stock: z.number().int().min(0).optional(),
   variants: z.array(productVariantSchema).max(40).nullable().optional(),
   price: z.number().min(0).optional(),
   previousPrice: z.number().min(0).nullable().optional(),
