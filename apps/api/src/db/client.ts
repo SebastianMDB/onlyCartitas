@@ -13,6 +13,7 @@ export const db = drizzle(queryClient, { schema });
 export async function ensureRuntimeSchema() {
   await queryClient`
     alter table if exists public.products
+      add column if not exists description text,
       add column if not exists variants jsonb,
       add column if not exists market_price numeric(10, 2),
       add column if not exists manual_segment text

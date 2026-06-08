@@ -75,7 +75,8 @@ export async function listProducts(filters: ProductFilters = {}) {
       .orderBy(desc(products.createdAt));
 
     return (rows as Product[]).map(normalizeProduct);
-  } catch {
+  } catch (error) {
+    console.error("listProducts failed", error);
     throw new ApiError(500, "No se pudieron obtener los productos");
   }
 }
@@ -85,7 +86,8 @@ export async function getProductById(id: string) {
     const [product] = await db.select().from(products).where(eq(products.id, id)).limit(1);
 
     return product ? normalizeProduct(product as Product) : null;
-  } catch {
+  } catch (error) {
+    console.error("getProductById failed", error);
     throw new ApiError(500, "No se pudo obtener el producto");
   }
 }
@@ -117,6 +119,7 @@ export async function createProduct(input: ProductInput) {
 
     return normalizeProduct(product as Product);
   } catch (error) {
+    console.error("createProduct failed", error);
     if (error instanceof ApiError) throw error;
     throw new ApiError(500, "No se pudo crear el producto");
   }
@@ -134,7 +137,8 @@ export async function updateProductInventory(id: string, input: { stock?: number
       .returning();
 
     return product ? normalizeProduct(product as Product) : null;
-  } catch {
+  } catch (error) {
+    console.error("updateProductInventory failed", error);
     throw new ApiError(500, "No se pudo actualizar el inventario");
   }
 }
@@ -160,7 +164,8 @@ export async function updateProduct(id: string, input: Partial<ProductInput>) {
       .returning();
 
     return product ? normalizeProduct(product as Product) : null;
-  } catch {
+  } catch (error) {
+    console.error("updateProduct failed", error);
     throw new ApiError(500, "No se pudo actualizar el producto");
   }
 }
