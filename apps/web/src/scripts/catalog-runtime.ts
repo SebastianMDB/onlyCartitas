@@ -174,14 +174,14 @@ const renderOptions = (select: Element | null, values: string[], placeholder: st
   select.value = values.some((value) => normalize(value) === currentValue) ? currentValue : "all";
 };
 
-const fetchProductsFromApi = async (apiBaseUrl: string, signal: AbortSignal) => {
+const fetchProductsFromApi = async (apiBaseUrl: string) => {
   const cached = window.__onlycartitasProductsCache;
   if (cached?.apiBaseUrl === apiBaseUrl && cached.promise && !cached.signal?.aborted) {
     return cached.promise;
   }
 
   const url = new URL("/api/products", apiBaseUrl);
-  const promise = fetch(url, { signal })
+  const promise = fetch(url)
     .then(async (response) => {
       const payload = await response.json().catch(() => null);
       return response.ok && Array.isArray(payload?.data) ? (payload.data as Product[]) : [];
@@ -211,8 +211,7 @@ const fetchProductsFromApi = async (apiBaseUrl: string, signal: AbortSignal) => 
     apiBaseUrl,
     fetchedAt: cached?.fetchedAt ?? 0,
     products: cached?.products ?? [],
-    promise,
-    signal
+    promise
   };
 
   return promise;
@@ -224,7 +223,7 @@ const loadProducts = async (apiBaseUrl: string, signal: AbortSignal) => {
     return cached.products;
   }
 
-  return fetchProductsFromApi(apiBaseUrl, signal);
+  return fetchProductsFromApi(apiBaseUrl);
 };
 
 const filterProductsForConfig = (products: Product[], config: CatalogConfig) =>
@@ -399,7 +398,7 @@ const initCatalog = async () => {
 
   if (hadUsableCache) {
     const currentSnapshot = JSON.stringify(products);
-    const freshProducts = filterProductsForConfig(await fetchProductsFromApi(apiBaseUrl, signal), config);
+    const freshProducts = filterProductsForConfig(await fetchProductsFromApi(apiBaseUrl), config);
     if (signal.aborted || JSON.stringify(freshProducts) === currentSnapshot) return;
     products = freshProducts;
     renderFilters();
