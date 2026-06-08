@@ -159,9 +159,9 @@ const renderProduct = (product: Product, siblingDesignChoices: DesignChoice[] = 
       : null;
 
   return `
-    <section class="mx-auto grid w-full max-w-7xl gap-8 px-4 pt-8 sm:px-6 lg:grid-cols-[minmax(0,520px)_1fr] lg:px-8" data-product-id="${escapeHtml(product.id)}">
-      <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)]">
-        <div class="relative flex aspect-[4/5] items-center justify-center rounded-[1.6rem] bg-[color:var(--color-surface)] p-5">
+    <section class="mx-auto grid w-full max-w-7xl gap-8 px-4 pt-8 sm:px-6 lg:grid-cols-[minmax(0,540px)_1fr] lg:px-8" data-product-id="${escapeHtml(product.id)}">
+      <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-4 shadow-[0_20px_60px_rgba(17,48,71,0.08)] lg:sticky lg:top-28 lg:self-start">
+        <div class="relative flex aspect-square items-center justify-center rounded-[1.6rem] bg-[color:var(--color-surface)] p-5">
           ${discountPercent ? `<span class="absolute left-5 top-5 rounded-full bg-amber-300 px-3 py-1 text-sm font-semibold text-slate-950">-${discountPercent}%</span>` : ""}
           <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" class="h-full w-full object-contain" width="900" height="1100" decoding="async" />
         </div>
@@ -178,7 +178,7 @@ const renderProduct = (product: Product, siblingDesignChoices: DesignChoice[] = 
           <div class="mt-6 grid gap-3 sm:grid-cols-3">
             <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Stock</p>
-              <p class="mt-2 text-2xl font-semibold text-[color:var(--color-primary)]" data-product-stock-label>Stock ${escapeHtml(selectedStock)}</p>
+              <p class="mt-2 text-2xl font-semibold text-[color:var(--color-primary)]" data-product-stock-label>${escapeHtml(selectedStock)}</p>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Idioma</p>
@@ -190,14 +190,17 @@ const renderProduct = (product: Product, siblingDesignChoices: DesignChoice[] = 
             </div>
           </div>
 
-          <div class="mt-7 flex flex-wrap items-end gap-3">
-            <p class="text-4xl font-semibold text-[color:var(--color-primary)]">${currencyFormatter.format(product.price)}</p>
-            ${product.previousPrice ? `<p class="pb-1 text-lg text-slate-400 line-through">${currencyFormatter.format(product.previousPrice)}</p>` : ""}
+          <div class="mt-7 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Precio</p>
+            <div class="mt-2 flex flex-wrap items-end gap-3">
+              <p class="text-4xl font-semibold text-[color:var(--color-primary)]">${currencyFormatter.format(product.price)}</p>
+              ${product.previousPrice ? `<p class="pb-1 text-lg text-slate-400 line-through">${currencyFormatter.format(product.previousPrice)}</p>` : ""}
+            </div>
           </div>
 
           ${
             designChoices.length
-              ? `<div class="mt-6" data-variant-picker>
+              ? `<div class="mt-6 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4" data-variant-picker>
                   <p class="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Diseño</p>
                   <div class="flex flex-wrap gap-2">
                     ${designChoices
@@ -213,7 +216,7 @@ const renderProduct = (product: Product, siblingDesignChoices: DesignChoice[] = 
 
           <button
             type="button"
-            class="mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none sm:w-auto"
+            class="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none"
             data-cart-add
             data-cart-id="${escapeHtml(selectedCartProductId)}"
             data-cart-name="${escapeHtml(selectedCartProductName)}"
@@ -232,23 +235,15 @@ const renderProduct = (product: Product, siblingDesignChoices: DesignChoice[] = 
         </div>
 
         <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-7">
-          <h2 class="text-xl font-semibold text-[color:var(--color-primary)]">Detalles</h2>
+          <h2 class="text-xl font-semibold text-[color:var(--color-primary)]">Ficha tecnica</h2>
           <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
             <div class="rounded-2xl bg-slate-50 p-4">
               <dt class="font-semibold text-slate-500">Categoria</dt>
               <dd class="mt-1 text-slate-950">${escapeHtml(product.category)}</dd>
             </div>
             <div class="rounded-2xl bg-slate-50 p-4">
-              <dt class="font-semibold text-slate-500">Disponibilidad</dt>
-              <dd class="mt-1 text-slate-950">${selectedStock > 0 ? "Disponible para compra" : "Sin stock"}</dd>
-            </div>
-            <div class="rounded-2xl bg-slate-50 p-4">
               <dt class="font-semibold text-slate-500">Condicion</dt>
-              <dd class="mt-1 text-slate-950">Nuevo / sellado o carta protegida</dd>
-            </div>
-            <div class="rounded-2xl bg-slate-50 p-4">
-              <dt class="font-semibold text-slate-500">Entrega</dt>
-              <dd class="mt-1 text-slate-950">Envio o retiro coordinado</dd>
+              <dd class="mt-1 text-slate-950">${product.kind === "sealed" ? "Producto sellado" : "Carta protegida"}</dd>
             </div>
           </dl>
         </div>
@@ -282,7 +277,7 @@ document.addEventListener("click", (event) => {
   cartButton.disabled = stock <= 0;
   cartButton.textContent = stock > 0 ? "Agregar al carrito" : "Sin stock";
   const stockLabel = section?.querySelector("[data-product-stock-label]");
-  if (stockLabel instanceof HTMLElement) stockLabel.textContent = `Stock ${stock}`;
+  if (stockLabel instanceof HTMLElement) stockLabel.textContent = String(stock);
 });
 
 const initProductDetail = async () => {
