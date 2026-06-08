@@ -1061,11 +1061,33 @@ const defaultProductCategoryOptions = productCategories.sealed;
           const stockInput = row.querySelector("[data-variant-stock]");
           const statusInput = row.querySelector("[data-variant-status]");
           return {
+            id: row instanceof HTMLElement ? row.dataset.variantId ?? "" : "",
             name: nameInput instanceof HTMLInputElement ? nameInput.value.trim() : "",
             stock: stockInput instanceof HTMLInputElement ? Number(stockInput.value) : 0,
             active: statusInput instanceof HTMLSelectElement ? statusInput.value !== "inactive" : true
           };
         });
+
+      const normalizeVariantRows = (scope) => {
+        const usedIds = new Set();
+        return collectVariantRows(scope)
+          .filter((variant) => variant.name || Number(variant.stock) > 0)
+          .map((variant, index) => {
+            const stock = Number(variant.stock);
+            if (!variant.name || !Number.isFinite(stock) || stock < 0) {
+              throw new Error("Revisa los diseños: cada fila necesita nombre y stock valido.");
+            }
+            let id = String(variant.id || createVariantId(variant.name, index));
+            while (usedIds.has(id)) id = `${id}-${index + 1}`;
+            usedIds.add(id);
+            return {
+              id,
+              name: variant.name,
+              stock: Math.floor(stock),
+              active: variant.active !== false
+            };
+          });
+      };
 
       const hasVariantRows = (scope) =>
         collectVariantRows(scope).some((variant) => variant.name || Number(variant.stock) > 0);
@@ -1100,7 +1122,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
         list.innerHTML = variants
           .map(
             (variant) => `
-              <article class="grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 md:grid-cols-[minmax(0,1fr)_120px_150px_44px] md:items-end" data-variant-row>
+              <article class="grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 md:grid-cols-[minmax(0,1fr)_120px_150px_44px] md:items-end" data-variant-row data-variant-id="${escapeHtml(variant.id ?? "")}">
                 <label class="block">
                   <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Diseño</span>
                   <input data-variant-name type="text" value="${escapeHtml(variant.name ?? "")}" placeholder="Salamence" class="h-11 w-full rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
@@ -1419,16 +1441,23 @@ const defaultProductCategoryOptions = productCategories.sealed;
 
         syncStatusWithStock();
         const stock = Number(stockInput.value);
+        const latestProduct = productMap.get(product.id) ?? product;
         const nextState = {
           stock: Number.isFinite(stock) && stock >= 0 ? stock : 0,
-          status: statusSelect.value === "inactive" ? "inactive" : "active"
+          status: statusSelect.value === "inactive" ? "inactive" : "active",
+          variants: Array.isArray(latestProduct.variants) ? latestProduct.variants : []
         };
 
         try {
-          const updatedProduct = await updateInventory(product, nextState);
+          const updatedProduct = await updateInventory(latestProduct, nextState);
           const mappedProduct = mapProductForAdmin(updatedProduct);
-          Object.assign(product, mappedProduct);
-          state[product.id] = nextState;
+          Object.assign(latestProduct, mappedProduct);
+          productMap.set(mappedProduct.id, mappedProduct);
+          state[mappedProduct.id] = {
+            stock: nextState.stock,
+            status: nextState.status,
+            variants: mappedProduct.variants
+          };
           saveState();
           showMessage("Producto actualizado en el backend.");
         } catch (error) {
@@ -1469,7 +1498,8 @@ const defaultProductCategoryOptions = productCategories.sealed;
         if (marketPrice !== null && !Number.isFinite(marketPrice)) {
           throw new Error("El precio mercado debe quedar vacio o ser un numero valido.");
         }
-        const variants = parseVariants(raw.variants);
+        const variantRows = normalizeVariantRows("edit");
+        const variants = variantRows.length > 0 ? variantRows : null;
         const variantStock = Array.isArray(variants)
           ? variants.reduce((total, variant) => total + (variant.active === false ? 0 : Number(variant.stock ?? 0)), 0)
           : null;
@@ -1498,6 +1528,12 @@ const defaultProductCategoryOptions = productCategories.sealed;
         const index = inventoryItems.findIndex((item) => item.id === product.id);
         if (index >= 0) inventoryItems[index] = mappedProduct;
         productMap.set(mappedProduct.id, mappedProduct);
+        state[mappedProduct.id] = {
+          stock: mappedProduct.stock,
+          status: mappedProduct.active === false ? "inactive" : "active",
+          variants: mappedProduct.variants
+        };
+        saveState();
         activeType = mappedProduct.type;
         renderDynamicOptions();
         renderProductOptions();
@@ -1520,7 +1556,8 @@ const defaultProductCategoryOptions = productCategories.sealed;
         const raw = readProductCreateForm();
         const hasOffer = productCreateOfferToggle instanceof HTMLInputElement && productCreateOfferToggle.checked;
         const stock = Number(raw.stock ?? 0);
-        const variants = parseVariants(raw.variants);
+        const variantRows = normalizeVariantRows("create");
+        const variants = variantRows.length > 0 ? variantRows : null;
         const price = Number(raw.price ?? 0);
         const previousPrice = Number(raw.previousPrice ?? 0);
         const requiredFields = ["name", "category", "set", "image"];
