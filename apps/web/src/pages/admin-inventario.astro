@@ -662,6 +662,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
         categories: Object.values(productCategoryOptions).flat(),
         illustrators: []
       };
+      let catalogOptionsWritable = true;
 
       const mapProductForAdmin = (product) => ({
         id: product.id,
@@ -1218,13 +1219,22 @@ const defaultProductCategoryOptions = productCategories.sealed;
       };
 
       const saveCatalogOptions = async () => {
+        if (!catalogOptionsWritable) {
+          throw new Error("Las listas del catalogo no estan disponibles en este API.");
+        }
         const response = await fetch(`${API_BASE_URL}/api/admin/site-settings/catalog-options`, {
           method: "PATCH",
           headers: authHeaders(),
           body: JSON.stringify(catalogOptions)
         });
         const payload = await response.json().catch(() => null);
+        if (response.status === 404) {
+          catalogOptionsWritable = false;
+          renderDynamicOptions();
+          throw new Error("Las listas del catalogo no estan disponibles en este API.");
+        }
         if (!response.ok) throw new Error(payload?.error ?? "No se pudieron guardar las listas.");
+        catalogOptionsWritable = true;
         catalogOptions = {
           sets: Array.isArray(payload.data?.sets) ? payload.data.sets : [],
           categories: Array.isArray(payload.data?.categories) ? payload.data.categories : [],
@@ -1237,7 +1247,13 @@ const defaultProductCategoryOptions = productCategories.sealed;
         try {
           const response = await fetch(`${API_BASE_URL}/api/site-settings/catalog-options`);
           const payload = await response.json().catch(() => null);
+          if (response.status === 404) {
+            catalogOptionsWritable = false;
+            renderDynamicOptions();
+            return;
+          }
           if (!response.ok) throw new Error(payload?.error ?? "No se pudieron cargar las listas.");
+          catalogOptionsWritable = true;
           catalogOptions = {
             sets: Array.isArray(payload.data?.sets) ? payload.data.sets : [],
             categories: Array.isArray(payload.data?.categories) ? payload.data.categories : [],
