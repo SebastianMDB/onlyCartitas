@@ -52,6 +52,11 @@ app.setErrorHandler((error, _request, reply) => {
   });
 });
 
+app.get("/", async () => ({
+  ok: true,
+  service: "onlycartitas-api"
+}));
+
 app.get("/health", async () => {
   await queryClient`select 1`;
 
