@@ -2,7 +2,7 @@ import "dotenv/config";
 import cors from "@fastify/cors";
 import Fastify from "fastify";
 import { ZodError } from "zod";
-import { queryClient } from "./db/client.js";
+import { ensureRuntimeSchema, queryClient } from "./db/client.js";
 import { env } from "./env.js";
 import { ApiError } from "./http.js";
 import { authRoutes } from "./routes/auth.js";
@@ -71,6 +71,7 @@ await app.register(siteSettingsRoutes);
 
 try {
   await queryClient`select 1`;
+  await ensureRuntimeSchema();
 
   await app.listen({
     port: env.PORT,
