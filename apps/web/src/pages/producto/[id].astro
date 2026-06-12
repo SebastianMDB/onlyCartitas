@@ -37,6 +37,13 @@ const discountPercent =
 const variants = Array.isArray(product.variants) ? product.variants.filter((variant) => variant.active !== false) : [];
 const selectedVariant = variants.find((variant) => variant.stock > 0) ?? variants[0] ?? null;
 const selectedStock = selectedVariant ? selectedVariant.stock : product.stock;
+const designVariantClass = (active: boolean) =>
+  [
+    "grid min-h-[4.25rem] rounded-2xl border px-4 py-3 text-left transition disabled:cursor-not-allowed disabled:opacity-45",
+    active
+      ? "border-slate-950 bg-slate-950 text-white shadow-[0_14px_34px_rgba(17,48,71,0.18)]"
+      : "border-slate-300 bg-white text-slate-700 hover:border-slate-500 hover:text-slate-950"
+  ].join(" ");
 ---
 
 <!doctype html>
@@ -100,22 +107,25 @@ const selectedStock = selectedVariant ? selectedVariant.stock : product.stock;
             {
               variants.length > 0 ? (
                 <div class="mt-6 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4" data-variant-picker>
-                  <p class="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Diseño</p>
-                  <div class="flex flex-wrap gap-2">
+                  <div class="mb-3 flex items-center justify-between gap-3">
+                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Dise&ntilde;o</p>
+                    <p class="text-xs font-medium text-slate-500">{variants.length} opciones</p>
+                  </div>
+                  <div class="grid gap-2 sm:grid-cols-2">
                     {variants.map((variant) => (
                       <button
                         type="button"
-                        class={`rounded-full border px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-45 ${
-                          variant.id === selectedVariant?.id
-                            ? "border-slate-950 bg-slate-950 text-white"
-                            : "border-slate-300 bg-white text-slate-700 hover:border-slate-500"
-                        }`}
+                        class={designVariantClass(variant.id === selectedVariant?.id)}
                         data-product-variant={variant.id}
                         data-variant-name={variant.name}
                         data-variant-stock={String(variant.stock)}
+                        aria-pressed={variant.id === selectedVariant?.id ? "true" : "false"}
                         disabled={variant.stock <= 0}
                       >
-                        {variant.name}
+                        <span class="text-sm font-semibold leading-snug">{variant.name}</span>
+                        <span class="mt-1 text-xs font-medium opacity-75">
+                          {variant.stock > 0 ? `${variant.stock} disponibles` : "Sin stock"}
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -180,6 +190,14 @@ const selectedStock = selectedVariant ? selectedVariant.stock : product.stock;
       import "../../scripts/product-detail-runtime";
     </script>
     <script>
+      const designVariantClass = (active: boolean) =>
+        [
+          "grid min-h-[4.25rem] rounded-2xl border px-4 py-3 text-left transition disabled:cursor-not-allowed disabled:opacity-45",
+          active
+            ? "border-slate-950 bg-slate-950 text-white shadow-[0_14px_34px_rgba(17,48,71,0.18)]"
+            : "border-slate-300 bg-white text-slate-700 hover:border-slate-500 hover:text-slate-950"
+        ].join(" ");
+
       document.addEventListener("click", (event) => {
         const button = event.target instanceof HTMLElement ? event.target.closest("[data-product-variant]") : null;
         if (!(button instanceof HTMLButtonElement)) return;
@@ -190,9 +208,8 @@ const selectedStock = selectedVariant ? selectedVariant.stock : product.stock;
         section?.querySelectorAll("[data-product-variant]").forEach((item) => {
           if (!(item instanceof HTMLButtonElement)) return;
           const isActive = item === button;
-          item.className = isActive
-            ? "rounded-full border px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-45 border-slate-950 bg-slate-950 text-white"
-            : "rounded-full border px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-45 border-slate-300 bg-white text-slate-700 hover:border-slate-500";
+          item.className = designVariantClass(isActive);
+          item.setAttribute("aria-pressed", isActive ? "true" : "false");
         });
 
         const stock = Number(button.dataset.variantStock ?? 0);

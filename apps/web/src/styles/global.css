@@ -11,11 +11,11 @@
 }
 
 html[data-theme="dark"] {
-  --color-surface: #061d2a;
+  --color-surface: #071824;
   --color-primary: #edf6fb;
-  --color-secondary: #86afc9;
-  --color-page-start: #04131d;
-  --color-page-end: #082534;
+  --color-secondary: #7fc7d8;
+  --color-page-start: #030b12;
+  --color-page-end: #0c2633;
   color-scheme: dark;
 }
 
@@ -45,8 +45,10 @@ body > footer {
 }
 
 html[data-theme="dark"] body {
-  background: radial-gradient(circle at top, rgba(20, 61, 88, 0.46), transparent 32%),
-    linear-gradient(180deg, var(--color-page-start) 0%, var(--color-surface) 34%, var(--color-page-end) 100%);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(127, 199, 216, 0.18), transparent 28%),
+    radial-gradient(circle at 82% 12%, rgba(255, 210, 63, 0.08), transparent 24%),
+    linear-gradient(180deg, var(--color-page-start) 0%, var(--color-surface) 42%, var(--color-page-end) 100%);
 }
 
 html[data-theme="dark"] .bg-\[\#071c2b\],
@@ -73,13 +75,13 @@ html[data-theme="dark"] .bg-\[color\:var\(--color-primary\)\] {
 html[data-theme="dark"] .bg-white,
 html[data-theme="dark"] .bg-white\/80,
 html[data-theme="dark"] .bg-white\/90 {
-  background-color: rgba(6, 29, 42, 0.88) !important;
+  background-color: rgba(8, 28, 40, 0.82) !important;
 }
 
 html[data-theme="dark"] .bg-slate-50,
 html[data-theme="dark"] .bg-slate-100,
 html[data-theme="dark"] .hover\:bg-slate-100:hover {
-  background-color: rgba(9, 38, 55, 0.92) !important;
+  background-color: rgba(12, 43, 58, 0.76) !important;
 }
 
 html[data-theme="dark"] .border-white\/60,
@@ -132,6 +134,67 @@ html:not([data-theme="dark"]) [data-theme-toggle] [data-theme-moon] {
 html[data-theme="dark"] [data-cart-count] {
   background-color: #061d2a !important;
   color: #dcecf7 !important;
+}
+
+html[data-theme="dark"] header {
+  background-color: rgba(4, 15, 24, 0.82) !important;
+  border-color: rgba(127, 199, 216, 0.18) !important;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+}
+
+html[data-theme="dark"] [data-product-card],
+html[data-theme="dark"] [data-product-detail] section > div > .rounded-\[2rem\],
+html[data-theme="dark"] [data-cart-panel] {
+  background:
+    linear-gradient(145deg, rgba(14, 45, 61, 0.92), rgba(6, 22, 33, 0.96)) !important;
+  border-color: rgba(127, 199, 216, 0.24) !important;
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+html[data-theme="dark"] [data-product-card] > a,
+html[data-theme="dark"] [data-product-detail] .aspect-square {
+  background:
+    radial-gradient(circle at 50% 24%, rgba(127, 199, 216, 0.2), transparent 42%),
+    linear-gradient(180deg, rgba(15, 54, 72, 0.92), rgba(5, 18, 27, 0.96)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+html[data-theme="dark"] [data-variant-picker] {
+  background:
+    linear-gradient(180deg, rgba(10, 34, 48, 0.86), rgba(7, 24, 36, 0.92)) !important;
+  border-color: rgba(127, 199, 216, 0.22) !important;
+}
+
+html[data-theme="dark"] [data-design-choice],
+html[data-theme="dark"] [data-product-variant] {
+  background-color: rgba(6, 22, 33, 0.72) !important;
+  border-color: rgba(127, 199, 216, 0.28) !important;
+  color: #d9edf5 !important;
+}
+
+html[data-theme="dark"] [data-design-choice][aria-pressed="true"],
+html[data-theme="dark"] [data-product-variant][aria-pressed="true"] {
+  background: linear-gradient(135deg, #e9f7fb, #9bd6e3) !important;
+  border-color: rgba(233, 247, 251, 0.86) !important;
+  color: #051620 !important;
+  box-shadow: 0 14px 34px rgba(127, 199, 216, 0.22) !important;
+}
+
+html[data-theme="dark"] [data-design-choice]:not(:disabled):hover,
+html[data-theme="dark"] [data-product-variant]:not(:disabled):hover {
+  border-color: rgba(233, 247, 251, 0.62) !important;
+}
+
+html[data-theme="dark"] [data-design-cta] {
+  background: linear-gradient(135deg, #e9f7fb, #9bd6e3) !important;
+  color: #051620 !important;
+  box-shadow: 0 14px 34px rgba(127, 199, 216, 0.2) !important;
+}
+
+html[data-theme="dark"] [data-design-cta]:hover {
+  background: linear-gradient(135deg, #ffffff, #b7e4ec) !important;
 }
 
 .hide-scrollbar {

@@ -101,6 +101,14 @@ const getDesignLabel = (baseProduct: Product, product: Product) => {
   return productName;
 };
 
+const designChoiceClass = (active: boolean) =>
+  [
+    "grid min-h-[4.25rem] min-w-[9rem] flex-1 rounded-2xl border px-4 py-3 text-left transition disabled:cursor-not-allowed disabled:opacity-45",
+    active
+      ? "border-slate-950 bg-slate-950 text-white shadow-[0_14px_34px_rgba(17,48,71,0.18)]"
+      : "border-slate-300 bg-white text-slate-700 hover:border-slate-500 hover:text-slate-950"
+  ].join(" ");
+
 const findSiblingDesignChoices = (product: Product, products: Product[]): DesignChoice[] => {
   const baseName = getBaseProductName(product.name);
   if (!baseName) return [];
@@ -201,12 +209,18 @@ const renderProduct = (product: Product, siblingDesignChoices: DesignChoice[] = 
           ${
             designChoices.length
               ? `<div class="mt-6 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4" data-variant-picker>
-                  <p class="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Diseño</p>
-                  <div class="flex flex-wrap gap-2">
+                  <div class="mb-3 flex items-center justify-between gap-3">
+                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Dise&ntilde;o</p>
+                    <p class="text-xs font-medium text-slate-500">${designChoices.length} opciones</p>
+                  </div>
+                  <div class="grid gap-2 sm:grid-cols-2">
                     ${designChoices
                       .map(
                         (choice) =>
-                          `<button type="button" class="rounded-full border px-4 py-2 text-sm font-semibold transition ${choice.id === selectedChoice?.id ? "border-slate-950 bg-slate-950 text-white" : "border-slate-300 bg-white text-slate-700 hover:border-slate-500"} disabled:cursor-not-allowed disabled:opacity-45" data-design-choice="${escapeHtml(choice.id)}" data-choice-product-id="${escapeHtml(choice.productId)}" data-choice-product-name="${escapeHtml(choice.productName)}" data-choice-stock="${escapeHtml(choice.stock)}" data-choice-image="${escapeHtml(choice.image)}" data-choice-variant-id="${escapeHtml(choice.variantId ?? "")}" data-choice-variant-name="${escapeHtml(choice.variantName ?? (siblingDesignChoices.length > 0 ? choice.label : ""))}" ${choice.stock <= 0 ? "disabled" : ""}>${escapeHtml(choice.label)}</button>`
+                          `<button type="button" class="${designChoiceClass(choice.id === selectedChoice?.id)}" data-design-choice="${escapeHtml(choice.id)}" data-choice-product-id="${escapeHtml(choice.productId)}" data-choice-product-name="${escapeHtml(choice.productName)}" data-choice-stock="${escapeHtml(choice.stock)}" data-choice-image="${escapeHtml(choice.image)}" data-choice-variant-id="${escapeHtml(choice.variantId ?? "")}" data-choice-variant-name="${escapeHtml(choice.variantName ?? (siblingDesignChoices.length > 0 ? choice.label : ""))}" aria-pressed="${choice.id === selectedChoice?.id}" ${choice.stock <= 0 ? "disabled" : ""}>
+                            <span class="text-sm font-semibold leading-snug">${escapeHtml(choice.label)}</span>
+                            <span class="mt-1 text-xs font-medium opacity-75">${choice.stock > 0 ? `${escapeHtml(choice.stock)} disponibles` : "Sin stock"}</span>
+                          </button>`
                       )
                       .join("")}
                   </div>
@@ -262,9 +276,8 @@ document.addEventListener("click", (event) => {
   section?.querySelectorAll("[data-design-choice]").forEach((item) => {
     if (!(item instanceof HTMLButtonElement)) return;
     const isActive = item === button;
-    item.className = isActive
-      ? "rounded-full border px-4 py-2 text-sm font-semibold transition border-slate-950 bg-slate-950 text-white disabled:cursor-not-allowed disabled:opacity-45"
-      : "rounded-full border px-4 py-2 text-sm font-semibold transition border-slate-300 bg-white text-slate-700 hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-45";
+    item.className = designChoiceClass(isActive);
+    item.setAttribute("aria-pressed", isActive ? "true" : "false");
   });
 
   const stock = Number(button.dataset.choiceStock ?? 0);
