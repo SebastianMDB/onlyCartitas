@@ -6,6 +6,8 @@
   --color-secondary: #739ab9;
   --color-page-start: #f5f8fb;
   --color-page-end: #e9f0f7;
+  --font-display: "Baloo 2", "Nunito Sans", "Segoe UI", sans-serif;
+  --font-body: "Nunito Sans", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   --astro-transition-duration: 0ms;
   color-scheme: light;
 }
@@ -32,7 +34,33 @@ body {
   min-height: 100dvh;
   background: radial-gradient(circle at top, rgba(115, 154, 185, 0.12), transparent 26%),
     linear-gradient(180deg, var(--color-page-start) 0%, var(--color-surface) 32%, var(--color-page-end) 100%);
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--font-body);
+  font-optical-sizing: auto;
+}
+
+h1,
+h2,
+h3,
+[data-hero-launch-set],
+[data-hero-title] {
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+header [data-nav-link],
+[data-cart-open],
+[data-design-cta],
+[data-cart-add],
+[data-pay-button] {
+  font-family: var(--font-body);
+  font-weight: 800;
 }
 
 body > main {
