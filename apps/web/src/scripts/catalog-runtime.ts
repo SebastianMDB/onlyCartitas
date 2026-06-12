@@ -122,7 +122,7 @@ const renderProductCard = (product: Product, columns: CatalogConfig["columns"] =
             </div>
           </div>
           <h3 class="${titleClass} text-lg font-semibold leading-snug text-slate-900">
-            <a href="${productUrl}" class="transition hover:text-[color:var(--color-secondary)]">${escapeHtml(product.name)}</a>
+            <a href="${productUrl}" class="line-clamp-2 break-words transition hover:text-[color:var(--color-secondary)]">${escapeHtml(product.name)}</a>
           </h3>
           <p class="mt-2 min-h-5 truncate text-sm text-slate-500">
             ${escapeHtml(product.set)}${product.illustrator ? ` - ${escapeHtml(product.illustrator)}` : ""}
