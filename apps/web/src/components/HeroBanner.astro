@@ -26,8 +26,8 @@ const launchSetName = hero.launchSetName || defaultHero.launchSetName;
 const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 ---
 
-<section class="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
-  <div class="relative overflow-hidden rounded-[2rem] bg-[color:var(--color-primary)] text-white shadow-[0_28px_80px_rgba(17,48,71,0.24)]" data-hero-root>
+<section class="mx-auto w-full max-w-7xl px-3 pt-5 sm:px-6 sm:pt-6 lg:px-8">
+  <div class="relative overflow-hidden rounded-[1.5rem] bg-[color:var(--color-primary)] text-white shadow-[0_28px_80px_rgba(17,48,71,0.24)] sm:rounded-[2rem]" data-hero-root>
     <img
       src={hero.backgroundImageUrl}
       alt=""
@@ -88,39 +88,39 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
     </svg>
     <div class="absolute -inset-px bg-gradient-to-r from-[#04131d]/95 via-[#071c2b]/72 to-[#04131d]/12"></div>
 
-    <div class="relative flex min-h-[500px] px-6 py-8 sm:px-8 lg:px-10 lg:py-10">
-      <div class="flex max-w-3xl flex-col justify-center gap-8">
+    <div class="relative flex min-h-[440px] px-5 py-7 sm:min-h-[500px] sm:px-8 lg:px-10 lg:py-10">
+      <div class="flex max-w-3xl flex-col justify-center gap-7 sm:gap-8">
         <div>
-          <div class="flex flex-wrap gap-3">
-            <span class="rounded-full bg-[#dcecf7] px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#061d2a] shadow-[0_12px_28px_rgba(17,48,71,0.22)]">
+          <div class="flex max-w-full flex-wrap gap-2 sm:gap-3">
+            <span class="rounded-full bg-[#dcecf7] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#061d2a] shadow-[0_12px_28px_rgba(17,48,71,0.22)] sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.22em]">
               Ofertas
             </span>
-            <span class="rounded-full border border-white/20 bg-white/8 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-100">
+            <span class="rounded-full border border-white/20 bg-white/8 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-100 sm:px-4 sm:py-2 sm:text-xs sm:tracking-[0.22em]">
               Retiro gratis Antofagasta +90k CLP
             </span>
           </div>
 
-          <div class="mt-8 max-w-2xl">
-            <p class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300" data-hero-primary-badge>{hero.primaryBadge}</p>
-            <h1 class="mt-3 text-5xl font-semibold leading-none tracking-tight sm:text-6xl lg:text-7xl" data-hero-launch-set>
+          <div class="mt-7 max-w-2xl sm:mt-8">
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-300 sm:text-sm sm:tracking-[0.24em]" data-hero-primary-badge>{hero.primaryBadge}</p>
+            <h1 class="mt-3 text-4xl font-semibold leading-[0.94] tracking-tight sm:text-6xl lg:text-7xl" data-hero-launch-set>
               {launchSetName}
             </h1>
-            <p class="mt-4 text-2xl font-semibold text-slate-100 sm:text-3xl" data-hero-title>{hero.title}</p>
+            <p class="mt-4 text-xl font-semibold leading-tight text-slate-100 sm:text-3xl" data-hero-title>{hero.title}</p>
           </div>
         </div>
 
-        <div class="flex flex-col gap-5">
-          <div class="flex flex-col gap-3 sm:flex-row">
+        <div class="flex flex-col gap-4 sm:gap-5">
+          <div class="flex flex-col gap-2.5 sm:flex-row sm:gap-3">
             <a
               href={hero.primaryCtaHref}
-              class="inline-flex min-h-13 items-center justify-center rounded-full bg-[#dcecf7] px-7 py-3.5 text-base font-semibold text-[#061d2a] shadow-[0_14px_30px_rgba(17,48,71,0.24)] transition hover:bg-[#f4f9fc]"
+              class="inline-flex min-h-11 items-center justify-center rounded-full bg-[#dcecf7] px-6 py-3 text-sm font-semibold text-[#061d2a] shadow-[0_14px_30px_rgba(17,48,71,0.24)] transition hover:bg-[#f4f9fc] sm:min-h-13 sm:px-7 sm:py-3.5 sm:text-base"
               data-hero-primary-cta
             >
               {hero.primaryCtaLabel}
             </a>
             <a
               href={hero.secondaryCtaHref}
-              class="inline-flex min-h-12 items-center justify-center rounded-full border border-white/25 bg-[#071c2b]/55 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-white/40 hover:bg-[#123d5a]/70"
+              class="inline-flex min-h-10 items-center justify-center rounded-full border border-white/25 bg-[#071c2b]/55 px-6 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-white/40 hover:bg-[#123d5a]/70 sm:min-h-12 sm:py-3"
               data-hero-secondary-cta
             >
               {hero.secondaryCtaLabel}

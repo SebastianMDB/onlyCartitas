@@ -15,22 +15,22 @@ const currentPath = Astro.url.pathname;
 ---
 
 <header class="sticky top-0 z-50 border-b border-white/60 bg-[color:var(--color-surface)]/92 backdrop-blur-xl">
-  <div class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 lg:px-8">
-    <div class="flex items-center gap-3 lg:gap-5">
-      <a href="/" class="flex min-w-0 shrink-0 items-center gap-3">
+  <div class="mx-auto flex w-full max-w-7xl flex-col gap-2.5 px-3 py-2.5 sm:gap-3 sm:px-6 sm:py-3 lg:px-8">
+    <div class="flex items-center gap-2.5 lg:gap-5">
+      <a href="/" class="flex min-w-0 shrink items-center gap-2.5 sm:shrink-0 sm:gap-3">
         <img
           src="/sets/logo.webp"
           alt="OnlyCartitas"
           width="56"
           height="56"
-          class="h-12 w-12 shrink-0 rounded-2xl object-cover shadow-[0_14px_32px_rgba(17,48,71,0.18)]"
+          class="h-10 w-10 shrink-0 rounded-[1rem] object-cover shadow-[0_14px_32px_rgba(17,48,71,0.18)] sm:h-12 sm:w-12 sm:rounded-2xl"
           decoding="async"
         />
         <div class="min-w-0">
-          <p class="truncate text-base font-semibold tracking-[0.14em] text-[color:var(--color-primary)] uppercase sm:text-lg">
+          <p class="truncate text-sm font-semibold tracking-[0.12em] text-[color:var(--color-primary)] uppercase sm:text-lg sm:tracking-[0.14em]">
             OnlyCartitas
           </p>
-          <p class="text-sm text-slate-500">TCG Store</p>
+          <p class="text-xs text-slate-500 sm:text-sm">TCG Store</p>
         </div>
       </a>
 
@@ -74,10 +74,10 @@ const currentPath = Astro.url.pathname;
         </label>
       </div> : <div class="hidden min-w-0 flex-1 md:block"></div>}
 
-      <div class="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+      <div class="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-3">
         <button
           type="button"
-          class="inline-flex h-11 items-center gap-1 rounded-full border border-slate-300 bg-white px-1.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:text-slate-950"
+          class="inline-flex h-10 items-center gap-1 rounded-full border border-slate-300 bg-white px-1 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:text-slate-950 sm:h-11 sm:px-1.5"
           data-theme-toggle
           aria-label="Cambiar a modo oscuro"
           aria-pressed="false"
@@ -87,7 +87,7 @@ const currentPath = Astro.url.pathname;
         </button>
         {!adminMode ? <button
           type="button"
-          class="inline-flex items-center gap-2 rounded-full bg-[#071c2b] px-4 py-2.5 text-sm font-medium text-white shadow-[0_10px_22px_rgba(17,48,71,0.18)] transition hover:bg-[color:var(--color-primary)]"
+          class="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#071c2b] px-3 text-sm font-bold text-white shadow-[0_10px_22px_rgba(17,48,71,0.18)] transition hover:bg-[color:var(--color-primary)] sm:h-auto sm:gap-2 sm:px-4 sm:py-2.5 sm:font-medium"
           data-cart-open
           aria-haspopup="dialog"
           aria-controls="cart-panel"
@@ -114,7 +114,7 @@ const currentPath = Astro.url.pathname;
       </div>
     </div>
 
-    {!adminMode ? <nav class="flex w-full snap-x snap-mandatory items-center gap-2 overflow-x-auto pb-1 hide-scrollbar lg:hidden">
+    {!adminMode ? <nav class="grid w-full grid-cols-4 gap-2 lg:hidden">
       {
         navItems.map((item) => {
           const isActive = currentPath === item.href;
@@ -127,7 +127,7 @@ const currentPath = Astro.url.pathname;
               data-nav-layout="mobile"
               data-featured={isFeatured ? "true" : "false"}
               aria-current={isActive ? "page" : undefined}
-              class={`min-w-fit shrink-0 snap-start rounded-full px-4 py-3 text-sm font-semibold transition sm:px-5 ${
+              class={`inline-flex min-h-10 items-center justify-center rounded-full px-2 py-2 text-center text-xs font-bold transition sm:min-h-12 sm:px-5 sm:py-3 sm:text-sm ${
                 isFeatured
                   ? "bg-[#071c2b] text-white shadow-[0_12px_28px_rgba(17,48,71,0.22)] hover:bg-[color:var(--color-primary)]"
                   : isActive
@@ -148,7 +148,7 @@ const currentPath = Astro.url.pathname;
         data-search-input
         type="search"
         placeholder="Buscar producto o categoria"
-        class="h-11 w-full rounded-full border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"
+        class="h-10 w-full rounded-full border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15 sm:h-11"
       />
     </label> : null}
   </div>
