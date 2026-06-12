@@ -80,11 +80,16 @@ import "../styles/global.css";
                 </label>
                 <label class="block">
                   <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Comuna *</span>
-                  <input data-required type="text" placeholder="Comuna" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  <input data-required data-checkout-comuna type="text" placeholder="Comuna" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                </label>
+                <label class="block">
+                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Ciudad *</span>
+                  <input data-required data-checkout-city type="text" placeholder="Ciudad" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
                 </label>
                 <label class="block">
                   <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Region *</span>
                   <select data-required class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                    <option>Antofagasta</option>
                     <option>Region Metropolitana</option>
                     <option>Valparaiso</option>
                     <option>Biobio</option>
@@ -95,7 +100,7 @@ import "../styles/global.css";
               </div>
 
               <div class="hidden rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600" data-pickup-info>
-                Retiro disponible coordinando por mensaje despues de confirmar el pedido. No se cobrara envio.
+                Retiro gratis en Antofagasta. Te hablaremos por WhatsApp para coordinar el encuentro despues de confirmar el pedido.
               </div>
 
               <label class="block">
@@ -209,6 +214,7 @@ import "../styles/global.css";
       const SESSION_STORAGE_KEY = "onlycartitas-auth-session";
       const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       const SHIPPING_PRICE = 4990;
+      const FREE_SHIPPING_THRESHOLD = 90_000;
 
       const checkoutForm = document.querySelector("[data-checkout-form]");
       const summaryItems = document.querySelector("[data-summary-items]");
@@ -229,6 +235,8 @@ import "../styles/global.css";
       const firstNameInput = document.querySelector("[data-checkout-first-name]");
       const lastNameInput = document.querySelector("[data-checkout-last-name]");
       const addressInput = document.querySelector("[data-checkout-address]");
+      const comunaInput = document.querySelector("[data-checkout-comuna]");
+      const cityInput = document.querySelector("[data-checkout-city]");
       const phoneInput = document.querySelector("[data-checkout-phone]");
       const subtotalLabel = document.querySelector("[data-summary-subtotal]");
       const shippingLabel = document.querySelector("[data-summary-shipping]");
@@ -236,6 +244,7 @@ import "../styles/global.css";
       const totalLabel = document.querySelector("[data-summary-total]");
       let deliveryMode: DeliveryMode = "envio";
       let appliedDiscount: AppliedDiscount | null = null;
+      let showedPickupAlert = false;
 
       const currencyFormatter = new Intl.NumberFormat("es-CL", {
         style: "currency",
@@ -245,6 +254,12 @@ import "../styles/global.css";
 
       const isHTMLElement = (value: unknown) => value instanceof HTMLElement;
       const isInputElement = (value: unknown) => value instanceof HTMLInputElement;
+      const normalizeLocation = (value: unknown) =>
+        String(value ?? "")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .trim()
+          .toLowerCase();
 
       const escapeHtml = (value: unknown) =>
         String(value)
@@ -312,7 +327,17 @@ import "../styles/global.css";
       let cart = readCart();
 
       const getSubtotal = () => cart.reduce((total, item) => total + item.price * item.quantity, 0);
-      const getShipping = () => (deliveryMode === "envio" && cart.length > 0 ? SHIPPING_PRICE : 0);
+      const isAntofagastaDelivery = () => {
+        const comuna = comunaInput instanceof HTMLInputElement ? comunaInput.value : "";
+        const city = cityInput instanceof HTMLInputElement ? cityInput.value : "";
+        return normalizeLocation(comuna) === "antofagasta" && normalizeLocation(city) === "antofagasta";
+      };
+      const hasFreeAntofagastaShipping = () =>
+        deliveryMode === "envio" && cart.length > 0 && isAntofagastaDelivery() && getSubtotal() > FREE_SHIPPING_THRESHOLD;
+      const getShipping = () => {
+        if (deliveryMode !== "envio" || cart.length === 0) return 0;
+        return hasFreeAntofagastaShipping() ? 0 : SHIPPING_PRICE;
+      };
       const getDiscount = () => Number(appliedDiscount?.discount ?? 0);
       const getTotal = () => Math.max(0, getSubtotal() + getShipping() - getDiscount());
 
@@ -329,7 +354,10 @@ import "../styles/global.css";
           payButton.classList.toggle("cursor-not-allowed", cart.length === 0);
         }
         if (isHTMLElement(subtotalLabel)) subtotalLabel.textContent = currencyFormatter.format(subtotal);
-        if (isHTMLElement(shippingLabel)) shippingLabel.textContent = shipping > 0 ? currencyFormatter.format(shipping) : "Gratis";
+        if (isHTMLElement(shippingLabel)) {
+          shippingLabel.textContent = shipping > 0 ? currencyFormatter.format(shipping) : "Gratis";
+          shippingLabel.title = hasFreeAntofagastaShipping() ? "Envio gratis en Antofagasta sobre $90.000" : "";
+        }
         if (isHTMLElement(discountLabel)) discountLabel.textContent = `-${currencyFormatter.format(discount)}`;
         if (isHTMLElement(totalLabel)) totalLabel.textContent = currencyFormatter.format(total);
         if (!isHTMLElement(summaryItems)) return;
@@ -366,6 +394,10 @@ import "../styles/global.css";
         });
         if (isHTMLElement(addressFields)) addressFields.classList.toggle("hidden", mode !== "envio");
         if (isHTMLElement(pickupInfo)) pickupInfo.classList.toggle("hidden", mode !== "retiro");
+        if (mode === "retiro" && !showedPickupAlert) {
+          showedPickupAlert = true;
+          window.alert("Te hablaremos por WhatsApp para coordinar el encuentro del retiro.");
+        }
         renderSummary();
       };
 
@@ -374,6 +406,11 @@ import "../styles/global.css";
           if (!(button instanceof HTMLButtonElement)) return;
           setDeliveryMode(button.dataset.deliveryOption === "retiro" ? "retiro" : "envio");
         });
+      });
+
+      [comunaInput, cityInput].forEach((input) => {
+        if (!(input instanceof HTMLInputElement)) return;
+        input.addEventListener("input", renderSummary);
       });
 
       discountButton?.addEventListener("click", async () => {
@@ -420,6 +457,8 @@ import "../styles/global.css";
         const email = emailInput instanceof HTMLInputElement ? emailInput.value.trim() : "";
         const phone = phoneInput instanceof HTMLInputElement ? phoneInput.value.trim() : "";
         const address = addressInput instanceof HTMLInputElement ? addressInput.value.trim() : "";
+        const comuna = comunaInput instanceof HTMLInputElement ? comunaInput.value.trim() : "";
+        const city = cityInput instanceof HTMLInputElement ? cityInput.value.trim() : "";
         const session = readSession();
         const response = await fetch(`${API_BASE_URL}/api/orders`, {
           method: "POST",
@@ -432,7 +471,7 @@ import "../styles/global.css";
             customerEmail: email,
             customerPhone: phone || undefined,
             deliveryMode,
-            address: deliveryMode === "envio" ? address : undefined,
+            address: deliveryMode === "envio" ? [address, comuna, city].filter(Boolean).join(", ") : undefined,
             discountCode: appliedDiscount?.code,
             items: cart.map((item) => ({
               id: item.id,
