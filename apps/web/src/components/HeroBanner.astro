@@ -23,21 +23,21 @@ const defaultHero: HeroSettings = {
 };
 const hero = { ...defaultHero, ...(settings ?? {}) };
 const launchSetName = hero.launchSetName || defaultHero.launchSetName;
+const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 ---
 
 <section class="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
-  <div class="relative overflow-hidden rounded-[2rem] bg-[color:var(--color-primary)] text-white shadow-[0_28px_80px_rgba(17,48,71,0.24)]">
-    {hero.backgroundImageUrl ? (
-      <img
-        src={hero.backgroundImageUrl}
-        alt=""
-        class="absolute -inset-px h-[calc(100%+2px)] w-[calc(100%+2px)] object-cover opacity-95"
-        loading="eager"
-        decoding="async"
-        fetchpriority="high"
-      />
-    ) : (
-    <svg class="absolute -inset-px h-[calc(100%+2px)] w-[calc(100%+2px)] object-cover opacity-95" viewBox="0 0 1200 520" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+  <div class="relative overflow-hidden rounded-[2rem] bg-[color:var(--color-primary)] text-white shadow-[0_28px_80px_rgba(17,48,71,0.24)]" data-hero-root>
+    <img
+      src={hero.backgroundImageUrl}
+      alt=""
+      class={`absolute -inset-px h-[calc(100%+2px)] w-[calc(100%+2px)] object-cover opacity-95 ${hero.backgroundImageUrl ? "" : "hidden"}`}
+      loading="eager"
+      decoding="async"
+      fetchpriority="high"
+      data-hero-background
+    />
+    <svg class={`absolute -inset-px h-[calc(100%+2px)] w-[calc(100%+2px)] object-cover opacity-95 ${hero.backgroundImageUrl ? "hidden" : ""}`} viewBox="0 0 1200 520" aria-hidden="true" preserveAspectRatio="xMidYMid slice" data-hero-fallback>
       <defs>
         <radialGradient id="launchGlowA" cx="70%" cy="45%" r="42%">
           <stop offset="0" stop-color="#8bd7ff" stop-opacity=".95" />
@@ -86,7 +86,6 @@ const launchSetName = hero.launchSetName || defaultHero.launchSetName;
         <text x="4" y="270" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="6" fill="#aee7ff">TRAINERS & PARTNERS</text>
       </g>
     </svg>
-    )}
     <div class="absolute -inset-px bg-gradient-to-r from-[#04131d]/95 via-[#071c2b]/72 to-[#04131d]/12"></div>
 
     <div class="relative flex min-h-[500px] px-6 py-8 sm:px-8 lg:px-10 lg:py-10">
@@ -102,11 +101,11 @@ const launchSetName = hero.launchSetName || defaultHero.launchSetName;
           </div>
 
           <div class="mt-8 max-w-2xl">
-            <p class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300">{hero.primaryBadge}</p>
-            <h1 class="mt-3 text-5xl font-semibold leading-none tracking-tight sm:text-6xl lg:text-7xl">
+            <p class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300" data-hero-primary-badge>{hero.primaryBadge}</p>
+            <h1 class="mt-3 text-5xl font-semibold leading-none tracking-tight sm:text-6xl lg:text-7xl" data-hero-launch-set>
               {launchSetName}
             </h1>
-            <p class="mt-4 text-2xl font-semibold text-slate-100 sm:text-3xl">{hero.title}</p>
+            <p class="mt-4 text-2xl font-semibold text-slate-100 sm:text-3xl" data-hero-title>{hero.title}</p>
           </div>
         </div>
 
@@ -115,12 +114,14 @@ const launchSetName = hero.launchSetName || defaultHero.launchSetName;
             <a
               href={hero.primaryCtaHref}
               class="inline-flex min-h-13 items-center justify-center rounded-full bg-[#dcecf7] px-7 py-3.5 text-base font-semibold text-[#061d2a] shadow-[0_14px_30px_rgba(17,48,71,0.24)] transition hover:bg-[#f4f9fc]"
+              data-hero-primary-cta
             >
               {hero.primaryCtaLabel}
             </a>
             <a
               href={hero.secondaryCtaHref}
               class="inline-flex min-h-12 items-center justify-center rounded-full border border-white/25 bg-[#071c2b]/55 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-white/40 hover:bg-[#123d5a]/70"
+              data-hero-secondary-cta
             >
               {hero.secondaryCtaLabel}
             </a>
@@ -129,4 +130,72 @@ const launchSetName = hero.launchSetName || defaultHero.launchSetName;
       </div>
     </div>
   </div>
+  <script is:inline type="application/json" data-hero-config set:html={JSON.stringify({ apiBaseUrl })}></script>
+  <script>
+    type HeroSettingsPayload = {
+      primaryBadge?: string;
+      title?: string;
+      launchSetName?: string;
+      primaryCtaLabel?: string;
+      primaryCtaHref?: string;
+      secondaryCtaLabel?: string;
+      secondaryCtaHref?: string;
+      backgroundImageUrl?: string;
+    };
+
+    const readHeroConfig = () => {
+      const configElement = document.querySelector("[data-hero-config]");
+      try {
+        return configElement?.textContent ? JSON.parse(configElement.textContent) : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const setText = (selector: string, value?: string) => {
+      const element = document.querySelector(selector);
+      if (element instanceof HTMLElement && value) element.textContent = value;
+    };
+
+    const setLink = (selector: string, label?: string, href?: string) => {
+      const element = document.querySelector(selector);
+      if (!(element instanceof HTMLAnchorElement)) return;
+      if (label) element.textContent = label;
+      if (href) element.href = href;
+    };
+
+    const applyHeroSettings = (settings: HeroSettingsPayload) => {
+      setText("[data-hero-primary-badge]", settings.primaryBadge);
+      setText("[data-hero-launch-set]", settings.launchSetName);
+      setText("[data-hero-title]", settings.title);
+      setLink("[data-hero-primary-cta]", settings.primaryCtaLabel, settings.primaryCtaHref);
+      setLink("[data-hero-secondary-cta]", settings.secondaryCtaLabel, settings.secondaryCtaHref);
+
+      const background = document.querySelector("[data-hero-background]");
+      const fallback = document.querySelector("[data-hero-fallback]");
+      const imageUrl = settings.backgroundImageUrl?.trim();
+      if (background instanceof HTMLImageElement && fallback instanceof SVGElement) {
+        background.classList.toggle("hidden", !imageUrl);
+        fallback.classList.toggle("hidden", Boolean(imageUrl));
+        if (imageUrl && background.src !== imageUrl) background.src = imageUrl;
+      }
+    };
+
+    const refreshHeroSettings = async () => {
+      const { apiBaseUrl } = readHeroConfig();
+      if (!apiBaseUrl) return;
+
+      try {
+        const response = await fetch(`${apiBaseUrl}/api/site-settings/hero`, { cache: "no-store" });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok || !payload?.data) return;
+        applyHeroSettings(payload.data);
+      } catch {
+        // Keep the static hero usable if the API is unavailable.
+      }
+    };
+
+    document.addEventListener("astro:page-load", refreshHeroSettings);
+    refreshHeroSettings();
+  </script>
 </section>
