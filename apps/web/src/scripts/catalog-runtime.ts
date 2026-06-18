@@ -1,4 +1,4 @@
-import { normalizeSearchText } from "../lib/search";
+import { normalizeSearchText, readCurrentSearchInputValue } from "../lib/search";
 
 type ProductLanguage = "japanese" | "spanish" | "english";
 type ProductKind = "sealed" | "single";
@@ -261,7 +261,7 @@ const initCatalog = async () => {
   let activeIllustrator = "all";
   let activeLanguage = "all";
   let activePokemonQuery = "";
-  let activeQuery = normalize(window.__onlycartitasSearchQuery);
+  let activeQuery = normalize(readCurrentSearchInputValue() || window.__onlycartitasSearchQuery);
 
   const filteredProducts = () =>
     products.filter((product) => {

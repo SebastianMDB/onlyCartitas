@@ -210,6 +210,8 @@ const normalizedCurrentPath = normalizePath(currentPath);
 ) : null}
 
 <script>
+  import { readCurrentSearchInputValue } from "../lib/search";
+
   type Theme = "dark" | "light";
   type InventoryProduct = {
     id: string;
@@ -232,7 +234,6 @@ const normalizedCurrentPath = normalizePath(currentPath);
     quantity: number;
   };
 
-  const inputs = Array.from(document.querySelectorAll("[data-search-input]"));
   const navLinks = Array.from(document.querySelectorAll("[data-nav-link]"));
   const INVENTORY_STORAGE_KEY = "onlycartitas-inventory-state";
   const INVENTORY_SYNC_TTL_MS = 10_000;
@@ -246,6 +247,7 @@ const normalizedCurrentPath = normalizePath(currentPath);
   let lastInventorySyncAt = 0;
 
   const isInputElement = (value: unknown) => value instanceof HTMLInputElement;
+  const getSearchInputs = () => Array.from(document.querySelectorAll("[data-search-input]")).filter(isInputElement);
 
   const THEME_STORAGE_KEY = "onlycartitas-theme";
 
@@ -281,6 +283,30 @@ const normalizedCurrentPath = normalizePath(currentPath);
         detail: value
       })
     );
+  };
+
+  const syncSearchInputs = (value: string) => {
+    getSearchInputs().forEach((input) => {
+      input.value = value;
+    });
+  };
+
+  const bindSearchInputs = () => {
+    const currentValue = readCurrentSearchInputValue();
+    syncSearchInputs(currentValue);
+    emitSearch(currentValue);
+
+    getSearchInputs().forEach((input) => {
+      if (input.dataset.searchBound === "true") return;
+      input.dataset.searchBound = "true";
+
+      input.addEventListener("input", (event) => {
+        const currentTarget = event.currentTarget;
+        const value = isInputElement(currentTarget) ? currentTarget.value : "";
+        syncSearchInputs(value);
+        emitSearch(value);
+      }, { signal: headerRuntimeSignal });
+    });
   };
 
   const readInventoryState = (): InventoryState => {
@@ -465,25 +491,11 @@ const normalizedCurrentPath = normalizePath(currentPath);
     applyTheme(event.newValue);
   }, { signal: headerRuntimeSignal });
 
-  inputs.forEach((input) => {
-    input.addEventListener("input", (event) => {
-      const currentTarget = event.currentTarget;
-      const value = isInputElement(currentTarget) ? currentTarget.value : "";
-
-      inputs.forEach((item) => {
-        if (item !== currentTarget && isInputElement(item)) {
-          item.value = value;
-        }
-      });
-
-      emitSearch(value);
-    }, { signal: headerRuntimeSignal });
-  });
-
-  emitSearch("");
+  bindSearchInputs();
   updateNavState();
   applyInventoryState();
   syncInventoryFromApi();
+  document.addEventListener("astro:page-load", bindSearchInputs, { signal: headerRuntimeSignal });
   document.addEventListener("astro:page-load", updateNavState, { signal: headerRuntimeSignal });
   document.addEventListener("astro:page-load", () => applyTheme(getPreferredTheme()), { signal: headerRuntimeSignal });
   document.addEventListener("astro:page-load", () => {
