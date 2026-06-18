@@ -1,5 +1,6 @@
 ---
 import type { Product } from "../lib/catalog";
+import { normalizeSearchText } from "../lib/search";
 
 type Props = {
   product: Product;
@@ -34,12 +35,12 @@ const hasVariants = Array.isArray(product.variants) && product.variants.length >
   class={containerClass}
   data-product-card
   data-product-id={product.id}
-  data-product-name={product.name.toLowerCase()}
-  data-product-category={product.category.toLowerCase()}
-  data-product-set={product.set.toLowerCase()}
-  data-product-language={product.language}
-  data-product-language-label={languageLabels[product.language].toLowerCase()}
-  data-product-illustrator={product.illustrator?.toLowerCase() ?? ""}
+  data-product-name={normalizeSearchText(product.name)}
+  data-product-category={normalizeSearchText(product.category)}
+  data-product-set={normalizeSearchText(product.set)}
+  data-product-language={normalizeSearchText(product.language)}
+  data-product-language-label={normalizeSearchText(languageLabels[product.language])}
+  data-product-illustrator={normalizeSearchText(product.illustrator)}
 >
   <a href={productUrl} class="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[1.4rem] bg-[color:var(--color-surface)]">
     {

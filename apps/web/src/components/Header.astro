@@ -275,6 +275,7 @@ const normalizedCurrentPath = normalizePath(currentPath);
   };
 
   const emitSearch = (value: string) => {
+    (window as any).__onlycartitasSearchQuery = value;
     window.dispatchEvent(
       new CustomEvent("carta-noble:search", {
         detail: value

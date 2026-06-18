@@ -1,3 +1,5 @@
+import { normalizeSearchText } from "../lib/search";
+
 type ProductLanguage = "japanese" | "spanish" | "english";
 type ProductKind = "sealed" | "single";
 
@@ -37,6 +39,7 @@ type ProductsCache = {
 declare global {
   interface Window {
     __onlycartitasProductsCache?: ProductsCache;
+    __onlycartitasSearchQuery?: string;
   }
 }
 
@@ -54,10 +57,7 @@ const currencyFormatter = new Intl.NumberFormat("es-CL", {
   maximumFractionDigits: 0
 });
 
-const normalize = (value: unknown) =>
-  String(value ?? "")
-    .trim()
-    .toLowerCase();
+const normalize = normalizeSearchText;
 
 const escapeHtml = (value: unknown) =>
   String(value ?? "")
@@ -261,7 +261,7 @@ const initCatalog = async () => {
   let activeIllustrator = "all";
   let activeLanguage = "all";
   let activePokemonQuery = "";
-  let activeQuery = "";
+  let activeQuery = normalize(window.__onlycartitasSearchQuery);
 
   const filteredProducts = () =>
     products.filter((product) => {

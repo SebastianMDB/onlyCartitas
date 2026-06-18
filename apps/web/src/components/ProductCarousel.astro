@@ -56,6 +56,14 @@ const sectionId = `carousel-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 </section>
 
 <script>
+  import { normalizeSearchText } from "../lib/search";
+
+  declare global {
+    interface Window {
+      __onlycartitasSearchQuery?: string;
+    }
+  }
+
   const isHTMLElement = (value: unknown) => value instanceof HTMLElement;
   const isButtonElement = (value: unknown) => value instanceof HTMLButtonElement;
 
@@ -88,7 +96,7 @@ const sectionId = `carousel-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
       };
 
       const updateVisibility = (query: string) => {
-        const normalizedQuery = query.trim().toLowerCase();
+        const normalizedQuery = normalizeSearchText(query);
         let visibleCount = 0;
 
         cards.forEach((card) => {
@@ -101,13 +109,15 @@ const sectionId = `carousel-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
           const productSet = card.dataset.productSet ?? "";
           const productLanguage = card.dataset.productLanguage ?? "";
           const productLanguageLabel = card.dataset.productLanguageLabel ?? "";
+          const productIllustrator = card.dataset.productIllustrator ?? "";
           const isVisible =
             normalizedQuery.length === 0 ||
             productName.includes(normalizedQuery) ||
             productCategory.includes(normalizedQuery) ||
             productSet.includes(normalizedQuery) ||
             productLanguage.includes(normalizedQuery) ||
-            productLanguageLabel.includes(normalizedQuery);
+            productLanguageLabel.includes(normalizedQuery) ||
+            productIllustrator.includes(normalizedQuery);
 
           card.style.display = isVisible ? "" : "none";
 
@@ -139,7 +149,7 @@ const sectionId = `carousel-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
       });
 
       updateArrows();
-      updateVisibility("");
+      updateVisibility(window.__onlycartitasSearchQuery ?? "");
     });
   };
 
