@@ -12,6 +12,8 @@ const navItems = [
 ];
 
 const currentPath = Astro.url.pathname;
+const normalizePath = (path: string) => (path.length > 1 ? path.replace(/\/+$/, "") : path);
+const normalizedCurrentPath = normalizePath(currentPath);
 ---
 
 <header class="sticky top-0 z-50 border-b border-white/60 bg-[color:var(--color-surface)]/92 backdrop-blur-xl">
@@ -37,7 +39,7 @@ const currentPath = Astro.url.pathname;
       {!adminMode ? <nav class="hidden shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white/80 p-1.5 shadow-sm lg:flex">
         {
           navItems.map((item) => {
-            const isActive = currentPath === item.href;
+            const isActive = normalizedCurrentPath === normalizePath(item.href);
             const isFeatured = item.featured;
 
             return (
@@ -48,10 +50,10 @@ const currentPath = Astro.url.pathname;
                 data-featured={isFeatured ? "true" : "false"}
                 aria-current={isActive ? "page" : undefined}
                 class={`rounded-full px-5 py-2.5 text-sm font-semibold transition ${
-                  isFeatured
-                    ? "bg-[#071c2b] text-white shadow-[0_12px_28px_rgba(17,48,71,0.22)] hover:bg-[color:var(--color-primary)]"
-                    : isActive
+                  isActive
                     ? "bg-[color:var(--color-primary)] text-white shadow-[0_10px_24px_rgba(17,48,71,0.16)]"
+                    : isFeatured
+                    ? "bg-[#071c2b] text-white shadow-[0_12px_28px_rgba(17,48,71,0.22)] hover:bg-[color:var(--color-primary)]"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
                 }`}
               >
@@ -117,7 +119,7 @@ const currentPath = Astro.url.pathname;
     {!adminMode ? <nav class="grid w-full grid-cols-4 gap-2 lg:hidden">
       {
         navItems.map((item) => {
-          const isActive = currentPath === item.href;
+          const isActive = normalizedCurrentPath === normalizePath(item.href);
           const isFeatured = item.featured;
 
           return (
@@ -128,10 +130,10 @@ const currentPath = Astro.url.pathname;
               data-featured={isFeatured ? "true" : "false"}
               aria-current={isActive ? "page" : undefined}
               class={`inline-flex min-h-10 items-center justify-center rounded-full px-2 py-2 text-center text-xs font-bold transition sm:min-h-12 sm:px-5 sm:py-3 sm:text-sm ${
-                isFeatured
-                  ? "bg-[#071c2b] text-white shadow-[0_12px_28px_rgba(17,48,71,0.22)] hover:bg-[color:var(--color-primary)]"
-                  : isActive
+                isActive
                   ? "bg-[color:var(--color-primary)] text-white shadow-[0_10px_24px_rgba(17,48,71,0.14)]"
+                  : isFeatured
+                  ? "bg-[#071c2b] text-white shadow-[0_12px_28px_rgba(17,48,71,0.22)] hover:bg-[color:var(--color-primary)]"
                   : "border border-slate-300 bg-white/90 text-slate-700 hover:border-slate-400 hover:text-slate-900"
               }`}
             >
@@ -393,13 +395,15 @@ const currentPath = Astro.url.pathname;
     "shadow-[0_12px_28px_rgba(17,48,71,0.22)]"
   ];
 
+  const normalizePath = (path: string) => (path.length > 1 ? path.replace(/\/+$/, "") : path);
+
   const updateNavState = () => {
-    const currentPath = window.location.pathname;
+    const currentPath = normalizePath(window.location.pathname);
 
     navLinks.forEach((link) => {
       if (!(link instanceof HTMLAnchorElement)) return;
 
-      const isActive = link.pathname === currentPath;
+      const isActive = normalizePath(link.pathname) === currentPath;
       const isFeatured = link.dataset.featured === "true";
       const isMobile = link.dataset.navLayout === "mobile";
 
@@ -407,20 +411,20 @@ const currentPath = Astro.url.pathname;
       link.toggleAttribute("aria-current", isActive);
       if (isActive) link.setAttribute("aria-current", "page");
 
-      if (isFeatured) {
-        link.classList.add(
-          "bg-[#071c2b]",
-          "text-white",
-          "shadow-[0_12px_28px_rgba(17,48,71,0.22)]",
-          "hover:bg-[color:var(--color-primary)]"
-        );
-      } else if (isActive) {
+      if (isActive) {
         link.classList.add(
           "bg-[color:var(--color-primary)]",
           "text-white",
           isMobile
             ? "shadow-[0_10px_24px_rgba(17,48,71,0.14)]"
             : "shadow-[0_10px_24px_rgba(17,48,71,0.16)]"
+        );
+      } else if (isFeatured) {
+        link.classList.add(
+          "bg-[#071c2b]",
+          "text-white",
+          "shadow-[0_12px_28px_rgba(17,48,71,0.22)]",
+          "hover:bg-[color:var(--color-primary)]"
         );
       } else if (isMobile) {
         link.classList.add(
