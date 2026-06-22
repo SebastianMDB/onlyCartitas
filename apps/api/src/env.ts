@@ -1,15 +1,17 @@
 import { z } from "zod";
 
+const trimTrailingSlashes = (value: unknown) => (typeof value === "string" ? value.replace(/\/+$/, "") : value);
+
 const envSchema = z
   .object({
     NODE_ENV: z.string().default("development"),
     PORT: z.coerce.number().int().positive().default(3000),
-    WEB_ORIGIN: z.string().default("http://localhost:4321"),
+    WEB_ORIGIN: z.preprocess(trimTrailingSlashes, z.string().default("http://localhost:4321")),
     API_SECRET: z.string().default("dev-onlycartitas-secret"),
     SESSION_TTL_SECONDS: z.coerce.number().int().positive().default(60 * 60 * 24 * 7),
     AUTH_REGISTER_ENABLED: z.coerce.boolean().default(true),
     DATABASE_URL: z.string().url(),
-    API_PUBLIC_URL: z.string().url().optional().or(z.literal("")),
+    API_PUBLIC_URL: z.preprocess(trimTrailingSlashes, z.string().url().optional().or(z.literal(""))),
     MERCADO_PAGO_ACCESS_TOKEN: z.string().optional().or(z.literal("")),
     MERCADO_PAGO_CURRENCY_ID: z.string().default("CLP"),
     MERCADO_PAGO_CHECKOUT_MODE: z.enum(["sandbox", "production"]).default("sandbox")
