@@ -5,19 +5,45 @@ type Props = {
   title: string;
   description: string;
   image?: string;
+  noindex?: boolean;
+  ogType?: "website" | "product";
+  structuredData?: Record<string, unknown> | Array<Record<string, unknown>>;
 };
 
-const { title, description, image } = Astro.props;
+const { title, description, image, noindex = false, ogType = "website", structuredData } = Astro.props;
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
 const faviconSvg =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23113047'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-family='Arial,sans-serif' font-size='22' font-weight='700' fill='white'%3EOC%3C/text%3E%3C/svg%3E";
-const socialImage = image ? new URL(image, canonicalUrl).toString() : null;
+const siteUrl = Astro.site ?? Astro.url.origin;
+const socialImage = new URL(image ?? "/sets/logo.webp", siteUrl).toString();
+const baseStructuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "OnlyCartitas",
+    url: new URL("/", siteUrl).toString(),
+    logo: new URL("/sets/logo.webp", siteUrl).toString()
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "OnlyCartitas",
+    url: new URL("/", siteUrl).toString(),
+    inLanguage: "es-CL"
+  }
+];
+const pageStructuredData = structuredData
+  ? Array.isArray(structuredData)
+    ? structuredData
+    : [structuredData]
+  : [];
+const allStructuredData = [...baseStructuredData, ...pageStructuredData];
 ---
 
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="description" content={description} />
-<meta name="robots" content="index, follow" />
+<meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large"} />
 <meta name="theme-color" content="#113047" />
 <link rel="canonical" href={canonicalUrl.toString()} />
 <link rel="icon" href={faviconSvg} type="image/svg+xml" />
@@ -28,17 +54,20 @@ const socialImage = image ? new URL(image, canonicalUrl).toString() : null;
 <link rel="preconnect" href="https://images.pokemontcg.io" crossorigin />
 <title>{title}</title>
 
-<meta property="og:type" content="website" />
+<meta property="og:type" content={ogType} />
 <meta property="og:site_name" content="OnlyCartitas" />
+<meta property="og:locale" content="es_CL" />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonicalUrl.toString()} />
-{socialImage ? <meta property="og:image" content={socialImage} /> : null}
+<meta property="og:image" content={socialImage} />
+<meta property="og:image:alt" content={title} />
 
-<meta name="twitter:card" content={socialImage ? "summary_large_image" : "summary"} />
+<meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
-{socialImage ? <meta name="twitter:image" content={socialImage} /> : null}
+<meta name="twitter:image" content={socialImage} />
+{allStructuredData.map((schema) => <script type="application/ld+json" set:html={JSON.stringify(schema)} />)}
 <script is:inline>
   (() => {
     const storageKey = "onlycartitas-theme";

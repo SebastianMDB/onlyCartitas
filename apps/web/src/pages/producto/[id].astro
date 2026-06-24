@@ -37,6 +37,63 @@ const discountPercent =
 const variants = Array.isArray(product.variants) ? product.variants.filter((variant) => variant.active !== false) : [];
 const selectedVariant = variants.find((variant) => variant.stock > 0) ?? variants[0] ?? null;
 const selectedStock = selectedVariant ? selectedVariant.stock : product.stock;
+const siteUrl = Astro.site ?? Astro.url.origin;
+const productUrl = new URL(Astro.url.pathname, siteUrl).toString();
+const productImageUrl = new URL(product.image, siteUrl).toString();
+const productDescription =
+  product.description ||
+  `${product.name} de ${product.set}, disponible en idioma ${languageLabel}. Revisa precio, stock y detalles antes de comprar.`;
+const productStructuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: productDescription,
+    image: productImageUrl,
+    sku: product.id,
+    brand: {
+      "@type": "Brand",
+      name: "Pokemon TCG"
+    },
+    category: product.category,
+    offers: {
+      "@type": "Offer",
+      url: productUrl,
+      priceCurrency: "CLP",
+      price: product.price,
+      availability: selectedStock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+      seller: {
+        "@type": "Organization",
+        name: "OnlyCartitas"
+      }
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Inicio",
+        item: new URL("/", siteUrl).toString()
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: product.kind === "sealed" ? "Sellados" : "Singles",
+        item: new URL(product.kind === "sealed" ? "/sellados" : "/singles", siteUrl).toString()
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: product.name,
+        item: productUrl
+      }
+    ]
+  }
+];
 const designVariantClass = (active: boolean) =>
   [
     "grid min-h-[4.25rem] rounded-2xl border px-4 py-3 text-left transition disabled:cursor-not-allowed disabled:opacity-45",
@@ -51,8 +108,10 @@ const designVariantClass = (active: boolean) =>
   <head>
     <BaseHead
       title={`${product.name} | OnlyCartitas`}
-      description={`${product.name} de ${product.set}. Revisa precio, stock, idioma y detalles antes de comprar.`}
+      description={productDescription}
       image={product.image}
+      ogType="product"
+      structuredData={productStructuredData}
     />
   </head>
   <body class="bg-[color:var(--color-surface)] text-slate-900 antialiased">
@@ -78,7 +137,7 @@ const designVariantClass = (active: boolean) =>
             <p class="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--color-secondary)]">{product.category}</p>
             <h1 class="mt-3 text-3xl font-semibold tracking-tight text-[color:var(--color-primary)] sm:text-5xl">{product.name}</h1>
             <p class="mt-4 text-base leading-7 text-slate-600">
-              {product.description || `Producto del set ${product.set}, disponible en idioma ${languageLabel}. Ideal para coleccion, juego o reposicion de inventario.`}
+              {productDescription}
             </p>
 
             <div class="mt-6 grid gap-3 sm:grid-cols-3">
