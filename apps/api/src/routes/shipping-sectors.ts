@@ -41,7 +41,7 @@ export async function shippingSectorRoutes(app: FastifyInstance) {
 
   app.patch("/api/admin/shipping-sectors/:id", async (request) => {
     requireAdmin(request.headers.authorization);
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.string().min(1) }).parse(request.params);
     const input = shippingSectorSchema.partial().parse(request.body);
     const data = await updateShippingSector(id, input);
     if (!data) throw new ApiError(404, "Sector no encontrado");
@@ -51,7 +51,7 @@ export async function shippingSectorRoutes(app: FastifyInstance) {
 
   app.delete("/api/admin/shipping-sectors/:id", async (request) => {
     requireAdmin(request.headers.authorization);
-    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const { id } = z.object({ id: z.string().min(1) }).parse(request.params);
     const data = await deleteShippingSector(id);
     if (!data) throw new ApiError(404, "Sector no encontrado");
 

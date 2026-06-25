@@ -2030,12 +2030,16 @@ const defaultProductCategoryOptions = productCategories.sealed;
       const createShippingSector = async () => {
         if (!isInput(shippingSectorNameInput) || !isInput(shippingSectorPriceInput)) return;
 
+        const name = shippingSectorNameInput.value.trim();
         const price = Number(shippingSectorPriceInput.value);
+        if (!name) throw new Error("Ingresa el nombre del sector.");
+        if (!Number.isFinite(price) || price < 0) throw new Error("Ingresa un costo de envio valido.");
+
         const response = await fetch(`${API_BASE_URL}/api/admin/shipping-sectors`, {
           method: "POST",
           headers: authHeaders(),
           body: JSON.stringify({
-            name: shippingSectorNameInput.value.trim(),
+            name,
             price,
             active: true
           })
@@ -2056,6 +2060,8 @@ const defaultProductCategoryOptions = productCategories.sealed;
         const name = nameInput instanceof HTMLInputElement ? nameInput.value.trim() : "";
         const price = priceInput instanceof HTMLInputElement ? Number(priceInput.value) : 0;
         const active = activeSelect instanceof HTMLSelectElement ? activeSelect.value === "true" : true;
+        if (!name) throw new Error("Ingresa el nombre del sector.");
+        if (!Number.isFinite(price) || price < 0) throw new Error("Ingresa un costo de envio valido.");
 
         const response = await fetch(`${API_BASE_URL}/api/admin/shipping-sectors/${id}`, {
           method: "PATCH",

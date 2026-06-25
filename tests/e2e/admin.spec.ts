@@ -5,6 +5,16 @@ const apiUrl = "http://localhost:3000";
 test("admin can review purchase history and manage discount codes", async ({ page }) => {
   const statusUpdates: unknown[] = [];
   const createdDiscounts: unknown[] = [];
+  const createdShippingSectors: unknown[] = [];
+  const updatedShippingSectors: unknown[] = [];
+  let shippingSectors = [
+    {
+      id: "sector-norte",
+      name: "Sector norte",
+      price: 3500,
+      active: true
+    }
+  ];
 
   await page.route(`${apiUrl}/api/auth/login`, async (route) => {
     await route.fulfill({
@@ -67,6 +77,33 @@ test("admin can review purchase history and manage discount codes", async ({ pag
     });
   });
 
+  await page.route(`${apiUrl}/api/admin/shipping-sectors`, async (route) => {
+    if (route.request().method() === "POST") {
+      const body = route.request().postDataJSON();
+      createdShippingSectors.push(body);
+      const sector = { id: "sector-sur", ...body };
+      shippingSectors = [...shippingSectors, sector];
+      await route.fulfill({ json: { data: sector } });
+      return;
+    }
+
+    await route.fulfill({ json: { data: shippingSectors } });
+  });
+
+  await page.route(`${apiUrl}/api/admin/shipping-sectors/*`, async (route) => {
+    if (route.request().method() === "PATCH") {
+      const body = route.request().postDataJSON();
+      updatedShippingSectors.push(body);
+      shippingSectors = shippingSectors.map((sector) =>
+        route.request().url().endsWith(sector.id) ? { ...sector, ...body } : sector
+      );
+      await route.fulfill({ json: { data: shippingSectors.find((sector) => route.request().url().endsWith(sector.id)) } });
+      return;
+    }
+
+    await route.fulfill({ json: { data: null } });
+  });
+
   await page.goto("/admin-inventario");
   await page.locator("[data-admin-user]").fill("admin");
   await page.locator("[data-admin-password]").fill("admin1234");
@@ -89,4 +126,16 @@ test("admin can review purchase history and manage discount codes", async ({ pag
   await expect.poll(() => createdDiscounts).toEqual([
     { code: "MAYO15", type: "percent", value: 15, active: true, maxUses: 5 }
   ]);
+
+  await page.getByRole("button", { name: "Envios" }).click();
+  await expect(page.locator('[data-shipping-sector-name="sector-norte"]')).toHaveValue("Sector norte");
+  await page.locator("[data-shipping-sector-name-input]").fill("Sector sur");
+  await page.locator("[data-shipping-sector-price-input]").fill("4500");
+  await page.getByRole("button", { name: "Crear" }).click();
+  await expect.poll(() => createdShippingSectors).toEqual([{ name: "Sector sur", price: 4500, active: true }]);
+  await expect(page.locator('[data-shipping-sector-name="sector-sur"]')).toHaveValue("Sector sur");
+
+  await page.locator('[data-shipping-sector-price="sector-norte"]').fill("3000");
+  await page.locator('[data-shipping-sector-save="sector-norte"]').click();
+  await expect.poll(() => updatedShippingSectors).toEqual([{ name: "Sector norte", price: 3000, active: true }]);
 });
