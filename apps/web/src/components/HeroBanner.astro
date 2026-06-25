@@ -88,16 +88,22 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
     </svg>
     <div class="absolute -inset-px bg-gradient-to-r from-[#04131d]/95 via-[#071c2b]/72 to-[#04131d]/12"></div>
 
+    <div class="absolute left-5 right-5 top-5 z-10 sm:left-8 sm:right-auto sm:top-7 lg:left-10">
+      <span class="inline-flex max-w-full items-center rounded-lg border border-white/55 bg-[#071824]/58 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white shadow-[0_14px_30px_rgba(4,19,29,0.28)] backdrop-blur-md sm:px-5 sm:py-2.5 sm:text-sm sm:tracking-[0.16em]">
+        ENVIO GRATIS EN ANTOFAGASTA POR COMPRAS +90.000
+      </span>
+    </div>
+
     <div class="relative flex min-h-[440px] px-5 py-7 sm:min-h-[500px] sm:px-8 lg:px-10 lg:py-10">
       <div class="flex max-w-3xl flex-col justify-center gap-7 sm:gap-8">
         <div>
-          <div class="flex max-w-3xl">
+          <div class="hidden">
             <span class="inline-flex w-full items-center justify-center rounded-lg border-2 border-white/75 bg-[#04131d]/38 px-4 py-2 text-center text-sm font-black uppercase tracking-[0.08em] text-white shadow-[0_16px_36px_rgba(4,19,29,0.34)] backdrop-blur-sm sm:px-5 sm:py-2.5 sm:text-base sm:tracking-[0.12em]">
               Envío GRATIS en ANTOFAGASTA por compras +90.000
             </span>
           </div>
 
-          <div class="mt-7 max-w-2xl sm:mt-8">
+          <div class="max-w-2xl">
             <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-300 sm:text-sm sm:tracking-[0.24em]" data-hero-primary-badge>{hero.primaryBadge}</p>
             <h1 class="mt-3 text-4xl font-semibold leading-[0.94] tracking-tight sm:text-6xl lg:text-7xl" data-hero-launch-set>
               {launchSetName}

@@ -66,6 +66,12 @@ const sectionId = `carousel-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
   const isHTMLElement = (value: unknown) => value instanceof HTMLElement;
   const isButtonElement = (value: unknown) => value instanceof HTMLButtonElement;
+  const carouselRuntimeKey = "__onlycartitasCarouselRuntimeAbortController";
+  const previousCarouselRuntime = (window as any)[carouselRuntimeKey];
+  if (previousCarouselRuntime instanceof AbortController) previousCarouselRuntime.abort();
+  const carouselRuntimeAbortController = new AbortController();
+  (window as any)[carouselRuntimeKey] = carouselRuntimeAbortController;
+  const carouselRuntimeSignal = carouselRuntimeAbortController.signal;
 
   const initCarouselSections = () => {
     const sections = Array.from(document.querySelectorAll("[data-carousel-section]"));
@@ -134,28 +140,25 @@ const sectionId = `carousel-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
       prevButton?.addEventListener("click", () => {
         const amount = Math.min(360, track.clientWidth * 0.92);
         track.scrollBy({ left: -amount, behavior: "smooth" });
-      });
+      }, { signal: carouselRuntimeSignal });
 
       nextButton?.addEventListener("click", () => {
         const amount = Math.min(360, track.clientWidth * 0.92);
         track.scrollBy({ left: amount, behavior: "smooth" });
-      });
+      }, { signal: carouselRuntimeSignal });
 
-      track.addEventListener("scroll", updateArrows, { passive: true });
-      window.addEventListener("resize", updateArrows);
+      track.addEventListener("scroll", updateArrows, { passive: true, signal: carouselRuntimeSignal });
+      window.addEventListener("resize", updateArrows, { signal: carouselRuntimeSignal });
       window.addEventListener("carta-noble:search", (event) => {
         const value = event instanceof CustomEvent && typeof event.detail === "string" ? event.detail : "";
         updateVisibility(value);
-      });
+      }, { signal: carouselRuntimeSignal });
 
       updateArrows();
       updateVisibility(readCurrentSearchInputValue() || window.__onlycartitasSearchQuery || "");
     });
   };
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initCarouselSections, { once: true });
-  } else {
-    initCarouselSections();
-  }
+  document.addEventListener("astro:page-load", initCarouselSections, { signal: carouselRuntimeSignal });
+  initCarouselSections();
 </script>
