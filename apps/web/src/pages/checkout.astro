@@ -167,6 +167,9 @@ import "../styles/global.css";
                 <dt class="text-slate-600">Envio</dt>
                 <dd class="font-semibold text-slate-950" data-summary-shipping>Por calcular</dd>
               </div>
+              <p class="hidden rounded-2xl bg-slate-50 px-4 py-3 text-xs font-semibold leading-5 text-slate-500" data-summary-shipping-note>
+                Envio por pagar. Te contactaremos segun tu region para coordinar.
+              </p>
               <div class="flex items-center justify-between gap-4">
                 <dt class="text-slate-600">Descuento</dt>
                 <dd class="font-semibold text-emerald-700" data-summary-discount>$0</dd>
@@ -219,7 +222,7 @@ import "../styles/global.css";
       const CART_STORAGE_PREFIX = "carta-noble-cart";
       const SESSION_STORAGE_KEY = "onlycartitas-auth-session";
       const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
-      const DEFAULT_SHIPPING_PRICE = 4_990;
+      const FREE_ANTOFAGASTA_SHIPPING_THRESHOLD = 90_000;
       const COMMUNES_BY_REGION: Record<string, string[]> = {
         "Arica y Parinacota": ["Arica", "Camarones", "Putre", "General Lagos"],
         Tarapaca: ["Iquique", "Alto Hospicio", "Pozo Almonte", "Camina", "Colchane", "Huara", "Pica"],
@@ -266,6 +269,7 @@ import "../styles/global.css";
       const phoneInput = document.querySelector("[data-checkout-phone]");
       const subtotalLabel = document.querySelector("[data-summary-subtotal]");
       const shippingLabel = document.querySelector("[data-summary-shipping]");
+      const shippingNote = document.querySelector("[data-summary-shipping-note]");
       const discountLabel = document.querySelector("[data-summary-discount]");
       const totalLabel = document.querySelector("[data-summary-total]");
       let deliveryMode: DeliveryMode = "envio";
@@ -400,8 +404,9 @@ import "../styles/global.css";
       };
       const getShipping = () => {
         if (deliveryMode === "retiro" || cart.length === 0) return 0;
+        if (isAntofagastaDelivery() && getSubtotal() > FREE_ANTOFAGASTA_SHIPPING_THRESHOLD) return 0;
         if (isAntofagastaDelivery()) return Number(getSelectedShippingSector()?.price ?? 0);
-        return DEFAULT_SHIPPING_PRICE;
+        return 0;
       };
       const getTotal = () => Math.max(0, getSubtotal() + getShipping() - getDiscount());
       const renderShippingSectorOptions = () => {
@@ -435,12 +440,25 @@ import "../styles/global.css";
         }
         if (isHTMLElement(subtotalLabel)) subtotalLabel.textContent = currencyFormatter.format(subtotal);
         if (isHTMLElement(shippingLabel)) {
-          shippingLabel.textContent = isAntofagastaDelivery() && !getSelectedShippingSector()
-            ? "Selecciona sector"
-            : shipping > 0
-              ? currencyFormatter.format(shipping)
-              : "Gratis";
-          shippingLabel.title = isAntofagastaDelivery() ? "Costo segun sector seleccionado" : "";
+          shippingLabel.textContent = deliveryMode === "envio" && !isAntofagastaDelivery()
+            ? "Por pagar"
+            : isAntofagastaDelivery() && getSubtotal() > FREE_ANTOFAGASTA_SHIPPING_THRESHOLD
+              ? "Gratis"
+              : isAntofagastaDelivery() && !getSelectedShippingSector()
+                ? "Selecciona sector"
+                : shipping > 0
+                  ? currencyFormatter.format(shipping)
+                  : "Gratis";
+          shippingLabel.title = isAntofagastaDelivery()
+            ? getSubtotal() > FREE_ANTOFAGASTA_SHIPPING_THRESHOLD
+              ? "Envio gratis en Antofagasta sobre $90.000"
+              : "Costo segun sector seleccionado"
+            : deliveryMode === "envio"
+              ? "Envio por pagar. Te contactaremos segun tu region."
+              : "";
+        }
+        if (isHTMLElement(shippingNote)) {
+          shippingNote.classList.toggle("hidden", !(deliveryMode === "envio" && !isAntofagastaDelivery()));
         }
         if (isHTMLElement(discountLabel)) discountLabel.textContent = `-${currencyFormatter.format(discount)}`;
         if (isHTMLElement(totalLabel)) totalLabel.textContent = currencyFormatter.format(total);

@@ -23,7 +23,7 @@ type CreateOrderInput = {
   discountCode?: string;
 };
 
-const SHIPPING_PRICE = 4990;
+const FREE_ANTOFAGASTA_SHIPPING_THRESHOLD = 90_000;
 const normalizeLocation = (value: unknown) =>
   String(value ?? "")
     .normalize("NFD")
@@ -96,7 +96,7 @@ export async function createOrder(input: CreateOrderInput) {
   );
 
   const subtotal = items.reduce((total, item) => total + item.subtotal, 0);
-  let shipping = input.deliveryMode === "envio" ? SHIPPING_PRICE : 0;
+  let shipping = 0;
   const metadata: Record<string, unknown> = {};
 
   if (input.deliveryMode === "envio" && isAntofagastaDelivery(input)) {
@@ -104,11 +104,12 @@ export async function createOrder(input: CreateOrderInput) {
     const shippingSector = await getActiveShippingSector(input.shippingSectorId);
     if (!shippingSector) throw new ApiError(400, "Sector de envio no disponible");
 
-    shipping = Number(shippingSector.price);
+    shipping = subtotal > FREE_ANTOFAGASTA_SHIPPING_THRESHOLD ? 0 : Number(shippingSector.price);
     metadata.shipping_sector = {
       id: shippingSector.id,
       name: shippingSector.name,
-      price: shippingSector.price
+      price: shippingSector.price,
+      free_shipping_applied: shipping === 0
     };
   }
 
@@ -116,7 +117,8 @@ export async function createOrder(input: CreateOrderInput) {
     metadata.delivery_address = {
       comuna: input.comuna ?? null,
       city: input.city ?? null,
-      region: input.region ?? null
+      region: input.region ?? null,
+      shipping_payment: isAntofagastaDelivery(input) ? "included" : "collect"
     };
   }
   const discountCode = input.discountCode ? await findUsableDiscountCode(input.discountCode, subtotal) : null;
