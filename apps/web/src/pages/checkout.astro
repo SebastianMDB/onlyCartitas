@@ -72,12 +72,10 @@ import "../styles/global.css";
                   <input data-required type="text" placeholder="RUT" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
                 </label>
                 <label class="block">
-                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Direccion *</span>
-                  <input data-required data-checkout-address type="text" autocomplete="street-address" placeholder="Direccion" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
-                </label>
-                <label class="block">
-                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Detalle direccion</span>
-                  <input type="text" placeholder="Casa, departamento, etc. (opcional)" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Region *</span>
+                  <select data-required data-checkout-region class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                    <option value="">Selecciona region</option>
+                  </select>
                 </label>
                 <label class="block">
                   <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Comuna *</span>
@@ -85,15 +83,19 @@ import "../styles/global.css";
                     <option value="">Selecciona comuna</option>
                   </select>
                 </label>
-                <label class="block">
-                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Ciudad *</span>
-                  <input data-required data-checkout-city type="text" placeholder="Ciudad" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                <label class="hidden" data-shipping-sector-field>
+                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Sector *</span>
+                  <select data-checkout-sector class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                    <option value="">Selecciona sector</option>
+                  </select>
                 </label>
                 <label class="block">
-                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Region *</span>
-                  <select data-required data-checkout-region class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
-                    <option value="">Selecciona region</option>
-                  </select>
+                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Direccion *</span>
+                  <input data-required data-checkout-address type="text" autocomplete="street-address" placeholder="Direccion" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                </label>
+                <label class="block">
+                  <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Direccion 2</span>
+                  <input data-checkout-address-detail type="text" placeholder="Casa, departamento, etc. (opcional)" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
                 </label>
               </div>
 
@@ -207,11 +209,17 @@ import "../styles/global.css";
         code: string;
         discount: number;
       };
+      type ShippingSector = {
+        id: string;
+        name: string;
+        price: number;
+        active: boolean;
+      };
 
       const CART_STORAGE_PREFIX = "carta-noble-cart";
       const SESSION_STORAGE_KEY = "onlycartitas-auth-session";
       const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
-      const FREE_SHIPPING_THRESHOLD = 90_000;
+      const DEFAULT_SHIPPING_PRICE = 4_990;
       const COMMUNES_BY_REGION: Record<string, string[]> = {
         "Arica y Parinacota": ["Arica", "Camarones", "Putre", "General Lagos"],
         Tarapaca: ["Iquique", "Alto Hospicio", "Pozo Almonte", "Camina", "Colchane", "Huara", "Pica"],
@@ -250,9 +258,11 @@ import "../styles/global.css";
       const firstNameInput = document.querySelector("[data-checkout-first-name]");
       const lastNameInput = document.querySelector("[data-checkout-last-name]");
       const addressInput = document.querySelector("[data-checkout-address]");
+      const addressDetailInput = document.querySelector("[data-checkout-address-detail]");
       const comunaInput = document.querySelector("[data-checkout-comuna]");
-      const cityInput = document.querySelector("[data-checkout-city]");
       const regionInput = document.querySelector("[data-checkout-region]");
+      const shippingSectorField = document.querySelector("[data-shipping-sector-field]");
+      const shippingSectorInput = document.querySelector("[data-checkout-sector]");
       const phoneInput = document.querySelector("[data-checkout-phone]");
       const subtotalLabel = document.querySelector("[data-summary-subtotal]");
       const shippingLabel = document.querySelector("[data-summary-shipping]");
@@ -260,6 +270,7 @@ import "../styles/global.css";
       const totalLabel = document.querySelector("[data-summary-total]");
       let deliveryMode: DeliveryMode = "envio";
       let appliedDiscount: AppliedDiscount | null = null;
+      let shippingSectors: ShippingSector[] = [];
       let showedPickupAlert = false;
 
       const currencyFormatter = new Intl.NumberFormat("es-CL", {
@@ -341,6 +352,21 @@ import "../styles/global.css";
         }
       };
 
+      const loadShippingSectors = async () => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/shipping-sectors`);
+          const payload = await response.json().catch(() => null);
+          if (!response.ok) throw new Error(payload?.error ?? "No se pudieron cargar los sectores.");
+          shippingSectors = Array.isArray(payload.data)
+            ? payload.data.map((sector) => ({ ...sector, price: Number(sector.price ?? 0) }))
+            : [];
+          renderShippingSectorOptions();
+        } catch {
+          shippingSectors = [];
+          renderShippingSectorOptions();
+        }
+      };
+
       let cart = readCart();
 
       const getSubtotal = () => cart.reduce((total, item) => total + item.price * item.quantity, 0);
@@ -364,16 +390,40 @@ import "../styles/global.css";
       };
       const isAntofagastaDelivery = () => {
         const comuna = isSelectElement(comunaInput) ? comunaInput.value : "";
-        const city = cityInput instanceof HTMLInputElement ? cityInput.value : "";
-        return normalizeLocation(comuna) === "antofagasta" && normalizeLocation(city) === "antofagasta";
+        const region = isSelectElement(regionInput) ? regionInput.value : "";
+        return normalizeLocation(region) === "antofagasta" && normalizeLocation(comuna) === "antofagasta";
       };
-      const hasFreeAntofagastaShipping = () =>
-        deliveryMode === "envio" && cart.length > 0 && isAntofagastaDelivery() && getSubtotal() > FREE_SHIPPING_THRESHOLD;
       const getDiscount = () => Number(appliedDiscount?.discount ?? 0);
-      const getTotal = () => Math.max(0, getSubtotal() - getDiscount());
+      const getSelectedShippingSector = () => {
+        const sectorId = isSelectElement(shippingSectorInput) ? shippingSectorInput.value : "";
+        return shippingSectors.find((sector) => sector.id === sectorId) ?? null;
+      };
+      const getShipping = () => {
+        if (deliveryMode === "retiro" || cart.length === 0) return 0;
+        if (isAntofagastaDelivery()) return Number(getSelectedShippingSector()?.price ?? 0);
+        return DEFAULT_SHIPPING_PRICE;
+      };
+      const getTotal = () => Math.max(0, getSubtotal() + getShipping() - getDiscount());
+      const renderShippingSectorOptions = () => {
+        if (!isSelectElement(shippingSectorInput)) return;
+        shippingSectorInput.innerHTML = [
+          `<option value="">Selecciona sector</option>`,
+          ...shippingSectors.map((sector) => `<option value="${escapeHtml(sector.id)}">${escapeHtml(sector.name)} - ${currencyFormatter.format(Number(sector.price ?? 0))}</option>`)
+        ].join("");
+      };
+      const updateShippingSectorVisibility = () => {
+        const shouldShow = deliveryMode === "envio" && isAntofagastaDelivery();
+        if (isHTMLElement(shippingSectorField)) shippingSectorField.classList.toggle("hidden", !shouldShow);
+        if (isSelectElement(shippingSectorInput)) {
+          shippingSectorInput.toggleAttribute("data-required", shouldShow);
+          if (!shouldShow) shippingSectorInput.value = "";
+        }
+      };
 
       const renderSummary = () => {
         const subtotal = getSubtotal();
+        updateShippingSectorVisibility();
+        const shipping = getShipping();
         const discount = getDiscount();
         const total = getTotal();
 
@@ -385,8 +435,12 @@ import "../styles/global.css";
         }
         if (isHTMLElement(subtotalLabel)) subtotalLabel.textContent = currencyFormatter.format(subtotal);
         if (isHTMLElement(shippingLabel)) {
-          shippingLabel.textContent = deliveryMode === "retiro" || hasFreeAntofagastaShipping() ? "Gratis" : "Segun servicio";
-          shippingLabel.title = hasFreeAntofagastaShipping() ? "Envio gratis en Antofagasta sobre $90.000" : "";
+          shippingLabel.textContent = isAntofagastaDelivery() && !getSelectedShippingSector()
+            ? "Selecciona sector"
+            : shipping > 0
+              ? currencyFormatter.format(shipping)
+              : "Gratis";
+          shippingLabel.title = isAntofagastaDelivery() ? "Costo segun sector seleccionado" : "";
         }
         if (isHTMLElement(discountLabel)) discountLabel.textContent = `-${currencyFormatter.format(discount)}`;
         if (isHTMLElement(totalLabel)) totalLabel.textContent = currencyFormatter.format(total);
@@ -439,16 +493,18 @@ import "../styles/global.css";
       });
 
       if (isSelectElement(regionInput)) {
-        regionInput.addEventListener("change", renderCommuneOptions);
+        regionInput.addEventListener("change", () => {
+          renderCommuneOptions();
+          renderSummary();
+        });
       }
-
-      [comunaInput, cityInput].forEach((input) => {
-        if (!(input instanceof HTMLInputElement)) return;
-        input.addEventListener("input", renderSummary);
-      });
 
       if (isSelectElement(comunaInput)) {
         comunaInput.addEventListener("change", renderSummary);
+      }
+
+      if (isSelectElement(shippingSectorInput)) {
+        shippingSectorInput.addEventListener("change", renderSummary);
       }
 
       discountButton?.addEventListener("click", async () => {
@@ -495,9 +551,11 @@ import "../styles/global.css";
         const email = emailInput instanceof HTMLInputElement ? emailInput.value.trim() : "";
         const phone = phoneInput instanceof HTMLInputElement ? phoneInput.value.trim() : "";
         const address = addressInput instanceof HTMLInputElement ? addressInput.value.trim() : "";
+        const addressDetail = addressDetailInput instanceof HTMLInputElement ? addressDetailInput.value.trim() : "";
         const comuna = isSelectElement(comunaInput) ? comunaInput.value.trim() : "";
-        const city = cityInput instanceof HTMLInputElement ? cityInput.value.trim() : "";
+        const city = comuna;
         const region = isSelectElement(regionInput) ? regionInput.value.trim() : "";
+        const shippingSector = getSelectedShippingSector();
         const session = readSession();
         const response = await fetch(`${API_BASE_URL}/api/orders`, {
           method: "POST",
@@ -510,7 +568,11 @@ import "../styles/global.css";
             customerEmail: email,
             customerPhone: phone || undefined,
             deliveryMode,
-            address: deliveryMode === "envio" ? [address, comuna, city, region].filter(Boolean).join(", ") : undefined,
+            address: deliveryMode === "envio" ? [address, addressDetail, comuna, region].filter(Boolean).join(", ") : undefined,
+            comuna: deliveryMode === "envio" ? comuna : undefined,
+            city: deliveryMode === "envio" ? city : undefined,
+            region: deliveryMode === "envio" ? region : undefined,
+            shippingSectorId: deliveryMode === "envio" && isAntofagastaDelivery() ? shippingSector?.id : undefined,
             discountCode: appliedDiscount?.code,
             items: cart.map((item) => ({
               id: item.id,
@@ -599,12 +661,17 @@ import "../styles/global.css";
         }
       });
 
-      applySessionToForm();
-      renderRegionOptions();
-      if (isSelectElement(regionInput)) regionInput.value = "Antofagasta";
-      renderCommuneOptions();
-      setDeliveryMode("envio");
-      renderSummary();
+      const initCheckout = async () => {
+        applySessionToForm();
+        await loadShippingSectors();
+        renderRegionOptions();
+        if (isSelectElement(regionInput)) regionInput.value = "Antofagasta";
+        renderCommuneOptions();
+        setDeliveryMode("envio");
+        renderSummary();
+      };
+
+      initCheckout();
     </script>
   </body>
 </html>

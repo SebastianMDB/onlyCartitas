@@ -10,6 +10,7 @@ import { discountCodeRoutes } from "./routes/discount-codes.js";
 import { orderRoutes } from "./routes/orders.js";
 import { paymentRoutes } from "./routes/payments.js";
 import { productRoutes } from "./routes/products.js";
+import { shippingSectorRoutes } from "./routes/shipping-sectors.js";
 import { siteSettingsRoutes } from "./routes/site-settings.js";
 
 const app = Fastify({
@@ -26,7 +27,7 @@ app.addHook("onRequest", async (_request, reply) => {
 
 await app.register(cors, {
   origin: env.NODE_ENV === "production" ? env.WEB_ORIGIN : env.WEB_ORIGIN === "*" ? true : env.WEB_ORIGIN,
-  methods: ["GET", "POST", "PATCH", "OPTIONS"],
+  methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 });
 
@@ -72,6 +73,7 @@ await app.register(discountCodeRoutes);
 await app.register(orderRoutes);
 await app.register(paymentRoutes);
 await app.register(productRoutes);
+await app.register(shippingSectorRoutes);
 await app.register(siteSettingsRoutes);
 
 try {

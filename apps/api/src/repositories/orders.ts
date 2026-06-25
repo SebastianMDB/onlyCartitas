@@ -5,6 +5,7 @@ import { orderItems, orders, products } from "../db/schema.js";
 import { ApiError } from "../http.js";
 import { findUsableDiscountCode, registerDiscountUse } from "./discount-codes.js";
 import { getProductById } from "./products.js";
+import { getActiveShippingSector } from "./shipping-sectors.js";
 import type { AuthUser, CartItem } from "../types.js";
 
 type CreateOrderInput = {
@@ -14,11 +15,21 @@ type CreateOrderInput = {
   customerPhone?: string;
   deliveryMode: "retiro" | "envio";
   address?: string;
+  comuna?: string;
+  city?: string;
+  region?: string;
+  shippingSectorId?: string;
   items: Array<Pick<CartItem, "id" | "quantity" | "variantId">>;
   discountCode?: string;
 };
 
 const SHIPPING_PRICE = 4990;
+const normalizeLocation = (value: unknown) =>
+  String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
 
 type OrderRow = typeof orders.$inferSelect;
 type OrderItemRow = typeof orderItems.$inferSelect;
@@ -47,9 +58,15 @@ const toOrderResponse = (order: OrderRow, items: OrderItemRow[] = []) => ({
   discount_code: order.discountCode,
   total: order.total,
   status: order.status,
+  metadata: order.metadata,
   created_at: order.createdAt.toISOString(),
   updated_at: order.updatedAt.toISOString()
 });
+
+const isAntofagastaDelivery = (input: Pick<CreateOrderInput, "comuna" | "city" | "region">) =>
+  normalizeLocation(input.region) === "antofagasta" &&
+  normalizeLocation(input.comuna) === "antofagasta" &&
+  normalizeLocation(input.city) === "antofagasta";
 
 export async function createOrder(input: CreateOrderInput) {
   const items = await Promise.all(
@@ -79,7 +96,29 @@ export async function createOrder(input: CreateOrderInput) {
   );
 
   const subtotal = items.reduce((total, item) => total + item.subtotal, 0);
-  const shipping = input.deliveryMode === "envio" ? SHIPPING_PRICE : 0;
+  let shipping = input.deliveryMode === "envio" ? SHIPPING_PRICE : 0;
+  const metadata: Record<string, unknown> = {};
+
+  if (input.deliveryMode === "envio" && isAntofagastaDelivery(input)) {
+    if (!input.shippingSectorId) throw new ApiError(400, "Selecciona un sector de envio para Antofagasta");
+    const shippingSector = await getActiveShippingSector(input.shippingSectorId);
+    if (!shippingSector) throw new ApiError(400, "Sector de envio no disponible");
+
+    shipping = Number(shippingSector.price);
+    metadata.shipping_sector = {
+      id: shippingSector.id,
+      name: shippingSector.name,
+      price: shippingSector.price
+    };
+  }
+
+  if (input.deliveryMode === "envio") {
+    metadata.delivery_address = {
+      comuna: input.comuna ?? null,
+      city: input.city ?? null,
+      region: input.region ?? null
+    };
+  }
   const discountCode = input.discountCode ? await findUsableDiscountCode(input.discountCode, subtotal) : null;
   const discount = discountCode?.discount ?? 0;
   const total = Math.max(0, subtotal + shipping - discount);
@@ -119,7 +158,8 @@ export async function createOrder(input: CreateOrderInput) {
           discount,
           discountCode: discountCode?.code ?? null,
           total,
-          status: "pending"
+          status: "pending",
+          metadata
         })
         .returning();
 

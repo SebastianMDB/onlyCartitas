@@ -67,11 +67,12 @@ const defaultProductCategoryOptions = productCategories.sealed;
       </section>
 
       <section class="mx-auto mt-6 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div class="grid gap-2 rounded-2xl bg-slate-100 p-1 sm:grid-cols-5" data-admin-tabs>
+        <div class="grid gap-2 rounded-2xl bg-slate-100 p-1 sm:grid-cols-6" data-admin-tabs>
           <button type="button" class="rounded-[1rem] bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm" data-admin-tab="inventory" aria-pressed="true">Inventario</button>
           <button type="button" class="rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-admin-tab="users" aria-pressed="false">Usuarios</button>
           <button type="button" class="rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-admin-tab="orders" aria-pressed="false">Compras</button>
           <button type="button" class="rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-admin-tab="discounts" aria-pressed="false">Descuentos</button>
+          <button type="button" class="rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-admin-tab="shipping" aria-pressed="false">Envios</button>
           <button type="button" class="rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-admin-tab="hero" aria-pressed="false">Hero</button>
         </div>
       </section>
@@ -483,6 +484,25 @@ const defaultProductCategoryOptions = productCategories.sealed;
         </div>
       </section>
 
+      <section class="mx-auto mt-8 hidden w-full max-w-4xl px-4 sm:px-6 lg:px-8" data-admin-panel="shipping">
+        <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Envios Antofagasta</p>
+            <h2 class="mt-2 text-2xl font-semibold text-[color:var(--color-primary)]">Sectores de envio</h2>
+          </div>
+
+          <form class="mt-5 grid gap-3 sm:grid-cols-[1fr_160px_auto]" data-shipping-sector-form>
+            <input data-shipping-sector-name-input type="text" placeholder="Sector norte" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+            <input data-shipping-sector-price-input type="number" min="0" step="1" placeholder="Costo" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+            <button type="submit" class="inline-flex min-h-12 items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]">
+              Crear
+            </button>
+          </form>
+          <p class="mt-3 hidden rounded-[1rem] bg-[color:var(--color-surface)] px-4 py-3 text-sm font-semibold text-[color:var(--color-primary)]" data-shipping-sector-admin-message></p>
+          <div class="mt-5 grid gap-3" data-admin-shipping-sectors></div>
+        </div>
+      </section>
+
       <section class="mx-auto mt-8 hidden w-full max-w-4xl px-4 sm:px-6 lg:px-8" data-admin-panel="hero">
         <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
           <div>
@@ -629,6 +649,11 @@ const defaultProductCategoryOptions = productCategories.sealed;
       const discountValueInput = document.querySelector("[data-discount-value-input]");
       const discountMaxInput = document.querySelector("[data-discount-max-input]");
       const discountAdminMessage = document.querySelector("[data-discount-admin-message]");
+      const shippingSectorsContainer = document.querySelector("[data-admin-shipping-sectors]");
+      const shippingSectorForm = document.querySelector("[data-shipping-sector-form]");
+      const shippingSectorNameInput = document.querySelector("[data-shipping-sector-name-input]");
+      const shippingSectorPriceInput = document.querySelector("[data-shipping-sector-price-input]");
+      const shippingSectorAdminMessage = document.querySelector("[data-shipping-sector-admin-message]");
       const heroForm = document.querySelector("[data-hero-form]");
       const heroInputs = Array.from(document.querySelectorAll("[data-hero-input]"));
       const heroPreview = document.querySelector("[data-hero-preview]");
@@ -866,6 +891,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
         loadUsers();
         loadOrders();
         loadDiscounts();
+        loadShippingSectors();
         loadHeroSettings();
         loadCatalogOptions();
       };
@@ -1028,6 +1054,14 @@ const defaultProductCategoryOptions = productCategories.sealed;
         discountAdminMessage.textContent = text;
         discountAdminMessage.classList.remove("hidden");
         window.setTimeout(() => discountAdminMessage.classList.add("hidden"), 1800);
+      };
+
+      const showShippingSectorMessage = (text) => {
+        if (!isElement(shippingSectorAdminMessage)) return;
+
+        shippingSectorAdminMessage.textContent = text;
+        shippingSectorAdminMessage.classList.remove("hidden");
+        window.setTimeout(() => shippingSectorAdminMessage.classList.add("hidden"), 1800);
       };
 
       const showHeroMessage = (text) => {
@@ -1775,8 +1809,8 @@ const defaultProductCategoryOptions = productCategories.sealed;
                     <p class="text-sm font-semibold text-slate-950">${escapeHtml(order.id)}</p>
                     <p class="mt-1 text-xs text-slate-500">${escapeHtml(new Date(order.created_at ?? Date.now()).toLocaleString("es-CL"))}</p>
                     <p class="mt-3 text-sm font-semibold text-[color:var(--color-primary)]">${escapeHtml(order.customer_name)} · ${escapeHtml(order.customer_email)}</p>
-                    <p class="mt-1 text-sm text-slate-600">${escapeHtml(order.delivery_mode)} · ${Number(order.items?.length ?? 0)} producto(s)</p>
-                    <p class="mt-2 text-sm text-slate-600">Subtotal ${currencyFormatter.format(Number(order.subtotal ?? 0))} · Descuento ${currencyFormatter.format(Number(order.discount ?? 0))} · Total ${currencyFormatter.format(Number(order.total ?? 0))}</p>
+                    <p class="mt-1 text-sm text-slate-600">${escapeHtml(order.delivery_mode)} · ${Number(order.items?.length ?? 0)} producto(s)${order.metadata?.shipping_sector?.name ? ` · Sector ${escapeHtml(order.metadata.shipping_sector.name)}` : ""}</p>
+                    <p class="mt-2 text-sm text-slate-600">Subtotal ${currencyFormatter.format(Number(order.subtotal ?? 0))} · Envio ${currencyFormatter.format(Number(order.shipping ?? 0))} · Descuento ${currencyFormatter.format(Number(order.discount ?? 0))} · Total ${currencyFormatter.format(Number(order.total ?? 0))}</p>
                   </div>
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Estado</span>
@@ -1855,6 +1889,51 @@ const defaultProductCategoryOptions = productCategories.sealed;
         } catch (error) {
           if (isElement(discountsContainer)) {
             discountsContainer.innerHTML = `<p class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">${escapeHtml(error instanceof Error ? error.message : "No se pudieron cargar los descuentos.")}</p>`;
+          }
+        }
+      };
+
+      const renderShippingSectors = (sectors) => {
+        if (!isElement(shippingSectorsContainer)) return;
+
+        if (!Array.isArray(sectors) || sectors.length === 0) {
+          shippingSectorsContainer.innerHTML = `<p class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center text-sm font-semibold text-slate-500">No hay sectores creados.</p>`;
+          return;
+        }
+
+        shippingSectorsContainer.innerHTML = sectors
+          .map(
+            (sector) => `
+              <article class="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[1fr_150px_130px_110px_110px] lg:items-center">
+                <input type="text" value="${escapeHtml(sector.name)}" class="h-11 rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" data-shipping-sector-name="${escapeHtml(sector.id)}" />
+                <input type="number" min="0" step="1" value="${escapeHtml(sector.price)}" class="h-11 rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" data-shipping-sector-price="${escapeHtml(sector.id)}" />
+                <select class="h-11 rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" data-shipping-sector-active="${escapeHtml(sector.id)}">
+                  <option value="true" ${sector.active ? "selected" : ""}>Activo</option>
+                  <option value="false" ${!sector.active ? "selected" : ""}>Inactivo</option>
+                </select>
+                <button type="button" class="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950" data-shipping-sector-save="${escapeHtml(sector.id)}">
+                  Guardar
+                </button>
+                <button type="button" class="inline-flex min-h-11 items-center justify-center rounded-full border border-red-200 px-4 py-3 text-sm font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-50" data-shipping-sector-delete="${escapeHtml(sector.id)}">
+                  Eliminar
+                </button>
+              </article>
+            `
+          )
+          .join("");
+      };
+
+      const loadShippingSectors = async () => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/admin/shipping-sectors`, {
+            headers: authHeaders()
+          });
+          const payload = await response.json().catch(() => null);
+          if (!response.ok) throw new Error(payload?.error ?? "No se pudieron cargar los sectores.");
+          renderShippingSectors(Array.isArray(payload.data) ? payload.data : []);
+        } catch (error) {
+          if (isElement(shippingSectorsContainer)) {
+            shippingSectorsContainer.innerHTML = `<p class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">${escapeHtml(error instanceof Error ? error.message : "No se pudieron cargar los sectores.")}</p>`;
           }
         }
       };
@@ -1946,6 +2025,60 @@ const defaultProductCategoryOptions = productCategories.sealed;
 
         showDiscountMessage("Codigo actualizado.");
         await loadDiscounts();
+      };
+
+      const createShippingSector = async () => {
+        if (!isInput(shippingSectorNameInput) || !isInput(shippingSectorPriceInput)) return;
+
+        const price = Number(shippingSectorPriceInput.value);
+        const response = await fetch(`${API_BASE_URL}/api/admin/shipping-sectors`, {
+          method: "POST",
+          headers: authHeaders(),
+          body: JSON.stringify({
+            name: shippingSectorNameInput.value.trim(),
+            price,
+            active: true
+          })
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(payload?.error ?? "No se pudo crear el sector.");
+
+        shippingSectorNameInput.value = "";
+        shippingSectorPriceInput.value = "";
+        showShippingSectorMessage("Sector creado.");
+        await loadShippingSectors();
+      };
+
+      const updateShippingSector = async (id, container = document) => {
+        const nameInput = container.querySelector(`[data-shipping-sector-name="${id}"]`);
+        const priceInput = container.querySelector(`[data-shipping-sector-price="${id}"]`);
+        const activeSelect = container.querySelector(`[data-shipping-sector-active="${id}"]`);
+        const name = nameInput instanceof HTMLInputElement ? nameInput.value.trim() : "";
+        const price = priceInput instanceof HTMLInputElement ? Number(priceInput.value) : 0;
+        const active = activeSelect instanceof HTMLSelectElement ? activeSelect.value === "true" : true;
+
+        const response = await fetch(`${API_BASE_URL}/api/admin/shipping-sectors/${id}`, {
+          method: "PATCH",
+          headers: authHeaders(),
+          body: JSON.stringify({ name, price, active })
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(payload?.error ?? "No se pudo actualizar el sector.");
+
+        showShippingSectorMessage("Sector actualizado.");
+        await loadShippingSectors();
+      };
+
+      const deleteShippingSector = async (id) => {
+        const response = await fetch(`${API_BASE_URL}/api/admin/shipping-sectors/${id}`, {
+          method: "DELETE",
+          headers: authHeaders()
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(payload?.error ?? "No se pudo eliminar el sector.");
+
+        showShippingSectorMessage("Sector eliminado.");
+        await loadShippingSectors();
       };
 
       typeButtons.forEach((button) => {
@@ -2141,6 +2274,35 @@ const defaultProductCategoryOptions = productCategories.sealed;
           await updateDiscount(target.dataset.discountSave, target.closest("article") ?? document);
         } catch (error) {
           showDiscountMessage(error instanceof Error ? error.message : "No se pudo actualizar el descuento.");
+        }
+      });
+
+      shippingSectorForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        try {
+          await createShippingSector();
+        } catch (error) {
+          showShippingSectorMessage(error instanceof Error ? error.message : "No se pudo crear el sector.");
+        }
+      });
+
+      shippingSectorsContainer?.addEventListener("click", async (event) => {
+        const saveTarget = event.target instanceof HTMLElement ? event.target.closest("[data-shipping-sector-save]") : null;
+        const deleteTarget = event.target instanceof HTMLElement ? event.target.closest("[data-shipping-sector-delete]") : null;
+
+        try {
+          if (saveTarget instanceof HTMLElement && saveTarget.dataset.shippingSectorSave) {
+            await updateShippingSector(saveTarget.dataset.shippingSectorSave, saveTarget.closest("article") ?? document);
+            return;
+          }
+
+          if (deleteTarget instanceof HTMLElement && deleteTarget.dataset.shippingSectorDelete) {
+            if (!window.confirm("Eliminar este sector de envio?")) return;
+            await deleteShippingSector(deleteTarget.dataset.shippingSectorDelete);
+          }
+        } catch (error) {
+          showShippingSectorMessage(error instanceof Error ? error.message : "No se pudo actualizar el sector.");
         }
       });
 

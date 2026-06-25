@@ -157,6 +157,15 @@ create table if not exists public.site_settings (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.shipping_sectors (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  price numeric(10, 2) not null check (price >= 0),
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create unique index if not exists app_users_username_unique on public.app_users(username);
 create index if not exists products_kind_idx on public.products(kind);
 create index if not exists products_category_idx on public.products(category);
@@ -171,6 +180,8 @@ create index if not exists order_items_product_id_idx on public.order_items(prod
 create index if not exists payments_order_id_idx on public.payments(order_id);
 create index if not exists payments_provider_payment_id_idx on public.payments(provider_payment_id);
 create index if not exists payments_status_idx on public.payments(status);
+create unique index if not exists shipping_sectors_name_unique on public.shipping_sectors(name);
+create index if not exists shipping_sectors_active_idx on public.shipping_sectors(active);
 
 create or replace function public.set_updated_at()
 returns trigger as $$
@@ -208,6 +219,11 @@ for each row execute function public.set_updated_at();
 drop trigger if exists site_settings_set_updated_at on public.site_settings;
 create trigger site_settings_set_updated_at
 before update on public.site_settings
+for each row execute function public.set_updated_at();
+
+drop trigger if exists shipping_sectors_set_updated_at on public.shipping_sectors;
+create trigger shipping_sectors_set_updated_at
+before update on public.shipping_sectors
 for each row execute function public.set_updated_at();
 
 insert into public.site_settings (key, value)

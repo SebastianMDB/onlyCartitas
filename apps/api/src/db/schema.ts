@@ -167,6 +167,22 @@ export const siteSettings = pgTable("site_settings", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
 });
 
+export const shippingSectors = pgTable(
+  "shipping_sectors",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    price: numeric("price", { precision: 10, scale: 2, mode: "number" }).notNull(),
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
+  },
+  (table) => ({
+    nameUnique: uniqueIndex("shipping_sectors_name_unique").on(table.name),
+    activeIdx: index("shipping_sectors_active_idx").on(table.active)
+  })
+);
+
 export const usersRelations = relations(appUsers, ({ many }) => ({
   orders: many(orders)
 }));

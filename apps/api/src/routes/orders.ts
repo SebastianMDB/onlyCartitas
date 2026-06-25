@@ -9,6 +9,10 @@ const createOrderSchema = z.object({
   customerPhone: z.string().trim().optional(),
   deliveryMode: z.enum(["retiro", "envio"]),
   address: z.string().trim().optional(),
+  comuna: z.string().trim().optional(),
+  city: z.string().trim().optional(),
+  region: z.string().trim().optional(),
+  shippingSectorId: z.string().uuid().optional(),
   discountCode: z.string().trim().optional(),
   items: z
     .array(
