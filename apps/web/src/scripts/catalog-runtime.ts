@@ -24,7 +24,7 @@ type CatalogConfig = {
   apiBaseUrl?: string;
   kind?: ProductKind;
   offer?: boolean;
-  layout?: "products" | "sealed" | "singles" | "offers";
+  layout?: "products" | "sealed" | "singles" | "offers" | "home";
   columns?: "three" | "four";
 };
 
@@ -81,7 +81,11 @@ const readConfig = (): CatalogConfig => {
 
 const getProductUrl = (product: Product) => `/producto?id=${encodeURIComponent(product.id)}`;
 
-const renderProductCard = (product: Product, columns: CatalogConfig["columns"] = "three") => {
+const renderProductCard = (
+  product: Product,
+  columns: CatalogConfig["columns"] = "three",
+  carousel = false
+) => {
   const discountPercent =
     product.previousPrice && product.previousPrice > product.price
       ? Math.round(((product.previousPrice - product.price) / product.previousPrice) * 100)
@@ -91,9 +95,13 @@ const renderProductCard = (product: Product, columns: CatalogConfig["columns"] =
   const titleClass = columns === "four" ? "mt-2 min-h-[3.5rem]" : "mt-2 min-h-[3.5rem]";
   const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
 
+  const containerClass = carousel
+    ? "group flex h-full w-[300px] max-w-[calc(100vw-2rem)] shrink-0 snap-start flex-col overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-[0_20px_45px_rgba(17,48,71,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_55px_rgba(17,48,71,0.14)] xl:w-[calc((100%_-_3.75rem)/4)]"
+    : "group flex h-full min-w-0 w-full flex-col overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-[0_20px_45px_rgba(17,48,71,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_55px_rgba(17,48,71,0.14)]";
+
   return `
     <article
-      class="group flex h-full min-w-0 w-full flex-col overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-[0_20px_45px_rgba(17,48,71,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_55px_rgba(17,48,71,0.14)]"
+      class="${containerClass}"
       data-product-card
       data-product-id="${escapeHtml(product.id)}"
       data-product-name="${escapeHtml(normalize(product.name))}"
@@ -174,14 +182,14 @@ const renderOptions = (select: Element | null, values: string[], placeholder: st
   select.value = values.some((value) => normalize(value) === currentValue) ? currentValue : "all";
 };
 
-const fetchProductsFromApi = async (apiBaseUrl: string) => {
+const fetchProductsFromApi = async (apiBaseUrl: string, signal: AbortSignal) => {
   const cached = window.__onlycartitasProductsCache;
   if (cached?.apiBaseUrl === apiBaseUrl && cached.promise && !cached.signal?.aborted) {
     return cached.promise;
   }
 
   const url = new URL("/api/products", apiBaseUrl);
-  const promise = fetch(url)
+  const promise = fetch(url, { cache: "no-store", signal })
     .then(async (response) => {
       const payload = await response.json().catch(() => null);
       return response.ok && Array.isArray(payload?.data) ? (payload.data as Product[]) : [];
@@ -195,15 +203,14 @@ const fetchProductsFromApi = async (apiBaseUrl: string) => {
       return products;
     })
     .catch((error) => {
-      const fallbackProducts = cached?.products ?? [];
+      if (error instanceof DOMException && error.name === "AbortError") {
+        throw error;
+      }
       window.__onlycartitasProductsCache = {
         apiBaseUrl,
-        fetchedAt: cached?.fetchedAt ?? 0,
-        products: fallbackProducts
+        fetchedAt: 0,
+        products: []
       };
-      if (error instanceof DOMException && error.name === "AbortError") {
-        return fallbackProducts;
-      }
       return [];
     });
 
@@ -211,19 +218,15 @@ const fetchProductsFromApi = async (apiBaseUrl: string) => {
     apiBaseUrl,
     fetchedAt: cached?.fetchedAt ?? 0,
     products: cached?.products ?? [],
-    promise
+    promise,
+    signal
   };
 
   return promise;
 };
 
 const loadProducts = async (apiBaseUrl: string, signal: AbortSignal) => {
-  const cached = window.__onlycartitasProductsCache;
-  if (cached?.apiBaseUrl === apiBaseUrl && cached.products.length > 0) {
-    return cached.products;
-  }
-
-  return fetchProductsFromApi(apiBaseUrl);
+  return fetchProductsFromApi(apiBaseUrl, signal);
 };
 
 const filterProductsForConfig = (products: Product[], config: CatalogConfig) =>
@@ -234,16 +237,37 @@ const filterProductsForConfig = (products: Product[], config: CatalogConfig) =>
     return matchesKind && matchesOffer;
   });
 
+const renderHomeSection = (title: string, products: Product[], index: number, columns: CatalogConfig["columns"]) => {
+  const sectionId = `home-carousel-${index}`;
+  return `
+    <section class="space-y-6" data-carousel-section>
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">OnlyCartitas</p>
+          <h2 class="mt-2 text-3xl font-semibold tracking-tight text-[color:var(--color-primary)] sm:text-4xl">${escapeHtml(title)}</h2>
+        </div>
+        <div class="hidden items-center gap-2 lg:flex">
+          <button type="button" aria-label="Desplazar ${escapeHtml(title)} a la izquierda" data-carousel-direction="prev" data-carousel-target="${sectionId}" class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 transition hover:border-slate-400 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40">
+            <svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"></path></svg>
+          </button>
+          <button type="button" aria-label="Desplazar ${escapeHtml(title)} a la derecha" data-carousel-direction="next" data-carousel-target="${sectionId}" class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 transition hover:border-slate-400 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40">
+            <svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"></path></svg>
+          </button>
+        </div>
+      </div>
+      <div id="${sectionId}" data-carousel-track class="hide-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 scroll-smooth">
+        ${products.map((product) => renderProductCard(product, columns, true)).join("")}
+      </div>
+    </section>
+  `;
+};
+
 const initCatalog = async () => {
   catalogAbortController?.abort();
   catalogAbortController = new AbortController();
   const signal = catalogAbortController.signal;
   const config = readConfig();
   const apiBaseUrl = config.apiBaseUrl ?? "http://localhost:3000";
-  const hadUsableCache =
-    window.__onlycartitasProductsCache?.apiBaseUrl === apiBaseUrl &&
-    window.__onlycartitasProductsCache.products.length > 0;
-
   const grid = document.querySelector("[data-products-grid]");
   const categoryContainer = document.querySelector("[data-category-filters]");
   const setFilter = document.querySelector("[data-set-filter]");
@@ -325,9 +349,35 @@ const initCatalog = async () => {
   const renderGrid = () => {
     if (signal.aborted) return;
     const visibleProducts = filteredProducts();
-    grid.innerHTML = visibleProducts.map((product) => renderProductCard(product, config.columns)).join("");
+    if (config.layout === "home") {
+      const offers = visibleProducts.filter((product) => product.offer || product.previousPrice);
+      const sealedProducts = visibleProducts.filter((product) => product.kind === "sealed");
+      const sections = [
+        ...(offers.length > 0 ? [{ title: "Ofertas", products: offers }] : []),
+        ...uniqueValues(sealedProducts.map((product) => product.category)).map((category) => ({
+          title: category,
+          products: sealedProducts.filter((product) => product.category === category)
+        }))
+      ];
+      grid.innerHTML = sections
+        .map((section, index) => renderHomeSection(section.title, section.products, index, config.columns))
+        .join("");
+      window.requestAnimationFrame(() => {
+        grid.querySelectorAll("[data-carousel-track]").forEach((track) => {
+          if (!(track instanceof HTMLElement)) return;
+          const section = track.closest("[data-carousel-section]");
+          const prev = section?.querySelector('[data-carousel-direction="prev"]');
+          const next = section?.querySelector('[data-carousel-direction="next"]');
+          if (prev instanceof HTMLButtonElement) prev.disabled = track.scrollLeft <= 8;
+          if (next instanceof HTMLButtonElement) next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 8;
+        });
+      });
+      if (emptyState instanceof HTMLElement) emptyState.style.display = sections.length === 0 ? "block" : "none";
+    } else {
+      grid.innerHTML = visibleProducts.map((product) => renderProductCard(product, config.columns)).join("");
+      if (emptyState instanceof HTMLElement) emptyState.style.display = visibleProducts.length === 0 ? "block" : "none";
+    }
     if (resultsCount instanceof HTMLElement) resultsCount.textContent = String(visibleProducts.length);
-    if (emptyState instanceof HTMLElement) emptyState.style.display = visibleProducts.length === 0 ? "block" : "none";
     window.dispatchEvent(
       new CustomEvent("onlycartitas:catalog-rendered", {
         detail: {
@@ -343,6 +393,28 @@ const initCatalog = async () => {
     renderOptions(illustratorFilter, uniqueValues(products.map((product) => product.illustrator)), "Todos los ilustradores");
     renderStats();
   };
+
+  if (config.layout === "home") {
+    grid.addEventListener("click", (event) => {
+      const button = event.target instanceof Element ? event.target.closest("[data-carousel-direction]") : null;
+      if (!(button instanceof HTMLButtonElement)) return;
+      const targetId = button.dataset.carouselTarget;
+      const track = targetId ? document.getElementById(targetId) : null;
+      if (!(track instanceof HTMLElement)) return;
+      const amount = Math.min(360, track.clientWidth * 0.92);
+      track.scrollBy({ left: button.dataset.carouselDirection === "prev" ? -amount : amount, behavior: "smooth" });
+    }, { signal });
+
+    grid.addEventListener("scroll", (event) => {
+      const track = event.target;
+      if (!(track instanceof HTMLElement) || !track.matches("[data-carousel-track]")) return;
+      const section = track.closest("[data-carousel-section]");
+      const prev = section?.querySelector('[data-carousel-direction="prev"]');
+      const next = section?.querySelector('[data-carousel-direction="next"]');
+      if (prev instanceof HTMLButtonElement) prev.disabled = track.scrollLeft <= 8;
+      if (next instanceof HTMLButtonElement) next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 8;
+    }, { capture: true, passive: true, signal });
+  }
 
   categoryContainer?.addEventListener("click", (event) => {
     const target = event.target instanceof HTMLElement ? event.target.closest("[data-category-button]") : null;
@@ -395,15 +467,6 @@ const initCatalog = async () => {
   if (signal.aborted) return;
   renderFilters();
   renderGrid();
-
-  if (hadUsableCache) {
-    const currentSnapshot = JSON.stringify(products);
-    const freshProducts = filterProductsForConfig(await fetchProductsFromApi(apiBaseUrl), config);
-    if (signal.aborted || JSON.stringify(freshProducts) === currentSnapshot) return;
-    products = freshProducts;
-    renderFilters();
-    renderGrid();
-  }
 };
 
 document.addEventListener("astro:page-load", initCatalog);

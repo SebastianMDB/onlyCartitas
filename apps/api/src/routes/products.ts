@@ -83,7 +83,8 @@ const requireAdmin = (authorization: string | undefined) => {
 };
 
 export async function productRoutes(app: FastifyInstance) {
-  app.get("/api/products", async (request) => {
+  app.get("/api/products", async (request, reply) => {
+    reply.header("Cache-Control", "no-store, max-age=0");
     const filters = productQuerySchema.parse(request.query);
     const data = await listProducts(filters);
 

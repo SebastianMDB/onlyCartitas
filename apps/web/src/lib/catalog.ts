@@ -100,7 +100,7 @@ export const fetchProducts = async (filters: ProductFilters = {}): Promise<Produ
   }
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) return [];
 
     const payload = await response.json();

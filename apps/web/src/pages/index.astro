@@ -3,15 +3,11 @@ import Header from "../components/Header.astro";
 import BaseHead from "../components/BaseHead.astro";
 import Footer from "../components/Footer.astro";
 import HeroBanner from "../components/HeroBanner.astro";
-import ProductCarousel from "../components/ProductCarousel.astro";
-import { categoriesFromProducts, fetchHeroSettings, fetchProducts } from "../lib/catalog";
+import { fetchHeroSettings } from "../lib/catalog";
 import "../styles/global.css";
 
-const allProducts = await fetchProducts();
+const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 const heroSettings = await fetchHeroSettings();
-const sealedProducts = allProducts.filter((product) => product.kind === "sealed");
-const productSections = categoriesFromProducts(sealedProducts);
-const offerProducts = allProducts.filter((product) => product.offer || product.previousPrice);
 ---
 
 <!doctype html>
@@ -26,21 +22,25 @@ const offerProducts = allProducts.filter((product) => product.offer || product.p
     <Header />
 
     <main class="pb-20">
-      <HeroBanner products={allProducts} settings={heroSettings} />
+      <HeroBanner products={[]} settings={heroSettings} />
 
-      <section id="productos" class="mx-auto mt-10 flex w-full max-w-7xl flex-col gap-12 px-4 sm:mt-14 sm:px-6 lg:px-8">
-        <ProductCarousel title="Ofertas" products={offerProducts} />
-
-        {
-          productSections.map((section) => (
-            <ProductCarousel
-              title={section}
-              products={sealedProducts.filter((product) => product.category === section)}
-            />
-          ))
-        }
+      <section id="productos" class="mx-auto mt-10 w-full max-w-7xl px-4 sm:mt-14 sm:px-6 lg:px-8">
+        <div class="flex flex-col gap-12" data-products-grid>
+          <p class="rounded-[1.5rem] border border-slate-200 bg-slate-50 px-6 py-8 text-center text-sm font-semibold text-slate-600">
+            Cargando productos...
+          </p>
+        </div>
+        <div class="hidden rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center" data-empty-state>
+          <p class="text-lg font-semibold text-[color:var(--color-primary)]">No hay productos disponibles</p>
+          <p class="mt-2 text-sm text-slate-500">El catalogo se actualizara cuando se agreguen productos.</p>
+        </div>
       </section>
     </main>
     <Footer />
+
+    <script is:inline type="application/json" data-catalog-config set:html={JSON.stringify({ apiBaseUrl, layout: "home", columns: "four" })}></script>
+    <script>
+      import "../scripts/catalog-runtime";
+    </script>
   </body>
 </html>
