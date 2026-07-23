@@ -40,7 +40,11 @@ PUBLIC_API_URL=http://localhost:3000
 - Root Directory: `apps/web`
 - Build Command: `npm run build`
 - Output Directory: `dist`
-- Variable recomendada: `PUBLIC_API_URL=https://tu-api.onrender.com`
+- Variables recomendadas:
+  - `PUBLIC_SITE_URL=https://www.onlycartitas.cl`
+  - `PUBLIC_API_URL=https://onlycartitas-api.onrender.com`
+
+`PUBLIC_SITE_URL` debe apuntar al dominio publico real. Si queda como la URL tecnica de Vercel, los canonicals, Open Graph, JSON-LD, `robots.txt` y `sitemap.xml` indicaran a buscadores que la version principal es `*.vercel.app` en vez de `www.onlycartitas.cl`.
 
 ### Backend en Render Free
 
@@ -57,6 +61,7 @@ Render mantiene web services Node.js en plan gratis, con límites mensuales y su
   - `SESSION_TTL_SECONDS=604800`
   - `AUTH_REGISTER_ENABLED=true`
   - `API_PUBLIC_URL=https://tu-api.onrender.com`
+  - `WEB_ORIGIN=https://www.onlycartitas.cl`
   - `MERCADO_PAGO_ACCESS_TOKEN=APP_USR-...`
   - `MERCADO_PAGO_CURRENCY_ID=CLP`
   - `MERCADO_PAGO_CHECKOUT_MODE=production`

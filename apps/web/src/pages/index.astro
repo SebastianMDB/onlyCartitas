@@ -3,11 +3,12 @@ import Header from "../components/Header.astro";
 import BaseHead from "../components/BaseHead.astro";
 import Footer from "../components/Footer.astro";
 import HeroBanner from "../components/HeroBanner.astro";
-import { fetchHeroSettings } from "../lib/catalog";
+import { fetchHeroSettings, fetchProducts, serializeJsonForInlineScript } from "../lib/catalog";
 import "../styles/global.css";
 
 const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 const heroSettings = await fetchHeroSettings();
+const initialProducts = await fetchProducts();
 ---
 
 <!doctype html>
@@ -39,6 +40,7 @@ const heroSettings = await fetchHeroSettings();
     <Footer />
 
     <script is:inline type="application/json" data-catalog-config set:html={JSON.stringify({ apiBaseUrl, layout: "home", columns: "four" })}></script>
+    <script is:inline type="application/json" data-catalog-initial-products set:html={serializeJsonForInlineScript(initialProducts)}></script>
     <script>
       import "../scripts/catalog-runtime";
     </script>

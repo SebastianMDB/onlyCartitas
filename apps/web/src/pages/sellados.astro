@@ -2,13 +2,14 @@
 import Header from "../components/Header.astro";
 import BaseHead from "../components/BaseHead.astro";
 import Footer from "../components/Footer.astro";
-import { productLanguages } from "../lib/catalog";
+import { fetchProducts, productLanguages, serializeJsonForInlineScript, uniqueValues } from "../lib/catalog";
 import "../styles/global.css";
 
 const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
-const products = [];
-const productSections = [];
-const sealedSets = [];
+const products = (await fetchProducts()).filter((product) => product.kind === "sealed");
+const productSections = uniqueValues(products.map((product) => product.category));
+const sealedSets = uniqueValues(products.map((product) => product.set));
+const offerCount = products.filter((product) => product.offer || product.previousPrice).length;
 ---
 
 <!doctype html>
@@ -45,7 +46,7 @@ const sealedSets = [];
               </div>
               <div class="rounded-[1.4rem] border border-white/10 bg-white/6 px-4 py-4 backdrop-blur-sm">
                 <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">Ofertas</p>
-                <p class="mt-2 text-2xl font-semibold text-white" data-stat="offers">0</p>
+                <p class="mt-2 text-2xl font-semibold text-white" data-stat="offers">{offerCount}</p>
               </div>
             </div>
           </div>
@@ -106,6 +107,7 @@ const sealedSets = [];
     <Footer />
 
     <script is:inline type="application/json" data-catalog-config set:html={JSON.stringify({ apiBaseUrl, kind: "sealed", layout: "sealed", columns: "three" })}></script>
+    <script is:inline type="application/json" data-catalog-initial-products set:html={serializeJsonForInlineScript(products)}></script>
     <script>
       import "../scripts/catalog-runtime";
     </script>

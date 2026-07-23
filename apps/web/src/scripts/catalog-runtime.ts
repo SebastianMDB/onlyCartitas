@@ -79,7 +79,17 @@ const readConfig = (): CatalogConfig => {
   }
 };
 
-const getProductUrl = (product: Product) => `/producto?id=${encodeURIComponent(product.id)}`;
+const readInitialProducts = (): Product[] => {
+  const initialProductsElement = document.querySelector("[data-catalog-initial-products]");
+  try {
+    const payload = initialProductsElement?.textContent ? JSON.parse(initialProductsElement.textContent) : [];
+    return Array.isArray(payload) ? (payload as Product[]) : [];
+  } catch {
+    return [];
+  }
+};
+
+const getProductUrl = (product: Product) => `/producto/${encodeURIComponent(product.id)}`;
 
 const renderProductCard = (
   product: Product,
@@ -394,6 +404,13 @@ const initCatalog = async () => {
     renderStats();
   };
 
+  const initialProducts = filterProductsForConfig(readInitialProducts(), config);
+  if (initialProducts.length > 0) {
+    products = initialProducts;
+    renderFilters();
+    renderGrid();
+  }
+
   if (config.layout === "home") {
     grid.addEventListener("click", (event) => {
       const button = event.target instanceof Element ? event.target.closest("[data-carousel-direction]") : null;
@@ -458,10 +475,12 @@ const initCatalog = async () => {
   }, { signal });
 
   try {
-    grid.innerHTML = `<p class="col-span-full rounded-[1.5rem] border border-slate-200 bg-slate-50 px-6 py-8 text-center text-sm font-semibold text-slate-600">Cargando productos...</p>`;
+    if (products.length === 0) {
+      grid.innerHTML = `<p class="col-span-full rounded-[1.5rem] border border-slate-200 bg-slate-50 px-6 py-8 text-center text-sm font-semibold text-slate-600">Cargando productos...</p>`;
+    }
     products = filterProductsForConfig(await loadProducts(apiBaseUrl, signal), config);
   } catch {
-    products = [];
+    if (products.length === 0) products = [];
   }
 
   if (signal.aborted) return;

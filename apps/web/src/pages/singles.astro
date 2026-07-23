@@ -2,14 +2,15 @@
 import Header from "../components/Header.astro";
 import BaseHead from "../components/BaseHead.astro";
 import Footer from "../components/Footer.astro";
-import { productLanguages } from "../lib/catalog";
+import { fetchProducts, productLanguages, serializeJsonForInlineScript, uniqueValues } from "../lib/catalog";
 import "../styles/global.css";
 
 const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
-const singleProducts = [];
-const singleSections = [];
-const singleSets = [];
-const singleIllustrators = [];
+const singleProducts = (await fetchProducts()).filter((product) => product.kind === "single");
+const singleSections = uniqueValues(singleProducts.map((product) => product.category));
+const singleSets = uniqueValues(singleProducts.map((product) => product.set));
+const singleIllustrators = uniqueValues(singleProducts.map((product) => product.illustrator));
+const featuredCount = singleProducts.filter((product) => product.offer || product.previousPrice).length;
 ---
 
 <!doctype html>
@@ -46,7 +47,7 @@ const singleIllustrators = [];
               </div>
               <div class="rounded-[1.4rem] border border-white/10 bg-white/6 px-4 py-4 backdrop-blur-sm">
                 <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">Destacadas</p>
-                <p class="mt-2 text-2xl font-semibold text-white" data-stat="offers">0</p>
+                <p class="mt-2 text-2xl font-semibold text-white" data-stat="offers">{featuredCount}</p>
               </div>
             </div>
           </div>
@@ -121,6 +122,7 @@ const singleIllustrators = [];
     <Footer />
 
     <script is:inline type="application/json" data-catalog-config set:html={JSON.stringify({ apiBaseUrl, kind: "single", layout: "singles", columns: "four" })}></script>
+    <script is:inline type="application/json" data-catalog-initial-products set:html={serializeJsonForInlineScript(singleProducts)}></script>
     <script>
       import "../scripts/catalog-runtime";
     </script>

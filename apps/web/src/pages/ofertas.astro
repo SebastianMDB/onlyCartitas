@@ -2,14 +2,17 @@
 import Header from "../components/Header.astro";
 import BaseHead from "../components/BaseHead.astro";
 import Footer from "../components/Footer.astro";
-import { productLanguages } from "../lib/catalog";
+import { fetchProducts, productLanguages, serializeJsonForInlineScript, uniqueValues } from "../lib/catalog";
 import "../styles/global.css";
 
 const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
-const offerProducts = [];
-const offerCategories = [];
-const offerSets = [];
-const maxDiscount = 0;
+const offerProducts = (await fetchProducts()).filter((product) => product.offer || product.previousPrice);
+const offerCategories = uniqueValues(offerProducts.map((product) => product.category));
+const offerSets = uniqueValues(offerProducts.map((product) => product.set));
+const maxDiscount = offerProducts.reduce((currentMax, product) => {
+  if (!product.previousPrice || product.previousPrice <= product.price) return currentMax;
+  return Math.max(currentMax, Math.round(((product.previousPrice - product.price) / product.previousPrice) * 100));
+}, 0);
 ---
 
 <!doctype html>
@@ -107,6 +110,7 @@ const maxDiscount = 0;
     <Footer />
 
     <script is:inline type="application/json" data-catalog-config set:html={JSON.stringify({ apiBaseUrl, offer: true, layout: "offers", columns: "four" })}></script>
+    <script is:inline type="application/json" data-catalog-initial-products set:html={serializeJsonForInlineScript(offerProducts)}></script>
     <script>
       import "../scripts/catalog-runtime";
     </script>

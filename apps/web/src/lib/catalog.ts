@@ -125,5 +125,7 @@ export const fetchHeroSettings = async (): Promise<HeroSettings | null> => {
 export const uniqueValues = (values: Array<string | null | undefined>) =>
   Array.from(new Set(values.filter((value): value is string => Boolean(value)))).sort();
 
+export const serializeJsonForInlineScript = (value: unknown) => JSON.stringify(value).replaceAll("<", "\\u003C");
+
 export const categoriesFromProducts = (products: Product[]) =>
   uniqueValues(products.map((product) => product.category));
