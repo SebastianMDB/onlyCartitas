@@ -167,6 +167,14 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       if (href) element.href = href;
     };
 
+    const toAbsoluteUrl = (value: string) => {
+      try {
+        return new URL(value, window.location.origin).href;
+      } catch {
+        return value;
+      }
+    };
+
     const applyHeroSettings = (settings: HeroSettingsPayload) => {
       setText("[data-hero-primary-badge]", settings.primaryBadge);
       setText("[data-hero-launch-set]", settings.launchSetName);
@@ -180,7 +188,7 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       if (background instanceof HTMLImageElement && fallback instanceof SVGElement) {
         background.classList.toggle("hidden", !imageUrl);
         fallback.classList.toggle("hidden", Boolean(imageUrl));
-        if (imageUrl && background.src !== imageUrl) background.src = imageUrl;
+        if (imageUrl && background.src !== toAbsoluteUrl(imageUrl)) background.src = imageUrl;
       }
     };
 

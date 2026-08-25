@@ -26,7 +26,7 @@ export const GET: APIRoute = async ({ site, url }) => {
   const productPages = products
     .filter((product) => product.active !== false)
     .map((product) => ({
-      path: `/producto/${product.id}`,
+      path: `/producto?id=${encodeURIComponent(product.id)}`,
       priority: "0.8",
       changefreq: "daily"
     }));

@@ -89,7 +89,7 @@ const readInitialProducts = (): Product[] => {
   }
 };
 
-const getProductUrl = (product: Product) => `/producto/${encodeURIComponent(product.id)}`;
+const getProductUrl = (product: Product) => `/producto?id=${encodeURIComponent(product.id)}`;
 
 const renderProductCard = (
   product: Product,

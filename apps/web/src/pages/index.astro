@@ -3,11 +3,10 @@ import Header from "../components/Header.astro";
 import BaseHead from "../components/BaseHead.astro";
 import Footer from "../components/Footer.astro";
 import HeroBanner from "../components/HeroBanner.astro";
-import { fetchHeroSettings, fetchProducts, serializeJsonForInlineScript } from "../lib/catalog";
+import { fetchProducts, serializeJsonForInlineScript } from "../lib/catalog";
 import "../styles/global.css";
 
 const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
-const heroSettings = await fetchHeroSettings();
 const initialProducts = await fetchProducts();
 ---
 
@@ -23,7 +22,7 @@ const initialProducts = await fetchProducts();
     <Header />
 
     <main class="pb-20">
-      <HeroBanner products={[]} settings={heroSettings} />
+      <HeroBanner products={[]} />
 
       <section id="productos" class="mx-auto mt-10 w-full max-w-7xl px-4 sm:mt-14 sm:px-6 lg:px-8">
         <div class="flex flex-col gap-12" data-products-grid>
