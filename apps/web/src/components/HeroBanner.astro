@@ -146,6 +146,13 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       backgroundImageUrl?: string;
     };
 
+    const heroRuntimeKey = "__onlycartitasHeroRuntime";
+    const heroCacheKey = "onlycartitas-hero-settings";
+    const previousHeroRuntime = (window as Window & { __onlycartitasHeroRuntime?: AbortController })[heroRuntimeKey];
+    previousHeroRuntime?.abort();
+    const heroRuntime = new AbortController();
+    (window as Window & { __onlycartitasHeroRuntime?: AbortController })[heroRuntimeKey] = heroRuntime;
+
     const readHeroConfig = () => {
       const configElement = document.querySelector("[data-hero-config]");
       try {
@@ -175,7 +182,49 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       }
     };
 
-    const applyHeroSettings = (settings: HeroSettingsPayload) => {
+    const readCachedHeroSettings = (): HeroSettingsPayload | null => {
+      try {
+        const value = window.localStorage.getItem(heroCacheKey);
+        return value ? JSON.parse(value) : null;
+      } catch {
+        return null;
+      }
+    };
+
+    const writeCachedHeroSettings = (settings: HeroSettingsPayload) => {
+      try {
+        window.localStorage.setItem(heroCacheKey, JSON.stringify(settings));
+      } catch {
+        // Cache is optional; the API response is still the source of truth.
+      }
+    };
+
+    const waitForImage = async (image: HTMLImageElement, imageUrl: string, signal: AbortSignal) => {
+      const absoluteUrl = toAbsoluteUrl(imageUrl);
+      if (image.src !== absoluteUrl) image.src = imageUrl;
+      if (image.complete && image.naturalWidth > 0) return true;
+
+      try {
+        await image.decode();
+      } catch {
+        await new Promise<void>((resolve) => {
+          const finish = () => {
+            signal.removeEventListener("abort", finish);
+            image.removeEventListener("load", finish);
+            image.removeEventListener("error", finish);
+            resolve();
+          };
+          signal.addEventListener("abort", finish, { once: true });
+          image.addEventListener("load", finish, { once: true, signal });
+          image.addEventListener("error", finish, { once: true, signal });
+        });
+      }
+
+      return !signal.aborted && image.complete && image.naturalWidth > 0;
+    };
+
+    const applyHeroSettings = async (settings: HeroSettingsPayload, signal: AbortSignal) => {
+      if (signal.aborted) return;
       setText("[data-hero-primary-badge]", settings.primaryBadge);
       setText("[data-hero-launch-set]", settings.launchSetName);
       setText("[data-hero-title]", settings.title);
@@ -186,27 +235,41 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       const fallback = document.querySelector("[data-hero-fallback]");
       const imageUrl = settings.backgroundImageUrl?.trim();
       if (background instanceof HTMLImageElement && fallback instanceof SVGElement) {
-        background.classList.toggle("hidden", !imageUrl);
-        fallback.classList.toggle("hidden", Boolean(imageUrl));
-        if (imageUrl && background.src !== toAbsoluteUrl(imageUrl)) background.src = imageUrl;
+        if (!imageUrl) {
+          background.classList.add("hidden");
+          fallback.classList.remove("hidden");
+          return;
+        }
+
+        const imageLoaded = await waitForImage(background, imageUrl, signal);
+        if (signal.aborted) return;
+        background.classList.toggle("hidden", !imageLoaded);
+        fallback.classList.toggle("hidden", imageLoaded);
       }
     };
 
+    const cachedSettings = readCachedHeroSettings();
+    if (cachedSettings) void applyHeroSettings(cachedSettings, heroRuntime.signal);
+
+    let hasRequestedHeroSettings = false;
     const refreshHeroSettings = async () => {
+      if (hasRequestedHeroSettings || heroRuntime.signal.aborted) return;
+      hasRequestedHeroSettings = true;
       const { apiBaseUrl } = readHeroConfig();
       if (!apiBaseUrl) return;
 
       try {
-        const response = await fetch(`${apiBaseUrl}/api/site-settings/hero`, { cache: "no-store" });
+        const response = await fetch(`${apiBaseUrl}/api/site-settings/hero`, { cache: "no-store", signal: heroRuntime.signal });
         const payload = await response.json().catch(() => null);
         if (!response.ok || !payload?.data) return;
-        applyHeroSettings(payload.data);
+        writeCachedHeroSettings(payload.data);
+        await applyHeroSettings(payload.data, heroRuntime.signal);
       } catch {
         // Keep the static hero usable if the API is unavailable.
       }
     };
 
-    document.addEventListener("astro:page-load", refreshHeroSettings);
-    refreshHeroSettings();
+    document.addEventListener("astro:page-load", refreshHeroSettings, { signal: heroRuntime.signal, once: true });
+    if (document.readyState !== "loading") void refreshHeroSettings();
   </script>
 </section>

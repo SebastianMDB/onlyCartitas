@@ -334,5 +334,17 @@ const initProductDetail = async () => {
   }
 };
 
-document.addEventListener("astro:page-load", initProductDetail);
-initProductDetail();
+let lastProductDetailInitUrl = "";
+let lastProductDetailInitAt = 0;
+
+const scheduleProductDetailInit = () => {
+  const currentUrl = window.location.href;
+  const now = Date.now();
+  if (currentUrl === lastProductDetailInitUrl && now - lastProductDetailInitAt < 500) return;
+  lastProductDetailInitUrl = currentUrl;
+  lastProductDetailInitAt = now;
+  void initProductDetail();
+};
+
+document.addEventListener("astro:page-load", scheduleProductDetailInit);
+if (document.readyState !== "loading") scheduleProductDetailInit();

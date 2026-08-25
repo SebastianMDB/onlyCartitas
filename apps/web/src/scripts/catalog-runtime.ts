@@ -488,5 +488,17 @@ const initCatalog = async () => {
   renderGrid();
 };
 
-document.addEventListener("astro:page-load", initCatalog);
-initCatalog();
+let lastCatalogInitUrl = "";
+let lastCatalogInitAt = 0;
+
+const scheduleCatalogInit = () => {
+  const currentUrl = window.location.href;
+  const now = Date.now();
+  if (currentUrl === lastCatalogInitUrl && now - lastCatalogInitAt < 500) return;
+  lastCatalogInitUrl = currentUrl;
+  lastCatalogInitAt = now;
+  void initCatalog();
+};
+
+document.addEventListener("astro:page-load", scheduleCatalogInit);
+if (document.readyState !== "loading") scheduleCatalogInit();
