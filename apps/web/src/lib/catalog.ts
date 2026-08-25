@@ -112,7 +112,7 @@ export const fetchProducts = async (filters: ProductFilters = {}): Promise<Produ
 
 export const fetchHeroSettings = async (): Promise<HeroSettings | null> => {
   try {
-    const response = await fetch(new URL("/api/site-settings/hero", apiBaseUrl));
+    const response = await fetch(new URL("/api/site-settings/hero", apiBaseUrl), { cache: "no-store" });
     if (!response.ok) return null;
 
     const payload = await response.json();

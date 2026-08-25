@@ -10,16 +10,16 @@ const { settings } = Astro.props;
 const defaultHero: HeroSettings = {
   primaryBadge: "Set destacado",
   secondaryBadge: "Catalogo",
-  title: "Productos disponibles",
-  description: "Disponible en OnlyCartitas.",
-  launchSetName: "Journey Together",
+  title: "BOOSTER BOX (JAP)",
+  description: "Disponible en OnlyCartitas. ETB, blisters, bundles y singles del set para reservar antes de que cambie el stock.",
+  launchSetName: "Mega Dream Ex",
   launchTitle: "Catalogo OnlyCartitas",
   launchLabel: "Nuevo",
   primaryCtaLabel: "Ver lanzamiento",
   primaryCtaHref: "/sellados",
   secondaryCtaLabel: "Ver ofertas",
   secondaryCtaHref: "/ofertas",
-  backgroundImageUrl: ""
+  backgroundImageUrl: "https://kctfvekrjzjpdiavlqdg.supabase.co/storage/v1/object/public/odin/Pixel%20art.jpeg"
 };
 const hero = { ...defaultHero, ...(settings ?? {}) };
 const launchSetName = hero.launchSetName || defaultHero.launchSetName;
@@ -270,6 +270,6 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
     };
 
     document.addEventListener("astro:page-load", refreshHeroSettings, { signal: heroRuntime.signal, once: true });
-    if (document.readyState !== "loading") void refreshHeroSettings();
+    void refreshHeroSettings();
   </script>
 </section>
