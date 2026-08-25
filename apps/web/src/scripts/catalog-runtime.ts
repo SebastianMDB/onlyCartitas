@@ -127,7 +127,7 @@ const renderProductCard = (
             ? `<span class="absolute left-3 top-3 z-10 rounded-full bg-amber-300 px-3 py-1 text-xs font-semibold text-slate-950 shadow-[0_10px_24px_rgba(0,0,0,0.18)]">${escapeHtml(discountPercent ? `-${discountPercent}%` : product.offer)}</span>`
             : ""
         }
-        <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" width="700" height="900" class="h-full max-h-64 w-full object-contain p-3 transition duration-500 group-hover:scale-[1.03]" loading="lazy" decoding="async" />
+        <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" width="700" height="900" class="h-full max-h-64 w-full object-contain p-3 transition duration-500 group-hover:scale-[1.03]" loading="lazy" decoding="async" fetchpriority="low" />
       </a>
 
       <div class="flex flex-1 flex-col justify-between pt-4">

@@ -128,7 +128,7 @@ const designVariantClass = (active: boolean) =>
                 </span>
               ) : null
             }
-            <img src={product.image} alt={product.name} class="h-full w-full object-contain" width="900" height="1100" decoding="async" />
+            <img src={product.image} alt={product.name} class="h-full w-full object-contain" width="900" height="1100" loading="eager" decoding="async" fetchpriority="high" />
           </div>
         </div>
 
