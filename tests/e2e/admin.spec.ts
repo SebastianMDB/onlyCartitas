@@ -35,12 +35,34 @@ test("admin can review purchase history and manage discount codes", async ({ pag
             customer_name: "Cliente Test",
             customer_email: "cliente@example.com",
             delivery_mode: "envio",
-            items: [{ id: "item-1" }],
+            address: "Av Test 123, Antofagasta, Antofagasta",
+            items: [
+              {
+                id: "item-1",
+                product_id: "etb-journey",
+                name: "Journey Together Elite Trainer Box",
+                quantity: 2,
+                unit_price: 50000,
+                subtotal: 100000
+              }
+            ],
             subtotal: 20,
             shipping: 4.99,
             discount: 2,
             total: 22.99,
             status: "pending",
+            metadata: {
+              delivery_address: {
+                comuna: "Antofagasta",
+                region: "Antofagasta",
+                shipping_payment: "included"
+              },
+              shipping_sector: {
+                id: "sector-norte",
+                name: "Sector norte",
+                price: 3500
+              }
+            },
             created_at: "2026-05-10T12:00:00.000Z"
           }
         ]
@@ -111,6 +133,9 @@ test("admin can review purchase history and manage discount codes", async ({ pag
 
   await page.getByRole("button", { name: "Compras" }).click();
   await expect(page.getByText("Cliente Test")).toBeVisible();
+  await expect(page.getByText("Journey Together Elite Trainer Box")).toBeVisible();
+  await expect(page.getByText("Av Test 123, Antofagasta, Antofagasta - Sector: Sector norte - Envio incluido")).toBeVisible();
+  await expect(page.getByText("etb-journey")).toBeVisible();
   await page.locator("[data-order-user-filter]").fill("cliente@example.com");
   await expect(page.getByText("1 de 1 compra(s)")).toBeVisible();
 
@@ -127,7 +152,7 @@ test("admin can review purchase history and manage discount codes", async ({ pag
     { code: "MAYO15", type: "percent", value: 15, active: true, maxUses: 5 }
   ]);
 
-  await page.getByRole("button", { name: "Envios" }).click();
+  await page.locator('[data-admin-tab="shipping"]').click();
   await expect(page.locator('[data-shipping-sector-name="sector-norte"]')).toHaveValue("Sector norte");
   await page.locator("[data-shipping-sector-name-input]").fill("Sector sur");
   await page.locator("[data-shipping-sector-price-input]").fill("4500");
