@@ -17,8 +17,8 @@ const featuredCount = singleProducts.filter((product) => product.offer || produc
 <html lang="es">
   <head>
     <BaseHead
-      title="Singles Pokemon TCG | OnlyCartitas"
-      description="Compra singles Pokemon TCG en OnlyCartitas. Filtra cartas por Pokemon, tipo, set, ilustrador e idioma para completar tu coleccion."
+      title="Singles Pokémon TCG | OnlyCartitas"
+      description="Compra singles Pokémon TCG en OnlyCartitas. Filtra cartas por Pokémon, tipo, set, ilustrador e idioma para completar tu colección."
     />
   </head>
   <body class="bg-[color:var(--color-surface)] text-slate-900 antialiased">
@@ -70,11 +70,11 @@ const featuredCount = singleProducts.filter((product) => product.offer || produc
 
           <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label class="block">
-              <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Pokemon</span>
+              <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Pokémon</span>
               <input
                 data-pokemon-filter
                 type="search"
-                placeholder="Nombre del Pokemon"
+                placeholder="Nombre del Pokémon"
                 class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"
               />
             </label>
@@ -106,7 +106,7 @@ const featuredCount = singleProducts.filter((product) => product.offer || produc
 
           <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p class="text-sm text-slate-500">Mostrando <span class="font-semibold text-slate-900" data-results-count>{singleProducts.length}</span> cartas</p>
-            <p class="text-sm text-slate-500">Usa el buscador superior o filtra por Pokemon, tipo, set, ilustrador e idioma.</p>
+            <p class="text-sm text-slate-500">Usa el buscador superior o filtra por Pokémon, tipo, set, ilustrador e idioma.</p>
           </div>
 
           <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" data-products-grid>

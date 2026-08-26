@@ -180,7 +180,7 @@ const renderProduct = (product: Product, siblingDesignChoices: DesignChoice[] = 
           <p class="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--color-secondary)]">${escapeHtml(product.category)}</p>
           <h1 class="mt-3 text-3xl font-semibold tracking-tight text-[color:var(--color-primary)] sm:text-5xl">${escapeHtml(product.name)}</h1>
           <p class="mt-4 text-base leading-7 text-slate-600">
-            ${escapeHtml(product.description || `Producto del set ${product.set}, disponible en idioma ${languageLabel}. Ideal para coleccion, juego o reposicion de inventario.`)}
+            ${escapeHtml(product.description || `Producto del set ${product.set}, disponible en idioma ${languageLabel}. Ideal para colección, juego o reposición de inventario.`)}
           </p>
 
           <div class="mt-6 grid gap-3 sm:grid-cols-3">
@@ -249,14 +249,14 @@ const renderProduct = (product: Product, siblingDesignChoices: DesignChoice[] = 
         </div>
 
         <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-7">
-          <h2 class="text-xl font-semibold text-[color:var(--color-primary)]">Ficha tecnica</h2>
+          <h2 class="text-xl font-semibold text-[color:var(--color-primary)]">Ficha técnica</h2>
           <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
             <div class="rounded-2xl bg-slate-50 p-4">
-              <dt class="font-semibold text-slate-500">Categoria</dt>
+              <dt class="font-semibold text-slate-500">Categoría</dt>
               <dd class="mt-1 text-slate-950">${escapeHtml(product.category)}</dd>
             </div>
             <div class="rounded-2xl bg-slate-50 p-4">
-              <dt class="font-semibold text-slate-500">Condicion</dt>
+              <dt class="font-semibold text-slate-500">Condición</dt>
               <dd class="mt-1 text-slate-950">${product.kind === "sealed" ? "Producto sellado" : "Carta protegida"}</dd>
             </div>
           </dl>

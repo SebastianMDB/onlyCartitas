@@ -30,7 +30,7 @@ import "../styles/global.css";
             <section class="grid gap-4">
               <div class="flex items-center justify-between gap-4">
                 <h2 class="text-xl font-semibold text-[color:var(--color-primary)]">Contacto</h2>
-                <a href="/login" class="text-sm font-semibold text-[color:var(--color-secondary)] hover:underline">Iniciar sesion</a>
+                <a href="/login" class="text-sm font-semibold text-[color:var(--color-secondary)] hover:underline">Iniciar sesión</a>
               </div>
               <label class="block">
                 <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Correo electronico *</span>
@@ -45,7 +45,7 @@ import "../styles/global.css";
             <section class="grid gap-4">
               <h2 class="text-xl font-semibold text-[color:var(--color-primary)]">Entrega</h2>
               <div class="grid rounded-2xl bg-slate-100 p-1 sm:grid-cols-2" data-delivery-tabs>
-                <button type="button" class="rounded-[1rem] bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm" data-delivery-option="envio" aria-pressed="true">Envio</button>
+                <button type="button" class="rounded-[1rem] bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-sm" data-delivery-option="envio" aria-pressed="true">Envío</button>
                 <button type="button" class="rounded-[1rem] px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-slate-950" data-delivery-option="retiro" aria-pressed="false">Retiro</button>
               </div>
 
@@ -74,7 +74,7 @@ import "../styles/global.css";
                 <label class="block">
                   <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Region *</span>
                   <select data-required data-checkout-region class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
-                    <option value="">Selecciona region</option>
+                    <option value="">Selecciona región</option>
                   </select>
                 </label>
                 <label class="block">
@@ -100,7 +100,7 @@ import "../styles/global.css";
               </div>
 
               <div class="hidden rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600" data-pickup-info>
-                Retiro gratis en Antofagasta. Te hablaremos por WhatsApp para coordinar el encuentro despues de confirmar el pedido.
+                Retiro gratis en Antofagasta. Te hablaremos por WhatsApp para coordinar el encuentro después de confirmar el pedido.
               </div>
 
               <label class="block">
@@ -120,13 +120,13 @@ import "../styles/global.css";
               </p>
               <label class="flex items-start gap-3 text-sm leading-6 text-slate-600">
                 <input type="checkbox" class="mt-1 h-4 w-4 rounded border-slate-300" data-terms-check />
-                <span>Acepto las <a href="/politicas" class="font-semibold text-[color:var(--color-primary)] hover:underline">politicas de compra, envio y devoluciones</a>.</span>
+                <span>Acepto las <a href="/politicas" class="font-semibold text-[color:var(--color-primary)] hover:underline">políticas de compra, envío y devoluciones</a>.</span>
               </label>
             </section>
           </div>
 
           <p class="mt-6 hidden rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" data-checkout-error>
-            Completa los campos requeridos, acepta las politicas y revisa que el carrito tenga productos.
+            Completa los campos requeridos, acepta las políticas y revisa que el carrito tenga productos.
           </p>
 
           <button type="submit" class="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]" data-pay-button>
@@ -147,7 +147,7 @@ import "../styles/global.css";
             <div class="mt-5 grid gap-4" data-summary-items></div>
 
             <div class="mt-5 hidden rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center" data-empty-checkout>
-              <p class="text-base font-semibold text-[color:var(--color-primary)]">Tu carrito esta vacio</p>
+              <p class="text-base font-semibold text-[color:var(--color-primary)]">Tu carrito está vacío</p>
               <p class="mt-2 text-sm text-slate-500">Agrega productos antes de pagar.</p>
               <a href="/ofertas" class="mt-4 inline-flex rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white">Ver productos</a>
             </div>
@@ -168,7 +168,7 @@ import "../styles/global.css";
                 <dd class="font-semibold text-slate-950" data-summary-shipping>Por calcular</dd>
               </div>
               <p class="hidden rounded-2xl bg-slate-50 px-4 py-3 text-xs font-semibold leading-5 text-slate-500" data-summary-shipping-note>
-                Envio por pagar. Te contactaremos segun tu region para coordinar.
+                Envío por pagar. Te contactaremos según tu región para coordinar.
               </p>
               <div class="flex items-center justify-between gap-4">
                 <dt class="text-slate-600">Descuento</dt>
@@ -191,8 +191,8 @@ import "../styles/global.css";
           <p class="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Pedido creado</p>
           <h2 class="mt-2 text-3xl font-semibold text-[color:var(--color-primary)]">Compra registrada</h2>
           <p class="mt-2 text-lg font-semibold text-emerald-700" data-success-order></p>
-          <p class="mt-3 text-sm leading-6 text-slate-600">Guardamos el pedido en el backend. El carrito quedo limpio.</p>
-          <p class="mt-2 text-sm leading-6 text-slate-600">No pudimos abrir Mercado Pago. El pedido quedo pendiente para intentar el pago nuevamente.</p>
+          <p class="mt-3 text-sm leading-6 text-slate-600">Guardamos el pedido en el backend. El carrito quedó limpio.</p>
+          <p class="mt-2 text-sm leading-6 text-slate-600">No pudimos abrir Mercado Pago. El pedido quedó pendiente para intentar el pago nuevamente.</p>
           <p class="mt-2 hidden text-sm leading-6 text-slate-600" data-success-payment-note>
             Revisa que las credenciales de Mercado Pago esten configuradas en el API.
           </p>
@@ -377,7 +377,7 @@ import "../styles/global.css";
       const renderRegionOptions = () => {
         if (!isSelectElement(regionInput)) return;
         regionInput.innerHTML = [
-          `<option value="">Selecciona region</option>`,
+          `<option value="">Selecciona región</option>`,
           ...Object.keys(COMMUNES_BY_REGION).map((region) => `<option value="${escapeHtml(region)}">${escapeHtml(region)}</option>`)
         ].join("");
       };
@@ -452,9 +452,9 @@ import "../styles/global.css";
           shippingLabel.title = isAntofagastaDelivery()
             ? getSubtotal() > FREE_ANTOFAGASTA_SHIPPING_THRESHOLD
               ? "Envio gratis en Antofagasta sobre $90.000"
-              : "Costo segun sector seleccionado"
+              : "Costo según sector seleccionado"
             : deliveryMode === "envio"
-              ? "Envio por pagar. Te contactaremos segun tu region."
+              ? "Envío por pagar. Te contactaremos según tu región."
               : "";
         }
         if (isHTMLElement(shippingNote)) {
@@ -542,7 +542,7 @@ import "../styles/global.css";
           });
 
           const payload = await response.json().catch(() => null);
-          if (!response.ok) throw new Error(payload?.error ?? "Codigo no valido.");
+          if (!response.ok) throw new Error(payload?.error ?? "Código no válido.");
           appliedDiscount = payload.data;
 
           if (isHTMLElement(discountMessage)) {
@@ -553,7 +553,7 @@ import "../styles/global.css";
           }
         } catch (error) {
           if (isHTMLElement(discountMessage)) {
-            discountMessage.textContent = error instanceof Error ? error.message : "Codigo no valido.";
+            discountMessage.textContent = error instanceof Error ? error.message : "Código no válido.";
             discountMessage.classList.toggle("hidden", false);
             discountMessage.classList.remove("text-emerald-700");
             discountMessage.classList.add("text-red-700");
