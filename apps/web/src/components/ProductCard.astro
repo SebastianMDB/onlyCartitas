@@ -1,5 +1,6 @@
 ---
 import type { Product } from "../lib/catalog";
+import { getProductCardImageUrl } from "../lib/image-urls";
 import { normalizeSearchText } from "../lib/search";
 
 type Props = {
@@ -29,6 +30,7 @@ const languageLabels = {
 };
 const productUrl = `/producto?id=${encodeURIComponent(product.id)}`;
 const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
+const productImage = getProductCardImageUrl(product.image);
 ---
 
 <article
@@ -52,7 +54,7 @@ const hasVariants = Array.isArray(product.variants) && product.variants.length >
     }
 
     <img
-      src={product.image}
+      src={productImage}
       alt={product.name}
       width="700"
       height="900"

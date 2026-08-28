@@ -49,7 +49,8 @@ const requireAdmin = (authorization: string | undefined) => {
 };
 
 export async function siteSettingsRoutes(app: FastifyInstance) {
-  app.get("/api/site-settings/hero", async () => {
+  app.get("/api/site-settings/hero", async (_request, reply) => {
+    reply.header("Cache-Control", "public, max-age=300, s-maxage=1800, stale-while-revalidate=3600");
     const data = await getHeroSettings();
     return { data };
   });
@@ -61,7 +62,8 @@ export async function siteSettingsRoutes(app: FastifyInstance) {
     return { data };
   });
 
-  app.get("/api/site-settings/catalog-options", async () => {
+  app.get("/api/site-settings/catalog-options", async (_request, reply) => {
+    reply.header("Cache-Control", "public, max-age=300, s-maxage=1800, stale-while-revalidate=3600");
     const data = await getCatalogOptions();
     return { data };
   });

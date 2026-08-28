@@ -1,5 +1,6 @@
 ---
 import type { HeroSettings, Product } from "../lib/catalog";
+import { getHeroImageUrl } from "../lib/image-urls";
 
 type Props = {
   products: Product[];
@@ -24,20 +25,21 @@ const defaultHero: HeroSettings = {
 const hero = { ...defaultHero, ...(settings ?? {}) };
 const launchSetName = hero.launchSetName || defaultHero.launchSetName;
 const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+const heroBackgroundImageUrl = hero.backgroundImageUrl ? getHeroImageUrl(hero.backgroundImageUrl) : "";
 ---
 
 <section class="mx-auto w-full max-w-7xl px-3 pt-5 sm:px-6 sm:pt-6 lg:px-8">
   <div class="relative overflow-hidden rounded-[1.5rem] bg-[color:var(--color-primary)] text-white shadow-[0_28px_80px_rgba(17,48,71,0.24)] sm:rounded-[2rem]" data-hero-root>
     <img
-      src={hero.backgroundImageUrl}
+      src={heroBackgroundImageUrl}
       alt=""
-      class={`absolute -inset-px h-[calc(100%+2px)] w-[calc(100%+2px)] object-cover opacity-95 ${hero.backgroundImageUrl ? "" : "hidden"}`}
+      class={`absolute -inset-px h-[calc(100%+2px)] w-[calc(100%+2px)] object-cover opacity-95 ${heroBackgroundImageUrl ? "" : "hidden"}`}
       loading="eager"
       decoding="async"
       fetchpriority="high"
       data-hero-background
     />
-    <svg class={`absolute -inset-px h-[calc(100%+2px)] w-[calc(100%+2px)] object-cover opacity-95 ${hero.backgroundImageUrl ? "hidden" : ""}`} viewBox="0 0 1200 520" aria-hidden="true" preserveAspectRatio="xMidYMid slice" data-hero-fallback>
+    <svg class={`absolute -inset-px h-[calc(100%+2px)] w-[calc(100%+2px)] object-cover opacity-95 ${heroBackgroundImageUrl ? "hidden" : ""}`} viewBox="0 0 1200 520" aria-hidden="true" preserveAspectRatio="xMidYMid slice" data-hero-fallback>
       <defs>
         <radialGradient id="launchGlowA" cx="70%" cy="45%" r="42%">
           <stop offset="0" stop-color="#8bd7ff" stop-opacity=".95" />
@@ -135,6 +137,8 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
   </div>
   <script is:inline type="application/json" data-hero-config set:html={JSON.stringify({ apiBaseUrl })}></script>
   <script>
+    import { getHeroImageUrl } from "../lib/image-urls";
+
     type HeroSettingsPayload = {
       primaryBadge?: string;
       title?: string;
@@ -233,7 +237,8 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
 
       const background = document.querySelector("[data-hero-background]");
       const fallback = document.querySelector("[data-hero-fallback]");
-      const imageUrl = settings.backgroundImageUrl?.trim();
+      const rawImageUrl = settings.backgroundImageUrl?.trim();
+      const imageUrl = rawImageUrl ? getHeroImageUrl(rawImageUrl) : "";
       if (background instanceof HTMLImageElement && fallback instanceof SVGElement) {
         if (!imageUrl) {
           background.classList.add("hidden");
@@ -259,7 +264,7 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
       if (!apiBaseUrl) return;
 
       try {
-        const response = await fetch(`${apiBaseUrl}/api/site-settings/hero`, { cache: "no-store", signal: heroRuntime.signal });
+        const response = await fetch(`${apiBaseUrl}/api/site-settings/hero`, { signal: heroRuntime.signal });
         const payload = await response.json().catch(() => null);
         if (!response.ok || !payload?.data) return;
         writeCachedHeroSettings(payload.data);

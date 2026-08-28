@@ -1,3 +1,5 @@
+import { getProductDetailImageUrl } from "../lib/image-urls";
+
 type ProductLanguage = "japanese" | "spanish" | "english";
 type Product = {
   id: string;
@@ -161,6 +163,7 @@ const renderProduct = (product: Product, siblingDesignChoices: DesignChoice[] = 
   const selectedCartImage = selectedChoice?.image ?? product.image;
   const selectedCartVariantId = selectedChoice?.variantId ?? "";
   const selectedCartVariantName = selectedChoice?.variantName ?? (siblingDesignChoices.length > 0 ? selectedChoice?.label ?? "" : "");
+  const productImage = getProductDetailImageUrl(product.image);
   const discountPercent =
     product.previousPrice && product.previousPrice > product.price
       ? Math.round(((product.previousPrice - product.price) / product.previousPrice) * 100)
@@ -171,7 +174,7 @@ const renderProduct = (product: Product, siblingDesignChoices: DesignChoice[] = 
       <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-4 shadow-[0_20px_60px_rgba(17,48,71,0.08)] lg:sticky lg:top-28 lg:self-start">
         <div class="relative flex aspect-square items-center justify-center rounded-[1.6rem] bg-[color:var(--color-surface)] p-5">
           ${discountPercent ? `<span class="absolute left-5 top-5 rounded-full bg-amber-300 px-3 py-1 text-sm font-semibold text-slate-950">-${discountPercent}%</span>` : ""}
-          <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" class="h-full w-full object-contain" width="900" height="1100" loading="eager" decoding="async" fetchpriority="high" />
+          <img src="${escapeHtml(productImage)}" alt="${escapeHtml(product.name)}" class="h-full w-full object-contain" width="900" height="1100" loading="eager" decoding="async" fetchpriority="high" />
         </div>
       </div>
 

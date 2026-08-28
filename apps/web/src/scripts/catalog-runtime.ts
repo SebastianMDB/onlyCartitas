@@ -1,4 +1,5 @@
 import { normalizeSearchText, readCurrentSearchInputValue } from "../lib/search";
+import { getProductCardImageUrl } from "../lib/image-urls";
 
 type ProductLanguage = "japanese" | "spanish" | "english";
 type ProductKind = "sealed" | "single";
@@ -102,6 +103,7 @@ const renderProductCard = (
       : null;
   const languageLabel = languageLabels[product.language] ?? product.language;
   const productUrl = getProductUrl(product);
+  const productImage = getProductCardImageUrl(product.image);
   const titleClass = columns === "four" ? "mt-2 min-h-[3.5rem]" : "mt-2 min-h-[3.5rem]";
   const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
 
@@ -127,7 +129,7 @@ const renderProductCard = (
             ? `<span class="absolute left-3 top-3 z-10 rounded-full bg-amber-300 px-3 py-1 text-xs font-semibold text-slate-950 shadow-[0_10px_24px_rgba(0,0,0,0.18)]">${escapeHtml(discountPercent ? `-${discountPercent}%` : product.offer)}</span>`
             : ""
         }
-        <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" width="700" height="900" class="h-full max-h-64 w-full object-contain p-3 transition duration-500 group-hover:scale-[1.03]" loading="lazy" decoding="async" fetchpriority="low" />
+        <img src="${escapeHtml(productImage)}" alt="${escapeHtml(product.name)}" width="700" height="900" class="h-full max-h-64 w-full object-contain p-3 transition duration-500 group-hover:scale-[1.03]" loading="lazy" decoding="async" fetchpriority="low" />
       </a>
 
       <div class="flex flex-1 flex-col justify-between pt-4">
@@ -199,7 +201,7 @@ const fetchProductsFromApi = async (apiBaseUrl: string, signal: AbortSignal) => 
   }
 
   const url = new URL("/api/products", apiBaseUrl);
-  const promise = fetch(url, { cache: "no-store", signal })
+  const promise = fetch(url, { signal })
     .then(async (response) => {
       const payload = await response.json().catch(() => null);
       return response.ok && Array.isArray(payload?.data) ? (payload.data as Product[]) : [];

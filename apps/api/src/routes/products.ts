@@ -84,8 +84,13 @@ const requireAdmin = (authorization: string | undefined) => {
 
 export async function productRoutes(app: FastifyInstance) {
   app.get("/api/products", async (request, reply) => {
-    reply.header("Cache-Control", "no-store, max-age=0");
     const filters = productQuerySchema.parse(request.query);
+    reply.header(
+      "Cache-Control",
+      filters.includeInactive
+        ? "no-store, max-age=0"
+        : "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+    );
     const data = await listProducts(filters);
 
     return {
@@ -93,7 +98,8 @@ export async function productRoutes(app: FastifyInstance) {
     };
   });
 
-  app.get("/api/products/:id", async (request) => {
+  app.get("/api/products/:id", async (request, reply) => {
+    reply.header("Cache-Control", "public, max-age=60, s-maxage=300, stale-while-revalidate=600");
     const { id } = z.object({ id: z.string() }).parse(request.params);
     const product = await getProductById(id);
     if (!product) throw new ApiError(404, "Producto no encontrado");

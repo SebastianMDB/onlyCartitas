@@ -4,6 +4,7 @@ import BaseHead from "../../components/BaseHead.astro";
 import Footer from "../../components/Footer.astro";
 import ProductCard from "../../components/ProductCard.astro";
 import { fetchProducts, productLanguages } from "../../lib/catalog";
+import { getProductDetailImageUrl } from "../../lib/image-urls";
 import type { Product } from "../../lib/catalog";
 import "../../styles/global.css";
 
@@ -39,7 +40,8 @@ const selectedVariant = variants.find((variant) => variant.stock > 0) ?? variant
 const selectedStock = selectedVariant ? selectedVariant.stock : product.stock;
 const siteUrl = Astro.site ?? Astro.url.origin;
 const productUrl = new URL(Astro.url.pathname, siteUrl).toString();
-const productImageUrl = new URL(product.image, siteUrl).toString();
+const productDisplayImage = getProductDetailImageUrl(product.image);
+const productImageUrl = new URL(productDisplayImage, siteUrl).toString();
 const productDescription =
   product.description ||
   `${product.name} de ${product.set}, disponible en idioma ${languageLabel}. Revisa precio, stock y detalles antes de comprar.`;
@@ -109,7 +111,7 @@ const designVariantClass = (active: boolean) =>
     <BaseHead
       title={`${product.name} | OnlyCartitas`}
       description={productDescription}
-      image={product.image}
+      image={productDisplayImage}
       ogType="product"
       structuredData={productStructuredData}
     />
@@ -128,7 +130,7 @@ const designVariantClass = (active: boolean) =>
                 </span>
               ) : null
             }
-            <img src={product.image} alt={product.name} class="h-full w-full object-contain" width="900" height="1100" loading="eager" decoding="async" fetchpriority="high" />
+            <img src={productDisplayImage} alt={product.name} class="h-full w-full object-contain" width="900" height="1100" loading="eager" decoding="async" fetchpriority="high" />
           </div>
         </div>
 
