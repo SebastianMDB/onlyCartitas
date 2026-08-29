@@ -10,10 +10,10 @@ const encode = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("
 
 const sign = (payload: string) => createHmac("sha256", env.API_SECRET).update(payload).digest("base64url");
 
-export function createSessionToken(user: AuthUser) {
+export function createSessionToken(user: AuthUser, expiresAt = Date.now() + env.SESSION_TTL_SECONDS * 1000) {
   const payload = encode({
     ...user,
-    expiresAt: Date.now() + env.SESSION_TTL_SECONDS * 1000
+    expiresAt
   });
 
   return `${payload}.${sign(payload)}`;

@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { ApiError } from "../http.js";
 import { createProduct, getProductById, listProducts, updateProduct, updateProductInventory } from "../repositories/products.js";
-import { verifySessionToken } from "../security/tokens.js";
+import { requireAdmin } from "../security/auth.js";
 
 const productQuerySchema = z.object({
   kind: z.enum(["sealed", "single"]).optional(),
@@ -77,11 +77,6 @@ const productUpdateSchema = z.object({
   manualSegment: z.string().trim().max(120).nullable().optional()
 });
 
-const requireAdmin = (authorization: string | undefined) => {
-  const session = verifySessionToken(authorization);
-  if (session?.role !== "admin") throw new ApiError(403, "Permisos insuficientes");
-};
-
 export async function productRoutes(app: FastifyInstance) {
   app.get("/api/products", async (request, reply) => {
     const filters = productQuerySchema.parse(request.query);
@@ -110,7 +105,7 @@ export async function productRoutes(app: FastifyInstance) {
   });
 
   app.post("/api/products", async (request) => {
-    requireAdmin(request.headers.authorization);
+    await requireAdmin(request.headers.authorization);
     const input = productSchema.parse(request.body);
     const product = await createProduct(input);
 
@@ -120,7 +115,7 @@ export async function productRoutes(app: FastifyInstance) {
   });
 
   app.patch("/api/products/:id/inventory", async (request) => {
-    requireAdmin(request.headers.authorization);
+    await requireAdmin(request.headers.authorization);
 
     const { id } = z.object({ id: z.string() }).parse(request.params);
     const input = inventorySchema.parse(request.body);
@@ -133,7 +128,7 @@ export async function productRoutes(app: FastifyInstance) {
   });
 
   app.patch("/api/products/:id", async (request) => {
-    requireAdmin(request.headers.authorization);
+    await requireAdmin(request.headers.authorization);
 
     const { id } = z.object({ id: z.string() }).parse(request.params);
     const input = productUpdateSchema.parse(request.body);

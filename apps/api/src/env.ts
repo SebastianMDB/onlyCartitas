@@ -10,8 +10,15 @@ const envSchema = z
     API_SECRET: z.string().default("dev-onlycartitas-secret"),
     SESSION_TTL_SECONDS: z.coerce.number().int().positive().default(60 * 60 * 24 * 7),
     AUTH_REGISTER_ENABLED: z.coerce.boolean().default(true),
+    PASSWORD_RESET_TOKEN_TTL_MINUTES: z.coerce.number().int().positive().default(30),
     DATABASE_URL: z.string().url(),
     API_PUBLIC_URL: z.preprocess(trimTrailingSlashes, z.string().url().optional().or(z.literal(""))),
+    SMTP_HOST: z.string().optional().or(z.literal("")),
+    SMTP_PORT: z.coerce.number().int().positive().default(587),
+    SMTP_SECURE: z.coerce.boolean().default(false),
+    SMTP_USER: z.string().optional().or(z.literal("")),
+    SMTP_PASSWORD: z.string().optional().or(z.literal("")),
+    SMTP_FROM: z.string().optional().or(z.literal("")),
     MERCADO_PAGO_ACCESS_TOKEN: z.string().optional().or(z.literal("")),
     MERCADO_PAGO_CURRENCY_ID: z.string().default("CLP"),
     MERCADO_PAGO_CHECKOUT_MODE: z.enum(["sandbox", "production"]).default("sandbox")
@@ -40,6 +47,14 @@ const envSchema = z
         code: z.ZodIssueCode.custom,
         path: ["WEB_ORIGIN"],
         message: "WEB_ORIGIN no puede ser * en produccion"
+      });
+    }
+
+    if (!env.SMTP_HOST || !env.SMTP_FROM) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["SMTP_HOST"],
+        message: "SMTP_HOST y SMTP_FROM son obligatorios para enviar recuperacion de clave en produccion"
       });
     }
 

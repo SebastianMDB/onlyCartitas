@@ -1,8 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { ApiError } from "../http.js";
 import { getCatalogOptions, getHeroSettings, updateCatalogOptions, updateHeroSettings } from "../repositories/site-settings.js";
-import { verifySessionToken } from "../security/tokens.js";
+import { requireAdmin } from "../security/auth.js";
 
 const optionalText = (max = 240) => z.string().trim().max(max).optional();
 const pathOrUrl = z
@@ -43,11 +42,6 @@ const catalogOptionsSchema = z.object({
   illustrators: optionListSchema
 });
 
-const requireAdmin = (authorization: string | undefined) => {
-  const session = verifySessionToken(authorization);
-  if (session?.role !== "admin") throw new ApiError(403, "Permisos insuficientes");
-};
-
 export async function siteSettingsRoutes(app: FastifyInstance) {
   app.get("/api/site-settings/hero", async (_request, reply) => {
     reply.header("Cache-Control", "public, max-age=300, s-maxage=1800, stale-while-revalidate=3600");
@@ -56,7 +50,7 @@ export async function siteSettingsRoutes(app: FastifyInstance) {
   });
 
   app.patch("/api/admin/site-settings/hero", async (request) => {
-    requireAdmin(request.headers.authorization);
+    await requireAdmin(request.headers.authorization);
     const input = heroSettingsSchema.parse(request.body);
     const data = await updateHeroSettings(input);
     return { data };
@@ -69,7 +63,7 @@ export async function siteSettingsRoutes(app: FastifyInstance) {
   });
 
   app.patch("/api/admin/site-settings/catalog-options", async (request) => {
-    requireAdmin(request.headers.authorization);
+    await requireAdmin(request.headers.authorization);
     const input = catalogOptionsSchema.parse(request.body);
     const data = await updateCatalogOptions(input);
     return { data };

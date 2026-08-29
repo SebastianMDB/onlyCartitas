@@ -17,9 +17,9 @@ import "../styles/global.css";
   <body class="bg-[color:var(--color-surface)] text-slate-900 antialiased">
     <Header />
 
-    <main class="hidden pb-20" data-account-content>
+    <main class="hidden pb-16 sm:pb-20" data-account-content>
       <section class="mx-auto w-full max-w-5xl px-4 pt-8 sm:px-6 lg:px-8">
-        <div class="rounded-[2rem] bg-[linear-gradient(135deg,#113047_0%,#173b56_100%)] p-6 text-white shadow-[0_28px_80px_rgba(17,48,71,0.24)] sm:p-8">
+        <div class="rounded-[2rem] bg-[color:var(--color-primary)] p-6 text-white shadow-[0_28px_80px_rgba(17,48,71,0.24)] sm:p-8">
           <p class="text-xs font-semibold uppercase tracking-[0.24em] text-sky-200">Cuenta</p>
           <h1 class="mt-3 text-4xl font-semibold tracking-tight">Mi cuenta</h1>
           <p class="mt-3 max-w-2xl text-sm leading-7 text-slate-200">
@@ -28,11 +28,12 @@ import "../styles/global.css";
         </div>
       </section>
 
-      <section class="mx-auto mt-8 grid w-full max-w-5xl gap-5 px-4 sm:px-6 lg:grid-cols-[320px_1fr] lg:px-8">
-        <aside class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)]">
+      <section class="mx-auto mt-6 grid w-full max-w-5xl gap-5 px-4 sm:mt-8 sm:px-6 lg:grid-cols-[320px_1fr] lg:px-8">
+        <aside class="rounded-[2rem] border border-slate-200/80 bg-white/95 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] lg:sticky lg:top-28 lg:self-start">
           <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Sesion</p>
           <h2 class="mt-2 text-2xl font-semibold text-[color:var(--color-primary)]" data-account-user>Cliente</h2>
           <p class="mt-2 text-sm text-slate-500" data-account-role>Rol cliente</p>
+          <p class="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">Los cambios sensibles se confirman con tu clave actual.</p>
           <div class="mt-5 grid gap-3">
             <a href="/ofertas" class="inline-flex min-h-11 items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white">Ver ofertas</a>
             <button type="button" class="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950" data-logout-button>
@@ -42,7 +43,7 @@ import "../styles/global.css";
         </aside>
 
         <div class="grid gap-5">
-          <section class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)]">
+          <section class="rounded-[2rem] border border-slate-200/80 bg-white/95 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
             <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Pedidos</p>
@@ -57,15 +58,36 @@ import "../styles/global.css";
             </div>
           </section>
 
-          <section class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)]">
-            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Datos guardados</p>
-            <div class="mt-4 grid gap-3 sm:grid-cols-2">
-              <input type="text" placeholder="Nombre" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
-              <input type="email" placeholder="Correo" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
-              <input type="tel" placeholder="Telefono" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
-              <input type="text" placeholder="Comuna" class="h-12 rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
-            </div>
-            <p class="mt-3 text-sm text-slate-500">Estos campos son visuales por ahora; se conectaran al servidor cuando el front este aprobado.</p>
+          <section class="rounded-[2rem] border border-slate-200/80 bg-white/95 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Perfil</p>
+            <h2 class="mt-2 text-2xl font-semibold text-[color:var(--color-primary)]">Datos de acceso</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-500">Actualiza usuario, correo o clave. Para guardar cualquier cambio debes ingresar tu clave actual.</p>
+            <form class="mt-5 grid gap-4 sm:grid-cols-2" data-profile-form>
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Usuario</span>
+                <input data-profile-username type="text" autocomplete="username" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                <span class="mt-2 block text-xs text-slate-500">Este nombre se usara para iniciar sesion.</span>
+              </label>
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Correo</span>
+                <input data-profile-email type="email" autocomplete="email" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                <span class="mt-2 block text-xs text-slate-500">Debe ser un correo al que tengas acceso.</span>
+              </label>
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Clave actual</span>
+                <input data-profile-current-password type="password" autocomplete="current-password" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                <span class="mt-2 block text-xs text-slate-500">Obligatoria para guardar cambios.</span>
+              </label>
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Nueva clave</span>
+                <input data-profile-password type="password" autocomplete="new-password" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                <span class="mt-2 block text-xs text-slate-500">Dejala vacia si no quieres cambiarla.</span>
+              </label>
+              <p class="hidden rounded-[1rem] px-4 py-3 text-sm font-semibold sm:col-span-2" data-profile-message></p>
+              <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f] sm:col-span-2">
+                Guardar cambios
+              </button>
+            </form>
           </section>
         </div>
       </section>
@@ -95,6 +117,12 @@ import "../styles/global.css";
       const logoutButton = document.querySelector("[data-logout-button]");
       const ordersList = document.querySelector("[data-orders-list]");
       const ordersEmpty = document.querySelector("[data-orders-empty]");
+      const profileForm = document.querySelector("[data-profile-form]");
+      const profileUsernameInput = document.querySelector("[data-profile-username]");
+      const profileEmailInput = document.querySelector("[data-profile-email]");
+      const profileCurrentPasswordInput = document.querySelector("[data-profile-current-password]");
+      const profilePasswordInput = document.querySelector("[data-profile-password]");
+      const profileMessage = document.querySelector("[data-profile-message]");
 
       const currencyFormatter = new Intl.NumberFormat("es-CL", {
         style: "currency",
@@ -103,6 +131,21 @@ import "../styles/global.css";
       });
 
       const isHTMLElement = (value: unknown) => value instanceof HTMLElement;
+      type ActiveSession = {
+        user?: string;
+        role?: "admin" | "customer";
+        token?: string;
+        expiresAt?: number;
+      };
+      type AuthMeResponse = {
+        user: {
+          username: string;
+          email: string | null;
+          role: "admin" | "customer";
+        };
+        token?: string;
+        expiresAt?: number | string;
+      };
       const escapeHtml = (value: unknown) =>
         String(value)
           .replaceAll("&", "&amp;")
@@ -110,6 +153,42 @@ import "../styles/global.css";
           .replaceAll(">", "&gt;")
           .replaceAll('"', "&quot;")
           .replaceAll("'", "&#039;");
+      const isInput = (value: unknown) => value instanceof HTMLInputElement;
+
+      const showProfileMessage = (message: string, type: "error" | "success") => {
+        if (!isHTMLElement(profileMessage)) return;
+
+        profileMessage.textContent = message;
+        profileMessage.classList.remove("hidden", "border", "border-red-200", "bg-red-50", "text-red-700", "border-emerald-200", "bg-emerald-50", "text-emerald-700");
+        profileMessage.classList.add(
+          "border",
+          type === "success" ? "border-emerald-200" : "border-red-200",
+          type === "success" ? "bg-emerald-50" : "bg-red-50",
+          type === "success" ? "text-emerald-700" : "text-red-700"
+        );
+      };
+
+      const applyProfileFields = (payload: AuthMeResponse) => {
+        if (isInput(profileUsernameInput)) profileUsernameInput.value = payload.user.username ?? "";
+        if (isInput(profileEmailInput)) profileEmailInput.value = payload.user.email ?? "";
+      };
+
+      const persistVerifiedSession = (baseSession: ActiveSession, payload: AuthMeResponse) => {
+        const verifiedSession = {
+          ...baseSession,
+          user: payload.user.username,
+          role: payload.user.role,
+          token: payload.token ?? baseSession.token,
+          expiresAt: Number(payload.expiresAt ?? baseSession.expiresAt)
+        };
+        activeSession = verifiedSession;
+        window.localStorage.setItem(SESSION_KEY, JSON.stringify(verifiedSession));
+
+        if (isHTMLElement(userLabel)) userLabel.textContent = verifiedSession.user ?? "Cliente";
+        if (isHTMLElement(roleLabel)) roleLabel.textContent = verifiedSession.role === "admin" ? "Rol admin" : "Rol cliente";
+        applyProfileFields(payload);
+        return verifiedSession;
+      };
 
       const readSession = () => {
         try {
@@ -120,7 +199,7 @@ import "../styles/global.css";
         }
       };
 
-      let activeSession = null;
+      let activeSession: ActiveSession | null = null;
 
       const clearSessionAndRedirect = () => {
         window.localStorage.removeItem(SESSION_KEY);
@@ -141,21 +220,12 @@ import "../styles/global.css";
               Authorization: `Bearer ${session.token}`
             }
           });
-          const payload = await response.json().catch(() => null);
+          const payload = (await response.json().catch(() => null)) as AuthMeResponse | null;
           if (!response.ok || !payload?.user) throw new Error("Sesion invalida");
 
-          activeSession = {
-            ...session,
-            user: payload.user.username,
-            role: payload.user.role,
-            expiresAt: Number(payload.expiresAt ?? session.expiresAt)
-          };
-          window.localStorage.setItem(SESSION_KEY, JSON.stringify(activeSession));
-
-          if (isHTMLElement(userLabel)) userLabel.textContent = activeSession.user ?? "Cliente";
-          if (isHTMLElement(roleLabel)) roleLabel.textContent = activeSession.role === "admin" ? "Rol admin" : "Rol cliente";
+          const verifiedSession = persistVerifiedSession(session, payload);
           accountContent?.classList.remove("hidden");
-          return activeSession;
+          return verifiedSession;
         } catch {
           clearSessionAndRedirect();
           return null;
@@ -202,6 +272,42 @@ import "../styles/global.css";
         return Array.isArray(payload.data) ? payload.data : [];
       };
 
+      const updateProfile = async () => {
+        const session = activeSession ?? await verifySession();
+        if (!session?.token) throw new Error("Sesion requerida.");
+
+        const username = isInput(profileUsernameInput) ? profileUsernameInput.value.trim() : "";
+        const email = isInput(profileEmailInput) ? profileEmailInput.value.trim() : "";
+        const currentPassword = isInput(profileCurrentPasswordInput) ? profileCurrentPasswordInput.value : "";
+        const password = isInput(profilePasswordInput) ? profilePasswordInput.value : "";
+
+        if (username.length < 3) throw new Error("El usuario debe tener al menos 3 caracteres.");
+        if (!email.includes("@")) throw new Error("Ingresa un correo valido para mantener tu cuenta recuperable.");
+        if (password && password.length < 8) throw new Error("La nueva clave debe tener al menos 8 caracteres.");
+        if (currentPassword.length < 8) throw new Error("Ingresa tu clave actual para guardar cambios.");
+
+        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.token}`
+          },
+          body: JSON.stringify({
+            username,
+            email,
+            currentPassword,
+            ...(password ? { currentPassword, password } : {})
+          })
+        });
+        const payload = (await response.json().catch(() => null)) as (AuthMeResponse & { error?: string }) | null;
+        if (!response.ok || !payload?.user) throw new Error(payload?.error ?? "No se pudo actualizar el perfil.");
+
+        persistVerifiedSession(session, payload);
+        window.dispatchEvent(new CustomEvent("onlycartitas:auth-updated"));
+        if (isInput(profileCurrentPasswordInput)) profileCurrentPasswordInput.value = "";
+        if (isInput(profilePasswordInput)) profilePasswordInput.value = "";
+      };
+
       verifySession().then((session) => {
         if (!session) return;
         loadOrders()
@@ -222,6 +328,16 @@ import "../styles/global.css";
         window.localStorage.removeItem(SESSION_KEY);
         window.dispatchEvent(new CustomEvent("onlycartitas:auth-updated"));
         window.location.assign("/");
+      });
+
+      profileForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        try {
+          await updateProfile();
+          showProfileMessage("Perfil actualizado. Tus datos de sesion ya estan sincronizados.", "success");
+        } catch (error) {
+          showProfileMessage(error instanceof Error ? error.message : "No se pudo actualizar el perfil.", "error");
+        }
       });
     </script>
   </body>

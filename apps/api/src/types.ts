@@ -42,5 +42,7 @@ export type CartItem = Pick<
 export type AuthUser = {
   id: string;
   username: string;
+  email: string | null;
   role: "admin" | "customer";
+  sessionVersion: number;
 };

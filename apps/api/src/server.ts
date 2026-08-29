@@ -17,12 +17,16 @@ const app = Fastify({
   logger: true
 });
 
-app.addHook("onRequest", async (_request, reply) => {
+app.addHook("onRequest", async (request, reply) => {
   reply.header("X-Content-Type-Options", "nosniff");
   reply.header("X-Frame-Options", "DENY");
   reply.header("Referrer-Policy", "no-referrer");
   reply.header("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
   reply.header("Cross-Origin-Resource-Policy", "same-site");
+  if (request.url.startsWith("/api/auth") || request.url.startsWith("/api/admin")) {
+    reply.header("Cache-Control", "no-store, max-age=0");
+    reply.header("Pragma", "no-cache");
+  }
 });
 
 await app.register(cors, {

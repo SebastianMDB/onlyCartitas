@@ -234,16 +234,22 @@ const normalizedCurrentPath = normalizePath(currentPath);
     stock: number;
     quantity: number;
   };
+  declare global {
+    interface Window {
+      __onlycartitasHeaderRuntimeAbortController?: AbortController;
+      __onlycartitasSearchQuery?: string;
+    }
+  }
 
   const navLinks = Array.from(document.querySelectorAll("[data-nav-link]"));
   const INVENTORY_STORAGE_KEY = "onlycartitas-inventory-state";
   const INVENTORY_SYNC_TTL_MS = 10_000;
   const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
   const headerRuntimeKey = "__onlycartitasHeaderRuntimeAbortController";
-  const previousHeaderRuntime = (window as any)[headerRuntimeKey];
+  const previousHeaderRuntime = window[headerRuntimeKey];
   if (previousHeaderRuntime instanceof AbortController) previousHeaderRuntime.abort();
   const headerRuntimeAbortController = new AbortController();
-  (window as any)[headerRuntimeKey] = headerRuntimeAbortController;
+  window[headerRuntimeKey] = headerRuntimeAbortController;
   const headerRuntimeSignal = headerRuntimeAbortController.signal;
   let lastInventorySyncAt = 0;
 
@@ -278,7 +284,7 @@ const normalizedCurrentPath = normalizePath(currentPath);
   };
 
   const emitSearch = (value: string) => {
-    (window as any).__onlycartitasSearchQuery = value;
+    window.__onlycartitasSearchQuery = value;
     window.dispatchEvent(
       new CustomEvent("carta-noble:search", {
         detail: value
@@ -690,6 +696,7 @@ const normalizedCurrentPath = normalizePath(currentPath);
         ...session,
         user: payload.user.username,
         role: payload.user.role,
+        token: payload.token ?? session.token,
         expiresAt: Number(payload.expiresAt ?? session.expiresAt)
       };
       window.localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(verifiedSession));

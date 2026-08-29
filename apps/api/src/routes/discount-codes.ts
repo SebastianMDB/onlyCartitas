@@ -7,7 +7,7 @@ import {
   listDiscountCodes,
   updateDiscountCode
 } from "../repositories/discount-codes.js";
-import { verifySessionToken } from "../security/tokens.js";
+import { requireAdmin } from "../security/auth.js";
 
 const discountCodeSchema = z.object({
   code: z.string().trim().min(2).max(40),
@@ -24,11 +24,6 @@ const validateSchema = z.object({
   subtotal: z.number().min(0)
 });
 
-const requireAdmin = (authorization: string | undefined) => {
-  const session = verifySessionToken(authorization);
-  if (session?.role !== "admin") throw new ApiError(403, "Permisos insuficientes");
-};
-
 export async function discountCodeRoutes(app: FastifyInstance) {
   app.post("/api/discount-codes/validate", async (request) => {
     const input = validateSchema.parse(request.body);
@@ -39,20 +34,20 @@ export async function discountCodeRoutes(app: FastifyInstance) {
   });
 
   app.get("/api/admin/discount-codes", async (request) => {
-    requireAdmin(request.headers.authorization);
+    await requireAdmin(request.headers.authorization);
     const data = await listDiscountCodes();
     return { data };
   });
 
   app.post("/api/admin/discount-codes", async (request) => {
-    requireAdmin(request.headers.authorization);
+    await requireAdmin(request.headers.authorization);
     const input = discountCodeSchema.parse(request.body);
     const data = await createDiscountCode(input);
     return { data };
   });
 
   app.patch("/api/admin/discount-codes/:id", async (request) => {
-    requireAdmin(request.headers.authorization);
+    await requireAdmin(request.headers.authorization);
     const { id } = z.object({ id: z.string().min(1) }).parse(request.params);
     const input = discountCodeSchema.partial().parse(request.body);
     const data = await updateDiscountCode(id, input);

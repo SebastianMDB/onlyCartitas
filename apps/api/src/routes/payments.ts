@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { createMercadoPagoPreference, syncMercadoPagoPayment } from "../repositories/payments.js";
-import { verifySessionToken } from "../security/tokens.js";
+import { getAuthenticatedUser } from "../security/auth.js";
 
 const preferenceSchema = z.object({
   orderId: z.string().uuid()
@@ -33,7 +33,7 @@ const webhookBodySchema = z
 
 export async function paymentRoutes(app: FastifyInstance) {
   app.post("/api/payments/mercadopago/preferences", async (request) => {
-    const session = verifySessionToken(request.headers.authorization) ?? undefined;
+    const session = (await getAuthenticatedUser(request.headers.authorization)) ?? undefined;
     const input = preferenceSchema.parse(request.body);
     const data = await createMercadoPagoPreference(input.orderId, session);
 

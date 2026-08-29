@@ -17,11 +17,24 @@ import "../styles/global.css";
   <body class="bg-[color:var(--color-surface)] text-slate-900 antialiased">
     <Header />
 
-    <main class="pb-20">
-      <section class="mx-auto w-full max-w-md px-4 pt-10 sm:px-6 lg:px-8">
-        <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
-          <p class="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--color-secondary)]">Acceso</p>
+    <main class="pb-16 sm:pb-20">
+      <section class="mx-auto grid w-full max-w-5xl gap-6 px-4 pt-6 sm:px-6 sm:pt-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:px-8">
+        <div class="login-intro rounded-[2rem] bg-[color:var(--color-primary)] p-6 text-white shadow-[0_24px_70px_rgba(17,48,71,0.18)] sm:p-8">
+          <p class="text-xs font-semibold uppercase tracking-[0.24em] text-sky-200">Acceso</p>
           <h1 class="mt-2 text-3xl font-semibold tracking-tight text-[color:var(--color-primary)]">Iniciar sesión</h1>
+
+          <p class="mt-3 text-sm leading-7 text-slate-200">
+            Entra a tu cuenta para revisar pedidos, actualizar tus datos y continuar compras con tu carrito.
+          </p>
+          <div class="mt-6 grid gap-3 text-sm text-slate-100">
+            <p class="rounded-2xl bg-white/10 px-4 py-3">Usa tu usuario registrado, no el correo.</p>
+            <p class="rounded-2xl bg-white/10 px-4 py-3">Si cambias tu clave, las sesiones anteriores se cierran por seguridad.</p>
+          </div>
+        </div>
+
+        <div class="rounded-[2rem] border border-slate-200/80 bg-white/95 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
+          <p class="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--color-secondary)]">Cuenta</p>
+          <h2 class="mt-2 text-2xl font-semibold tracking-tight text-[color:var(--color-primary)] sm:text-3xl">Tus datos</h2>
 
           <form class="mt-5 grid gap-4" data-login-form>
             <label class="block">
@@ -32,6 +45,7 @@ import "../styles/global.css";
                 autocomplete="username"
                 class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"
               />
+              <span class="mt-2 block text-xs text-slate-500">El mismo usuario que creaste al registrarte.</span>
             </label>
 
             <label class="block">
@@ -42,16 +56,48 @@ import "../styles/global.css";
                 autocomplete="current-password"
                 class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"
               />
+              <span class="mt-2 block text-xs text-slate-500">Minimo 8 caracteres.</span>
             </label>
 
             <p class="hidden rounded-[1rem] border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" data-login-error>
-              Usuario o clave incorrectos.
+              No pudimos iniciar sesion. Revisa usuario y clave.
             </p>
 
             <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]">
               Entrar
             </button>
           </form>
+
+          <details class="mt-5 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+            <summary class="cursor-pointer text-sm font-semibold text-[color:var(--color-primary)]">Restablecer clave</summary>
+            <p class="mt-3 text-sm leading-6 text-slate-500">Confirma el usuario y correo registrado. Te enviaremos un link temporal para crear una nueva clave.</p>
+            <form class="mt-4 grid gap-4 sm:grid-cols-2" data-reset-request-form>
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Usuario</span>
+                <input data-reset-user type="text" autocomplete="username" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+              </label>
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Correo registrado</span>
+                <input data-reset-email type="email" autocomplete="email" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+              </label>
+              <p class="hidden rounded-[1rem] px-4 py-3 text-sm font-semibold sm:col-span-2" data-reset-message></p>
+              <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950 sm:col-span-2">
+                Enviar link
+              </button>
+            </form>
+
+            <form class="mt-4 hidden gap-4" data-reset-confirm-form>
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Nueva clave</span>
+                <input data-reset-password type="password" autocomplete="new-password" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                <span class="mt-2 block text-xs text-slate-500">Debe tener al menos 8 caracteres. El link se usa una sola vez.</span>
+              </label>
+              <p class="hidden rounded-[1rem] px-4 py-3 text-sm font-semibold" data-reset-confirm-message></p>
+              <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950">
+                Guardar nueva clave
+              </button>
+            </form>
+          </details>
 
           <p class="mt-5 text-center text-sm text-slate-500">
             No tienes cuenta?
@@ -62,10 +108,21 @@ import "../styles/global.css";
     </main>
     <Footer />
 
+    <style>
+      .login-intro > p:first-child {
+        color: rgb(186 230 253);
+      }
+
+      .login-intro > h1 {
+        color: #fff;
+      }
+    </style>
+
     <script>
       type AuthSessionResponse = {
         user: {
           username: string;
+          email: string | null;
           role: "admin" | "customer";
         };
         token: string;
@@ -77,6 +134,20 @@ import "../styles/global.css";
       let loginAbortController: AbortController | null = null;
 
       const isInput = (value: unknown) => value instanceof HTMLInputElement;
+
+      const showResetMessage = (message: string, type: "error" | "success", selector = "[data-reset-message]") => {
+        const resetMessage = document.querySelector(selector);
+        if (!(resetMessage instanceof HTMLElement)) return;
+
+        resetMessage.textContent = message;
+        resetMessage.classList.remove("hidden", "border", "border-red-200", "bg-red-50", "text-red-700", "border-emerald-200", "bg-emerald-50", "text-emerald-700");
+        resetMessage.classList.add(
+          "border",
+          type === "success" ? "border-emerald-200" : "border-red-200",
+          type === "success" ? "bg-emerald-50" : "bg-red-50",
+          type === "success" ? "text-emerald-700" : "text-red-700"
+        );
+      };
 
       const createSession = ({ user, token, expiresAt }: AuthSessionResponse) => {
         window.localStorage.setItem(
@@ -107,6 +178,33 @@ import "../styles/global.css";
         return response.json();
       };
 
+      const requestPasswordReset = async (username: string, email: string) => {
+        const response = await fetch(`${API_BASE_URL}/api/auth/reset-password/request`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ username, email })
+        });
+
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(payload?.error ?? "No se pudo enviar el link de recuperacion.");
+        return payload?.message ?? "Si los datos coinciden, enviaremos un link de recuperacion al correo registrado.";
+      };
+
+      const confirmPasswordReset = async (token: string, password: string) => {
+        const response = await fetch(`${API_BASE_URL}/api/auth/reset-password/confirm`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ token, password })
+        });
+
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(payload?.error ?? "No se pudo guardar la nueva clave.");
+      };
+
       const initLoginForm = () => {
         loginAbortController?.abort();
         loginAbortController = new AbortController();
@@ -115,6 +213,20 @@ import "../styles/global.css";
         const userInput = document.querySelector("[data-login-user]");
         const passwordInput = document.querySelector("[data-login-password]");
         const errorMessage = document.querySelector("[data-login-error]");
+        const resetRequestForm = document.querySelector("[data-reset-request-form]");
+        const resetConfirmForm = document.querySelector("[data-reset-confirm-form]");
+        const resetUserInput = document.querySelector("[data-reset-user]");
+        const resetEmailInput = document.querySelector("[data-reset-email]");
+        const resetPasswordInput = document.querySelector("[data-reset-password]");
+        const resetToken = new URLSearchParams(window.location.search).get("resetToken")?.trim() ?? "";
+
+        if (resetToken && resetConfirmForm instanceof HTMLElement && resetRequestForm instanceof HTMLElement) {
+          const resetDetails = resetConfirmForm.closest("details");
+          if (resetDetails instanceof HTMLDetailsElement) resetDetails.open = true;
+          resetRequestForm.classList.add("hidden");
+          resetConfirmForm.classList.remove("hidden");
+          resetConfirmForm.classList.add("grid");
+        }
 
         form?.addEventListener("submit", async (event) => {
           event.preventDefault();
@@ -128,6 +240,53 @@ import "../styles/global.css";
             window.location.assign(session.user.role === "admin" ? "/admin-inventario" : "/");
           } catch {
             errorMessage?.classList.remove("hidden");
+          }
+        }, { signal });
+
+        resetRequestForm?.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const username = isInput(resetUserInput) ? resetUserInput.value.trim() : "";
+          const email = isInput(resetEmailInput) ? resetEmailInput.value.trim() : "";
+
+          if (username.length < 3) {
+            showResetMessage("Ingresa un usuario valido para pedir el link.", "error");
+            return;
+          }
+
+          if (!email.includes("@")) {
+            showResetMessage("Ingresa el correo asociado a esa cuenta.", "error");
+            return;
+          }
+
+          try {
+            const message = await requestPasswordReset(username, email);
+            showResetMessage(message, "success");
+          } catch (error) {
+            showResetMessage(error instanceof Error ? error.message : "No se pudo enviar el link de recuperacion.", "error");
+          }
+        }, { signal });
+
+        resetConfirmForm?.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const password = isInput(resetPasswordInput) ? resetPasswordInput.value : "";
+
+          if (!resetToken) {
+            showResetMessage("El link de recuperacion no es valido.", "error", "[data-reset-confirm-message]");
+            return;
+          }
+
+          if (password.length < 8) {
+            showResetMessage("La nueva clave debe tener al menos 8 caracteres.", "error", "[data-reset-confirm-message]");
+            return;
+          }
+
+          try {
+            await confirmPasswordReset(resetToken, password);
+            if (isInput(resetPasswordInput)) resetPasswordInput.value = "";
+            window.history.replaceState({}, "", "/login");
+            showResetMessage("Clave actualizada. Ya puedes iniciar sesion con tu nueva clave.", "success", "[data-reset-confirm-message]");
+          } catch (error) {
+            showResetMessage(error instanceof Error ? error.message : "No se pudo guardar la nueva clave.", "error", "[data-reset-confirm-message]");
           }
         }, { signal });
       };

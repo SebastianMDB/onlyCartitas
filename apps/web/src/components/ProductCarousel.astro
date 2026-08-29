@@ -61,16 +61,17 @@ const sectionId = `carousel-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
   declare global {
     interface Window {
       __onlycartitasSearchQuery?: string;
+      __onlycartitasCarouselRuntimeAbortController?: AbortController;
     }
   }
 
   const isHTMLElement = (value: unknown) => value instanceof HTMLElement;
   const isButtonElement = (value: unknown) => value instanceof HTMLButtonElement;
   const carouselRuntimeKey = "__onlycartitasCarouselRuntimeAbortController";
-  const previousCarouselRuntime = (window as any)[carouselRuntimeKey];
+  const previousCarouselRuntime = window[carouselRuntimeKey];
   if (previousCarouselRuntime instanceof AbortController) previousCarouselRuntime.abort();
   const carouselRuntimeAbortController = new AbortController();
-  (window as any)[carouselRuntimeKey] = carouselRuntimeAbortController;
+  window[carouselRuntimeKey] = carouselRuntimeAbortController;
   const carouselRuntimeSignal = carouselRuntimeAbortController.signal;
 
   const initCarouselSections = () => {

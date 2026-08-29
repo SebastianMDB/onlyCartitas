@@ -59,13 +59,35 @@ export const appUsers = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     username: text("username").notNull(),
+    email: text("email"),
     passwordHash: text("password_hash").notNull(),
     role: userRoleEnum("role").notNull().default("customer"),
+    sessionVersion: integer("session_version").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
   },
   (table) => ({
-    usernameUnique: uniqueIndex("app_users_username_unique").on(table.username)
+    usernameUnique: uniqueIndex("app_users_username_unique").on(table.username),
+    emailUnique: uniqueIndex("app_users_email_unique").on(table.email)
+  })
+);
+
+export const passwordResetTokens = pgTable(
+  "password_reset_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => appUsers.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
+  },
+  (table) => ({
+    tokenHashUnique: uniqueIndex("password_reset_tokens_token_hash_unique").on(table.tokenHash),
+    userIdIdx: index("password_reset_tokens_user_id_idx").on(table.userId),
+    expiresAtIdx: index("password_reset_tokens_expires_at_idx").on(table.expiresAt)
   })
 );
 
@@ -184,7 +206,15 @@ export const shippingSectors = pgTable(
 );
 
 export const usersRelations = relations(appUsers, ({ many }) => ({
-  orders: many(orders)
+  orders: many(orders),
+  passwordResetTokens: many(passwordResetTokens)
+}));
+
+export const passwordResetTokensRelations = relations(passwordResetTokens, ({ one }) => ({
+  user: one(appUsers, {
+    fields: [passwordResetTokens.userId],
+    references: [appUsers.id]
+  })
 }));
 
 export const productsRelations = relations(products, ({ many }) => ({

@@ -5,7 +5,7 @@ import Footer from "../components/Footer.astro";
 import { productCategories } from "../lib/catalog";
 import "../styles/global.css";
 
-const inventoryItems: any[] = [];
+const inventoryItems: Array<{ id: string; name: string }> = [];
 const apiBaseUrl = import.meta.env.PUBLIC_API_URL;
 const defaultProductCategoryOptions = productCategories.sealed;
 ---
@@ -77,16 +77,26 @@ const defaultProductCategoryOptions = productCategories.sealed;
         </div>
       </section>
 
-      <section class="mx-auto mt-8 w-full max-w-6xl px-4 sm:px-6 lg:px-8" data-admin-panel="inventory">
-        <div class="rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
+      <section class="mx-auto mt-8 w-full max-w-7xl px-4 sm:px-6 lg:px-8" data-admin-panel="inventory">
+        <div class="rounded-[2rem] border border-slate-200/80 bg-white/95 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
           <div class="grid gap-5">
-            <div>
+            <div class="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+              <div>
               <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Inventario</p>
               <h2 class="mt-2 text-2xl font-semibold text-[color:var(--color-primary)]">Stock y visibilidad</h2>
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Trabaja primero con filtros y stock rapido. Usa datos editables solo cuando cambie la ficha publica del producto.</p>
+              </div>
+              <div class="grid gap-2 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600 sm:min-w-64">
+                <span class="font-semibold text-[color:var(--color-primary)]">Flujo recomendado</span>
+                <span>1. Filtra tipo o nombre</span>
+                <span>2. Ajusta stock exacto</span>
+                <span>3. Guarda datos solo si cambia la ficha</span>
+              </div>
             </div>
 
             <details class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4" open>
               <summary class="cursor-pointer text-sm font-semibold text-[color:var(--color-primary)]">Crear producto</summary>
+              <p class="mt-3 text-sm leading-6 text-slate-500">Alta de productos nuevos. Para cambios diarios de unidades, usa la seccion de stock rapido.</p>
               <form class="mt-4 grid gap-4" data-product-create-form>
                 <div class="grid gap-4 lg:grid-cols-2">
                   <label class="block">
@@ -179,6 +189,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
 
             <details class="rounded-[1.5rem] border border-slate-200 bg-white p-4">
               <summary class="cursor-pointer text-sm font-semibold text-[color:var(--color-primary)]">Listas del catálogo</summary>
+              <p class="mt-3 text-sm leading-6 text-slate-500">Mantiene opciones reutilizables para crear y editar productos sin escribirlas desde cero cada vez.</p>
               <div class="mt-4 grid gap-4 lg:grid-cols-3">
                 <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Sets</p>
@@ -207,7 +218,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
               </div>
               <p class="mt-4 hidden rounded-[1rem] bg-[color:var(--color-surface)] px-4 py-3 text-sm font-semibold text-[color:var(--color-primary)]" data-options-message></p>
             </details>
-            <div>
+            <div class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
               <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Tipo</span>
               <div class="grid gap-2 sm:grid-cols-2">
                 <button type="button" class="rounded-full bg-[color:var(--color-primary)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#173b56]" data-type-button data-type="sellado" aria-pressed="true">
@@ -221,7 +232,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
               </div>
             </div>
 
-            <div class="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+            <div class="grid gap-4 rounded-[1.5rem] border border-slate-200 bg-white p-4 lg:grid-cols-[0.9fr_1.1fr]">
               <label class="block">
                 <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Filtrar producto</span>
                 <input
@@ -230,6 +241,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
                   placeholder="Nombre, categoria o set"
                   class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"
                 />
+                <span class="mt-2 block text-xs text-slate-500">Busca por nombre, categoria o set antes de abrir el selector.</span>
               </label>
 
               <label class="block">
@@ -237,6 +249,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
                 <select data-product class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
                   {inventoryItems.map((product) => <option value={product.id}>{product.name}</option>)}
                 </select>
+                <span class="mt-2 block text-xs text-slate-500">El stock y la ficha de abajo pertenecen al producto seleccionado.</span>
               </label>
             </div>
 
@@ -245,7 +258,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
                 <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]" data-product-type>
                   Sellado
                 </p>
-                <h2 class="mt-2 text-2xl font-semibold text-[color:var(--color-primary)]" data-product-name>
+                <h2 class="mt-2 text-2xl font-semibold leading-tight text-[color:var(--color-primary)]" data-product-name>
                   Producto
                 </h2>
                 <p class="mt-2 text-sm text-slate-500" data-product-meta>Categoría - Set</p>
@@ -255,8 +268,8 @@ const defaultProductCategoryOptions = productCategories.sealed;
               </span>
             </div>
 
-            <div class="grid gap-4 lg:grid-cols-[0.85fr_1.15fr]">
-              <form class="rounded-[1.5rem] border border-slate-200 bg-white p-4" data-form>
+            <div class="grid gap-4 lg:grid-cols-[360px_1fr]">
+              <form class="rounded-[1.5rem] border border-slate-200 bg-white p-4 lg:sticky lg:top-28 lg:self-start" data-form>
                 <div>
                   <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Stock</p>
                   <h3 class="mt-2 text-xl font-semibold text-[color:var(--color-primary)]">Movimiento rapido</h3>
@@ -265,7 +278,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
                 <div class="mt-4 grid gap-4">
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Stock exacto</span>
-                    <div class="grid grid-cols-[44px_1fr_44px] gap-2">
+                    <div class="grid grid-cols-[48px_1fr_48px] gap-2">
                     <button type="button" class="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 text-lg font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900" data-stock-minus aria-label="Restar stock">
                       -
                     </button>
@@ -277,7 +290,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
                   </label>
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Visibilidad</span>
-                  <select data-status class="mt-3 h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
+                  <select data-status class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15">
                     <option value="active">Activo en tienda</option>
                     <option value="inactive">Inactivo / oculto</option>
                   </select>
@@ -297,6 +310,9 @@ const defaultProductCategoryOptions = productCategories.sealed;
                   <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Producto</p>
                   <h3 class="mt-2 text-xl font-semibold text-[color:var(--color-primary)]">Datos editables</h3>
                   <p class="mt-2 text-sm text-slate-500">Edita nombre, set, precio, imagen y atributos sin mezclarlo con stock.</p>
+                </div>
+                <div class="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
+                  Cambios en nombre, precio, imagen y descripcion impactan directamente la ficha que ve el cliente.
                 </div>
                 <div class="mt-4 grid gap-4 lg:grid-cols-2">
                   <label class="block">
@@ -333,14 +349,17 @@ const defaultProductCategoryOptions = productCategories.sealed;
                   <label class="block lg:col-span-2">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Imagen URL</span>
                     <input data-product-edit="image" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                    <span class="mt-2 block text-xs text-slate-500">Ruta local o URL publica de la imagen.</span>
                   </label>
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Precio anterior</span>
                     <input data-product-edit="previousPrice" type="number" min="0" step="1" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                    <span class="mt-2 block text-xs text-slate-500">Opcional; se usa para mostrar referencia de oferta.</span>
                   </label>
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Etiqueta oferta</span>
                     <input data-product-edit="offer" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                    <span class="mt-2 block text-xs text-slate-500">Dejalo vacio si el producto no esta en oferta.</span>
                   </label>
                   <label class="block">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Ilustrador</span>
@@ -365,6 +384,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
                   <label class="block lg:col-span-2">
                     <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Segmento manual</span>
                     <input data-product-edit="manualSegment" type="text" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                    <span class="mt-2 block text-xs text-slate-500">Opcional para ordenar colecciones o campañas internas.</span>
                   </label>
                   <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:col-span-2" data-variant-builder="edit">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -738,7 +758,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
 
       const verifyAdminSession = async () => {
         const session = readSession();
-        if (!session?.token || session.role !== "admin") return null;
+        if (!session?.token) return null;
 
         try {
           const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
@@ -759,7 +779,15 @@ const defaultProductCategoryOptions = productCategories.sealed;
             return null;
           }
 
-          return session;
+          const verifiedSession = {
+            ...session,
+            user: payload.user.username,
+            role: payload.user.role,
+            token: payload.token ?? session.token,
+            expiresAt: Number(payload.expiresAt ?? session.expiresAt)
+          };
+          window.localStorage.setItem(SESSION_KEY, JSON.stringify(verifiedSession));
+          return verifiedSession;
         } catch {
           return session;
         }
@@ -1014,6 +1042,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
         return slug || `diseno-${index + 1}`;
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const parseVariants = (value) => {
         const lines = String(value ?? "")
           .split("\n")
@@ -1041,6 +1070,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
         });
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const variantsToText = (variants) =>
         Array.isArray(variants)
           ? variants
@@ -1422,7 +1452,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
         if (!product) {
           if (isElement(productType)) productType.textContent = activeType === "single" ? "Single" : "Sellado";
           if (isElement(productName)) productName.textContent = "Sin productos";
-          if (isElement(productMeta)) productMeta.textContent = "Cambia el filtro o busca otro producto.";
+          if (isElement(productMeta)) productMeta.textContent = "No hay coincidencias para el filtro actual. Limpia la busqueda o cambia el tipo.";
           if (isInput(stockInput)) stockInput.value = "0";
           if (isSelect(statusSelect)) statusSelect.value = "active";
           productEditInputs.forEach((input) => {
@@ -1485,7 +1515,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
           try {
             await saveProductDetails();
           } catch (error) {
-            showMessage(error instanceof Error ? error.message : "No se pudieron guardar los diseños.");
+            showMessage(error instanceof Error ? error.message : "No se pudieron guardar los disenos del producto.");
             return;
           }
         }
@@ -1510,7 +1540,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
             variants: mappedProduct.variants
           };
           saveState();
-          showMessage("Producto actualizado en el backend.");
+          showMessage("Stock y visibilidad actualizados para el producto seleccionado.");
         } catch (error) {
           showMessage(error instanceof Error ? error.message : "No se pudo actualizar el inventario.");
           return;
@@ -1591,7 +1621,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
         if (isSelect(productSelect)) productSelect.value = mappedProduct.id;
         updateTypeButtons();
         renderSelectedProduct();
-        showProductEditMessage("Datos del producto actualizados.");
+        showProductEditMessage("Ficha del producto actualizada.");
       };
 
       const readProductCreateForm = () =>
@@ -1672,7 +1702,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
         renderDynamicOptions();
         renderProductOptions();
         updateTypeButtons();
-        showProductCreateMessage("Producto creado. Ya aparece en inventario.");
+        showProductCreateMessage("Producto creado y agregado al selector de inventario.");
       };
 
       const getFilteredUsers = () => {
@@ -1682,6 +1712,7 @@ const defaultProductCategoryOptions = productCategories.sealed;
           const matchesQuery =
             !query ||
             String(user.username ?? "").toLowerCase().includes(query) ||
+            String(user.email ?? "").toLowerCase().includes(query) ||
             String(user.role ?? "").toLowerCase().includes(query);
           const matchesRole = !role || user.role === role;
           return matchesQuery && matchesRole;
@@ -1695,10 +1726,14 @@ const defaultProductCategoryOptions = productCategories.sealed;
           ? users
               .map(
                 (user) => `
-                  <article class="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[1fr_180px_120px] lg:items-end">
+                  <article class="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[1fr_1fr_180px_120px] lg:items-end">
                     <label class="block">
                       <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Usuario</span>
                       <input value="${escapeHtml(user.username)}" class="h-11 w-full rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition disabled:cursor-not-allowed disabled:opacity-70 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" data-user-name="${escapeHtml(user.id)}" ${usersReadOnly ? "disabled" : ""} />
+                    </label>
+                    <label class="block">
+                      <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Correo</span>
+                      <input value="${escapeHtml(user.email ?? "")}" type="email" class="h-11 w-full rounded-2xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition disabled:cursor-not-allowed disabled:opacity-70 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" data-user-email="${escapeHtml(user.id)}" ${usersReadOnly ? "disabled" : ""} />
                     </label>
                     <label class="block">
                       <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Rol</span>
@@ -1754,15 +1789,19 @@ const defaultProductCategoryOptions = productCategories.sealed;
 
       const updateUser = async (id, container = document) => {
         const usernameInput = container.querySelector(`[data-user-name="${id}"]`);
+        const emailInput = container.querySelector(`[data-user-email="${id}"]`);
         const roleSelect = container.querySelector(`[data-user-role="${id}"]`);
         const username = usernameInput instanceof HTMLInputElement ? usernameInput.value.trim() : "";
+        const email = emailInput instanceof HTMLInputElement ? emailInput.value.trim() : "";
         const role = roleSelect instanceof HTMLSelectElement && roleSelect.value === "admin" ? "admin" : "customer";
         if (!username) throw new Error("El usuario no puede quedar vacío.");
+
+        if (email && !email.includes("@")) throw new Error("Ingresa un correo valido.");
 
         const response = await fetch(`${API_BASE_URL}/api/admin/users/${id}`, {
           method: "PATCH",
           headers: authHeaders(),
-          body: JSON.stringify({ username, role })
+          body: JSON.stringify({ username, email: email || null, role })
         });
         const payload = await response.json().catch(() => null);
         if (!response.ok) throw new Error(payload?.error ?? "No se pudo actualizar el usuario.");

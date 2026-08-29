@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { createOrder, listOrders, updateOrderStatus } from "../repositories/orders.js";
-import { verifySessionToken } from "../security/tokens.js";
+import { getAuthenticatedUser } from "../security/auth.js";
 
 const createOrderSchema = z.object({
   customerName: z.string().trim().min(2),
@@ -31,7 +31,7 @@ const orderStatusSchema = z.object({
 
 export async function orderRoutes(app: FastifyInstance) {
   app.post("/api/orders", async (request) => {
-    const session = verifySessionToken(request.headers.authorization) ?? undefined;
+    const session = (await getAuthenticatedUser(request.headers.authorization)) ?? undefined;
     const input = createOrderSchema.parse(request.body);
     const data = await createOrder({ ...input, user: session });
 
@@ -41,7 +41,7 @@ export async function orderRoutes(app: FastifyInstance) {
   });
 
   app.get("/api/orders", async (request) => {
-    const session = verifySessionToken(request.headers.authorization) ?? undefined;
+    const session = (await getAuthenticatedUser(request.headers.authorization)) ?? undefined;
     const data = await listOrders(session);
 
     return {
@@ -50,7 +50,7 @@ export async function orderRoutes(app: FastifyInstance) {
   });
 
   app.patch("/api/orders/:id/status", async (request) => {
-    const session = verifySessionToken(request.headers.authorization) ?? undefined;
+    const session = (await getAuthenticatedUser(request.headers.authorization)) ?? undefined;
     const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
     const input = orderStatusSchema.parse(request.body);
     const data = await updateOrderStatus(id, input.status, session);

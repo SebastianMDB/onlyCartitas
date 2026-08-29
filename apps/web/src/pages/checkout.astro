@@ -301,12 +301,13 @@ import "../styles/global.css";
           .replaceAll('"', "&quot;")
           .replaceAll("'", "&#039;");
 
-      const getApiErrorMessage = (payload: any, fallback: string) => {
-        const issue = Array.isArray(payload?.details) ? payload.details[0] : null;
+      const getApiErrorMessage = (payload: unknown, fallback: string) => {
+        const apiPayload = payload as { details?: Array<{ path?: unknown[]; message?: string }>; error?: string } | null;
+        const issue = Array.isArray(apiPayload?.details) ? apiPayload.details[0] : null;
         const field = Array.isArray(issue?.path) ? issue.path.join(".") : "";
         if (field === "customerName") return "Ingresa nombre y apellido para continuar.";
         if (issue?.message) return `${field ? `${field}: ` : ""}${issue.message}`;
-        return payload?.error ?? fallback;
+        return apiPayload?.error ?? fallback;
       };
 
       const readSession = () => {
@@ -362,7 +363,7 @@ import "../styles/global.css";
           const payload = await response.json().catch(() => null);
           if (!response.ok) throw new Error(payload?.error ?? "No se pudieron cargar los sectores.");
           shippingSectors = Array.isArray(payload.data)
-            ? payload.data.map((sector) => ({ ...sector, price: Number(sector.price ?? 0) }))
+            ? payload.data.map((sector: ShippingSector) => ({ ...sector, price: Number(sector.price ?? 0) }))
             : [];
           renderShippingSectorOptions();
         } catch {
