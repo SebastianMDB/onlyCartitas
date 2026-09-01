@@ -81,7 +81,7 @@ import "../styles/global.css";
                 <input data-reset-email type="email" autocomplete="email" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
               </label>
               <p class="hidden rounded-[1rem] px-4 py-3 text-sm font-semibold sm:col-span-2" data-reset-message></p>
-              <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950 sm:col-span-2">
+              <button data-reset-request-submit type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950 sm:col-span-2 disabled:cursor-not-allowed disabled:opacity-60">
                 Enviar link
               </button>
             </form>
@@ -93,7 +93,7 @@ import "../styles/global.css";
                 <span class="mt-2 block text-xs text-slate-500">Debe tener al menos 8 caracteres. El link se usa una sola vez.</span>
               </label>
               <p class="hidden rounded-[1rem] px-4 py-3 text-sm font-semibold" data-reset-confirm-message></p>
-              <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950">
+              <button data-reset-confirm-submit type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950 disabled:cursor-not-allowed disabled:opacity-60">
                 Guardar nueva clave
               </button>
             </form>
@@ -218,6 +218,8 @@ import "../styles/global.css";
         const resetUserInput = document.querySelector("[data-reset-user]");
         const resetEmailInput = document.querySelector("[data-reset-email]");
         const resetPasswordInput = document.querySelector("[data-reset-password]");
+        const resetRequestSubmit = document.querySelector("[data-reset-request-submit]");
+        const resetConfirmSubmit = document.querySelector("[data-reset-confirm-submit]");
         const resetToken = new URLSearchParams(window.location.search).get("resetToken")?.trim() ?? "";
 
         if (resetToken && resetConfirmForm instanceof HTMLElement && resetRequestForm instanceof HTMLElement) {
@@ -259,10 +261,13 @@ import "../styles/global.css";
           }
 
           try {
+            if (resetRequestSubmit instanceof HTMLButtonElement) resetRequestSubmit.disabled = true;
             const message = await requestPasswordReset(username, email);
             showResetMessage(message, "success");
           } catch (error) {
             showResetMessage(error instanceof Error ? error.message : "No se pudo enviar el link de recuperacion.", "error");
+          } finally {
+            if (resetRequestSubmit instanceof HTMLButtonElement) resetRequestSubmit.disabled = false;
           }
         }, { signal });
 
@@ -281,12 +286,15 @@ import "../styles/global.css";
           }
 
           try {
+            if (resetConfirmSubmit instanceof HTMLButtonElement) resetConfirmSubmit.disabled = true;
             await confirmPasswordReset(resetToken, password);
             if (isInput(resetPasswordInput)) resetPasswordInput.value = "";
             window.history.replaceState({}, "", "/login");
             showResetMessage("Clave actualizada. Ya puedes iniciar sesion con tu nueva clave.", "success", "[data-reset-confirm-message]");
           } catch (error) {
             showResetMessage(error instanceof Error ? error.message : "No se pudo guardar la nueva clave.", "error", "[data-reset-confirm-message]");
+          } finally {
+            if (resetConfirmSubmit instanceof HTMLButtonElement) resetConfirmSubmit.disabled = false;
           }
         }, { signal });
       };

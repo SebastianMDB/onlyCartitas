@@ -14,7 +14,8 @@ import { shippingSectorRoutes } from "./routes/shipping-sectors.js";
 import { siteSettingsRoutes } from "./routes/site-settings.js";
 
 const app = Fastify({
-  logger: true
+  logger: true,
+  trustProxy: env.NODE_ENV === "production"
 });
 
 app.addHook("onRequest", async (request, reply) => {
