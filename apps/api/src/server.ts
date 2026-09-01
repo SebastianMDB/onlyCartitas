@@ -18,6 +18,16 @@ const app = Fastify({
   trustProxy: env.NODE_ENV === "production"
 });
 
+const webOrigins = env.WEB_ORIGIN.split(",").map((origin) => origin.trim()).filter(Boolean);
+const corsOrigin =
+  env.NODE_ENV === "production"
+    ? webOrigins
+    : env.WEB_ORIGIN === "*"
+      ? true
+      : webOrigins.length > 1
+        ? webOrigins
+        : webOrigins[0];
+
 app.addHook("onRequest", async (request, reply) => {
   reply.header("X-Content-Type-Options", "nosniff");
   reply.header("X-Frame-Options", "DENY");
@@ -31,7 +41,7 @@ app.addHook("onRequest", async (request, reply) => {
 });
 
 await app.register(cors, {
-  origin: env.NODE_ENV === "production" ? env.WEB_ORIGIN : env.WEB_ORIGIN === "*" ? true : env.WEB_ORIGIN,
+  origin: corsOrigin,
   methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 });

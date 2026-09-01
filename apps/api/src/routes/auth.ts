@@ -46,6 +46,7 @@ const sensitiveAuthRateLimit = {
 };
 
 const authSubject = (value: string) => value.trim().toLowerCase();
+const webOrigin = env.WEB_ORIGIN.split(",")[0]?.trim() ?? "http://localhost:4321";
 
 const userUpdateSchema = z.object({
   username: z.string().trim().min(3).max(40).optional(),
@@ -136,7 +137,7 @@ export async function authRoutes(app: FastifyInstance) {
     });
     const reset = await createPasswordResetToken(input.username, input.email);
     if (reset) {
-      const resetUrl = `${env.WEB_ORIGIN}/login?resetToken=${encodeURIComponent(reset.token)}`;
+      const resetUrl = `${webOrigin}/login?resetToken=${encodeURIComponent(reset.token)}`;
       await sendEmail(buildPasswordResetEmail(reset.email, resetUrl));
     }
 
