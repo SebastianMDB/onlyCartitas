@@ -101,9 +101,16 @@ html[data-theme="dark"] .bg-\[color\:var\(--color-primary\)\] {
 }
 
 html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] .bg-white\/55,
 html[data-theme="dark"] .bg-white\/80,
-html[data-theme="dark"] .bg-white\/90 {
+html[data-theme="dark"] .bg-white\/90,
+html[data-theme="dark"] .bg-white\/95 {
   background-color: rgba(8, 28, 40, 0.82) !important;
+}
+
+html[data-theme="dark"] .bg-white\/6,
+html[data-theme="dark"] .bg-white\/10 {
+  background-color: rgba(127, 199, 216, 0.1) !important;
 }
 
 html[data-theme="dark"] .bg-slate-50,
