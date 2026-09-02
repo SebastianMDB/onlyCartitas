@@ -137,7 +137,7 @@ export async function authRoutes(app: FastifyInstance) {
     });
     const reset = await createPasswordResetToken(input.username, input.email);
     if (reset) {
-      const resetUrl = `${webOrigin}/login?resetToken=${encodeURIComponent(reset.token)}`;
+      const resetUrl = `${webOrigin}/recuperar-clave?resetToken=${encodeURIComponent(reset.token)}`;
       await sendEmail(buildPasswordResetEmail(reset.email, resetUrl), request.log);
     }
 

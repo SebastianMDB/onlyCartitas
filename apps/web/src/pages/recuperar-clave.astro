@@ -1,0 +1,196 @@
+---
+import Header from "../components/Header.astro";
+import BaseHead from "../components/BaseHead.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/global.css";
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <BaseHead
+      title="Recuperar clave | OnlyCartitas"
+      description="Recupera el acceso a tu cuenta de OnlyCartitas."
+      noindex
+    />
+  </head>
+  <body class="bg-[color:var(--color-surface)] text-slate-900 antialiased">
+    <Header />
+
+    <main class="grid place-items-center px-4 py-10 sm:px-6 sm:py-14">
+      <section class="w-full max-w-md" aria-labelledby="reset-title">
+        <div class="rounded-[1.5rem] border border-slate-200/80 bg-white/95 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-7">
+          <div class="text-center">
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Cuenta OnlyCartitas</p>
+            <h1 id="reset-title" class="mt-1 text-3xl font-semibold tracking-normal text-[color:var(--color-primary)]">Recuperar clave</h1>
+            <p class="mt-3 text-sm leading-6 text-slate-500">Confirma tu usuario y correo registrado. Te enviaremos un link temporal.</p>
+          </div>
+
+          <form class="mt-6 grid gap-4" data-reset-request-form>
+            <label class="block">
+              <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Usuario</span>
+              <input data-reset-user type="text" autocomplete="username" placeholder="tu_usuario" class="h-12 w-full rounded-[1rem] border border-slate-300 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+            </label>
+            <label class="block">
+              <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Correo registrado</span>
+              <input data-reset-email type="email" autocomplete="email" placeholder="correo@dominio.cl" class="h-12 w-full rounded-[1rem] border border-slate-300 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+            </label>
+            <p class="hidden rounded-[1rem] px-4 py-3 text-sm font-semibold" data-reset-message></p>
+            <button data-reset-request-submit type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f] disabled:cursor-not-allowed disabled:opacity-60">
+              Enviar link
+            </button>
+          </form>
+
+          <form class="mt-6 hidden gap-4" data-reset-confirm-form>
+            <label class="block">
+              <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Nueva clave</span>
+              <input data-reset-password type="password" autocomplete="new-password" placeholder="Minimo 8 caracteres" class="h-12 w-full rounded-[1rem] border border-slate-300 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+              <span class="mt-2 block text-xs text-slate-500">El link expira pronto y se puede usar una sola vez.</span>
+            </label>
+            <p class="hidden rounded-[1rem] px-4 py-3 text-sm font-semibold" data-reset-confirm-message></p>
+            <button data-reset-confirm-submit type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f] disabled:cursor-not-allowed disabled:opacity-60">
+              Guardar nueva clave
+            </button>
+          </form>
+
+          <p class="mt-6 border-t border-slate-200/80 pt-5 text-center text-sm text-slate-500">
+            Ya tienes acceso?
+            <a href="/login" class="font-semibold text-[color:var(--color-primary)] hover:underline">Inicia sesion</a>
+          </p>
+        </div>
+      </section>
+    </main>
+    <Footer />
+
+    <script>
+      const API_BASE_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:3000";
+      let resetAbortController: AbortController | null = null;
+
+      const isInput = (value: unknown) => value instanceof HTMLInputElement;
+
+      const showResetMessage = (message: string, type: "error" | "success", selector = "[data-reset-message]") => {
+        const resetMessage = document.querySelector(selector);
+        if (!(resetMessage instanceof HTMLElement)) return;
+
+        resetMessage.textContent = message;
+        resetMessage.classList.remove("hidden", "border", "border-red-200", "bg-red-50", "text-red-700", "border-emerald-200", "bg-emerald-50", "text-emerald-700");
+        resetMessage.classList.add(
+          "border",
+          type === "success" ? "border-emerald-200" : "border-red-200",
+          type === "success" ? "bg-emerald-50" : "bg-red-50",
+          type === "success" ? "text-emerald-700" : "text-red-700"
+        );
+      };
+
+      const requestPasswordReset = async (username: string, email: string) => {
+        const response = await fetch(`${API_BASE_URL}/api/auth/reset-password/request`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ username, email })
+        });
+
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(payload?.error ?? "No se pudo enviar el link de recuperacion.");
+        return payload?.message ?? "Si los datos coinciden, enviaremos un link de recuperacion al correo registrado.";
+      };
+
+      const confirmPasswordReset = async (token: string, password: string) => {
+        const response = await fetch(`${API_BASE_URL}/api/auth/reset-password/confirm`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ token, password })
+        });
+
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(payload?.error ?? "No se pudo guardar la nueva clave.");
+      };
+
+      const initResetForm = () => {
+        resetAbortController?.abort();
+        resetAbortController = new AbortController();
+        const signal = resetAbortController.signal;
+        const resetRequestForm = document.querySelector("[data-reset-request-form]");
+        const resetConfirmForm = document.querySelector("[data-reset-confirm-form]");
+        const resetUserInput = document.querySelector("[data-reset-user]");
+        const resetEmailInput = document.querySelector("[data-reset-email]");
+        const resetPasswordInput = document.querySelector("[data-reset-password]");
+        const resetRequestSubmit = document.querySelector("[data-reset-request-submit]");
+        const resetConfirmSubmit = document.querySelector("[data-reset-confirm-submit]");
+        const resetToken = new URLSearchParams(window.location.search).get("resetToken")?.trim() ?? "";
+
+        if (resetToken && resetConfirmForm instanceof HTMLElement && resetRequestForm instanceof HTMLElement) {
+          resetRequestForm.classList.add("hidden");
+          resetConfirmForm.classList.remove("hidden");
+          resetConfirmForm.classList.add("grid");
+        }
+
+        resetRequestForm?.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const username = isInput(resetUserInput) ? resetUserInput.value.trim() : "";
+          const email = isInput(resetEmailInput) ? resetEmailInput.value.trim() : "";
+
+          if (username.length < 3) {
+            showResetMessage("Ingresa un usuario valido para pedir el link.", "error");
+            return;
+          }
+
+          if (!email.includes("@")) {
+            showResetMessage("Ingresa el correo asociado a esa cuenta.", "error");
+            return;
+          }
+
+          try {
+            if (resetRequestSubmit instanceof HTMLButtonElement) {
+              resetRequestSubmit.disabled = true;
+              resetRequestSubmit.textContent = "Enviando...";
+            }
+            showResetMessage("Enviando link de recuperacion...", "success");
+            const message = await requestPasswordReset(username, email);
+            showResetMessage(message, "success");
+          } catch (error) {
+            showResetMessage(error instanceof Error ? error.message : "No se pudo enviar el link de recuperacion.", "error");
+          } finally {
+            if (resetRequestSubmit instanceof HTMLButtonElement) {
+              resetRequestSubmit.disabled = false;
+              resetRequestSubmit.textContent = "Enviar link";
+            }
+          }
+        }, { signal });
+
+        resetConfirmForm?.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const password = isInput(resetPasswordInput) ? resetPasswordInput.value : "";
+
+          if (!resetToken) {
+            showResetMessage("El link de recuperacion no es valido.", "error", "[data-reset-confirm-message]");
+            return;
+          }
+
+          if (password.length < 8) {
+            showResetMessage("La nueva clave debe tener al menos 8 caracteres.", "error", "[data-reset-confirm-message]");
+            return;
+          }
+
+          try {
+            if (resetConfirmSubmit instanceof HTMLButtonElement) resetConfirmSubmit.disabled = true;
+            await confirmPasswordReset(resetToken, password);
+            if (isInput(resetPasswordInput)) resetPasswordInput.value = "";
+            window.history.replaceState({}, "", "/recuperar-clave");
+            showResetMessage("Clave actualizada. Ya puedes iniciar sesion con tu nueva clave.", "success", "[data-reset-confirm-message]");
+          } catch (error) {
+            showResetMessage(error instanceof Error ? error.message : "No se pudo guardar la nueva clave.", "error", "[data-reset-confirm-message]");
+          } finally {
+            if (resetConfirmSubmit instanceof HTMLButtonElement) resetConfirmSubmit.disabled = false;
+          }
+        }, { signal });
+      };
+
+      document.addEventListener("astro:page-load", initResetForm);
+      initResetForm();
+    </script>
+  </body>
+</html>
