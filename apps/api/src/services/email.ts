@@ -67,10 +67,26 @@ const connectSmtp = () =>
       port: env.SMTP_PORT
     };
     const socket = env.SMTP_SECURE ? tls.connect(options) : net.connect(options);
-    socket.setTimeout(SMTP_TIMEOUT_MS);
-    socket.once(env.SMTP_SECURE ? "secureConnect" : "connect", () => resolve(socket));
-    socket.once("error", reject);
-    socket.once("timeout", () => reject(new Error("SMTP connection timeout")));
+    const timeout = setTimeout(() => {
+      socket.destroy(new Error("SMTP connection timeout"));
+    }, SMTP_TIMEOUT_MS);
+    const cleanup = () => {
+      clearTimeout(timeout);
+      socket.off(env.SMTP_SECURE ? "secureConnect" : "connect", onConnect);
+      socket.off("error", onError);
+    };
+    const onConnect = () => {
+      cleanup();
+      socket.setTimeout(SMTP_TIMEOUT_MS);
+      resolve(socket);
+    };
+    const onError = (error: Error) => {
+      cleanup();
+      reject(error);
+    };
+
+    socket.once(env.SMTP_SECURE ? "secureConnect" : "connect", onConnect);
+    socket.once("error", onError);
   });
 
 const upgradeToTls = (socket: SmtpSocket) =>
