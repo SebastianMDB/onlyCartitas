@@ -9,7 +9,7 @@ import "../styles/global.css";
 <html lang="es">
   <head>
     <BaseHead
-      title="Iniciar sesión | OnlyCartitas"
+      title="Iniciar sesion | OnlyCartitas"
       description="Acceso para clientes y administradores de OnlyCartitas."
       noindex
     />
@@ -17,68 +17,104 @@ import "../styles/global.css";
   <body class="bg-[color:var(--color-surface)] text-slate-900 antialiased">
     <Header />
 
-    <main class="pb-16 sm:pb-20">
-      <section class="mx-auto grid w-full max-w-5xl gap-6 px-4 pt-6 sm:px-6 sm:pt-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:px-8">
-        <div class="login-intro rounded-[2rem] bg-[color:var(--color-primary)] p-6 text-white shadow-[0_24px_70px_rgba(17,48,71,0.18)] sm:p-8">
-          <p class="text-xs font-semibold uppercase tracking-[0.24em] text-sky-200">Acceso</p>
-          <h1 class="mt-2 text-3xl font-semibold tracking-tight text-[color:var(--color-primary)]">Iniciar sesión</h1>
+    <main class="pb-14 sm:pb-18">
+      <section class="mx-auto grid w-full max-w-6xl gap-6 px-4 pt-6 sm:px-6 sm:pt-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(420px,1fr)] lg:items-start lg:px-8">
+        <div class="overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white/90 shadow-[0_20px_60px_rgba(17,48,71,0.08)]">
+          <div class="bg-[color:var(--color-primary)] px-5 py-5 text-white sm:px-7 sm:py-6">
+            <div class="flex items-center gap-4">
+              <img
+                src="/sets/logo.webp"
+                alt="OnlyCartitas"
+                width="72"
+                height="72"
+                class="h-14 w-14 shrink-0 rounded-2xl object-cover shadow-[0_16px_36px_rgba(0,0,0,0.18)]"
+                loading="eager"
+                decoding="async"
+              />
+              <div class="min-w-0">
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-sky-200">Cuenta OnlyCartitas</p>
+                <h1 class="mt-1 text-3xl font-semibold tracking-normal text-white sm:text-4xl">Iniciar sesion</h1>
+              </div>
+            </div>
 
-          <p class="mt-3 text-sm leading-7 text-slate-200">
-            Entra a tu cuenta para revisar pedidos, actualizar tus datos y continuar compras con tu carrito.
-          </p>
-          <div class="mt-6 grid gap-3 text-sm text-slate-100">
-            <p class="rounded-2xl bg-white/10 px-4 py-3">Usa tu usuario registrado, no el correo.</p>
-            <p class="rounded-2xl bg-white/10 px-4 py-3">Si cambias tu clave, las sesiones anteriores se cierran por seguridad.</p>
+            <p class="mt-5 max-w-xl text-sm leading-7 text-slate-100">
+              Revisa tus pedidos, mantiene tus datos actualizados y continua compras con tu carrito desde cualquier dispositivo.
+            </p>
+          </div>
+
+          <div class="grid gap-0 divide-y divide-slate-200/80 text-sm text-slate-600 sm:grid-cols-3 sm:divide-x sm:divide-y-0 lg:grid-cols-1 lg:divide-x-0 lg:divide-y">
+            <div class="p-4">
+              <p class="font-semibold text-slate-950">Usuario</p>
+              <p class="mt-1 leading-6">Entra con tu nombre de usuario, no con el correo.</p>
+            </div>
+            <div class="p-4">
+              <p class="font-semibold text-slate-950">Compras</p>
+              <p class="mt-1 leading-6">Tus pedidos quedan asociados a la cuenta.</p>
+            </div>
+            <div class="p-4">
+              <p class="font-semibold text-slate-950">Clave</p>
+              <p class="mt-1 leading-6">El link de recuperacion se usa una sola vez.</p>
+            </div>
           </div>
         </div>
 
-        <div class="rounded-[2rem] border border-slate-200/80 bg-white/95 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-6">
-          <p class="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--color-secondary)]">Cuenta</p>
-          <h2 class="mt-2 text-2xl font-semibold tracking-tight text-[color:var(--color-primary)] sm:text-3xl">Tus datos</h2>
+        <div class="grid gap-4">
+          <section class="rounded-[1.75rem] border border-slate-200/80 bg-white/95 p-5 shadow-[0_20px_60px_rgba(17,48,71,0.08)] sm:p-7" aria-labelledby="login-title">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--color-secondary)]">Acceso</p>
+                <h2 id="login-title" class="mt-1 text-2xl font-semibold tracking-normal text-[color:var(--color-primary)] sm:text-3xl">Tus datos</h2>
+              </div>
+              <a href="/registro" class="inline-flex min-h-10 items-center justify-center rounded-full border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950">
+                Crear cuenta
+              </a>
+            </div>
 
-          <form class="mt-5 grid gap-4" data-login-form>
-            <label class="block">
-              <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Usuario</span>
-              <input
-                data-login-user
-                type="text"
-                autocomplete="username"
-                class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"
-              />
-              <span class="mt-2 block text-xs text-slate-500">El mismo usuario que creaste al registrarte.</span>
-            </label>
+            <form class="mt-6 grid gap-4" data-login-form>
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Usuario</span>
+                <input
+                  data-login-user
+                  type="text"
+                  autocomplete="username"
+                  placeholder="tu_usuario"
+                  class="h-13 w-full rounded-[1rem] border border-slate-300 bg-white px-4 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"
+                />
+              </label>
 
-            <label class="block">
-              <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Clave</span>
-              <input
-                data-login-password
-                type="password"
-                autocomplete="current-password"
-                class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"
-              />
-              <span class="mt-2 block text-xs text-slate-500">Minimo 8 caracteres.</span>
-            </label>
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Clave</span>
+                <input
+                  data-login-password
+                  type="password"
+                  autocomplete="current-password"
+                  placeholder="Minimo 8 caracteres"
+                  class="h-13 w-full rounded-[1rem] border border-slate-300 bg-white px-4 text-base text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15"
+                />
+              </label>
 
-            <p class="hidden rounded-[1rem] border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" data-login-error>
-              No pudimos iniciar sesion. Revisa usuario y clave.
-            </p>
+              <p class="hidden rounded-[1rem] border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" data-login-error>
+                No pudimos iniciar sesion. Revisa usuario y clave.
+              </p>
 
-            <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f]">
-              Entrar
-            </button>
-          </form>
+              <button data-login-submit type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#071c2b] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(17,48,71,0.18)] transition hover:bg-[#0d2a3f] disabled:cursor-not-allowed disabled:opacity-60">
+                Entrar
+              </button>
+            </form>
+          </section>
 
-          <details class="mt-5 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
-            <summary class="cursor-pointer text-sm font-semibold text-[color:var(--color-primary)]">Restablecer clave</summary>
-            <p class="mt-3 text-sm leading-6 text-slate-500">Confirma el usuario y correo registrado. Te enviaremos un link temporal para crear una nueva clave.</p>
+          <section class="rounded-[1.5rem] border border-slate-200 bg-slate-50/90 p-5 sm:p-6" data-reset-panel aria-labelledby="reset-title">
+            <h2 id="reset-title" class="text-lg font-semibold tracking-normal text-[color:var(--color-primary)]">Recuperar clave</h2>
+            <p class="mt-1 text-sm leading-6 text-slate-500">Confirma el usuario y correo registrado. Te enviaremos un link temporal.</p>
+
             <form class="mt-4 grid gap-4 sm:grid-cols-2" data-reset-request-form>
               <label class="block">
-                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Usuario</span>
-                <input data-reset-user type="text" autocomplete="username" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Usuario</span>
+                <input data-reset-user type="text" autocomplete="username" placeholder="tu_usuario" class="h-12 w-full rounded-[1rem] border border-slate-300 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
               </label>
               <label class="block">
-                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Correo registrado</span>
-                <input data-reset-email type="email" autocomplete="email" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Correo registrado</span>
+                <input data-reset-email type="email" autocomplete="email" placeholder="correo@dominio.cl" class="h-12 w-full rounded-[1rem] border border-slate-300 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
               </label>
               <p class="hidden rounded-[1rem] px-4 py-3 text-sm font-semibold sm:col-span-2" data-reset-message></p>
               <button data-reset-request-submit type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950 sm:col-span-2 disabled:cursor-not-allowed disabled:opacity-60">
@@ -88,35 +124,20 @@ import "../styles/global.css";
 
             <form class="mt-4 hidden gap-4" data-reset-confirm-form>
               <label class="block">
-                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Nueva clave</span>
-                <input data-reset-password type="password" autocomplete="new-password" class="h-12 w-full rounded-2xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
-                <span class="mt-2 block text-xs text-slate-500">Debe tener al menos 8 caracteres. El link se usa una sola vez.</span>
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Nueva clave</span>
+                <input data-reset-password type="password" autocomplete="new-password" placeholder="Minimo 8 caracteres" class="h-12 w-full rounded-[1rem] border border-slate-300 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
+                <span class="mt-2 block text-xs text-slate-500">El link expira pronto y se puede usar una sola vez.</span>
               </label>
               <p class="hidden rounded-[1rem] px-4 py-3 text-sm font-semibold" data-reset-confirm-message></p>
               <button data-reset-confirm-submit type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950 disabled:cursor-not-allowed disabled:opacity-60">
                 Guardar nueva clave
               </button>
             </form>
-          </details>
-
-          <p class="mt-5 text-center text-sm text-slate-500">
-            No tienes cuenta?
-            <a href="/registro" class="font-semibold text-[color:var(--color-primary)] hover:underline">Registrate</a>
-          </p>
+          </section>
         </div>
       </section>
     </main>
     <Footer />
-
-    <style>
-      .login-intro > p:first-child {
-        color: rgb(186 230 253);
-      }
-
-      .login-intro > h1 {
-        color: #fff;
-      }
-    </style>
 
     <script>
       type AuthSessionResponse = {
@@ -212,6 +233,7 @@ import "../styles/global.css";
         const form = document.querySelector("[data-login-form]");
         const userInput = document.querySelector("[data-login-user]");
         const passwordInput = document.querySelector("[data-login-password]");
+        const loginSubmit = document.querySelector("[data-login-submit]");
         const errorMessage = document.querySelector("[data-login-error]");
         const resetRequestForm = document.querySelector("[data-reset-request-form]");
         const resetConfirmForm = document.querySelector("[data-reset-confirm-form]");
@@ -223,8 +245,6 @@ import "../styles/global.css";
         const resetToken = new URLSearchParams(window.location.search).get("resetToken")?.trim() ?? "";
 
         if (resetToken && resetConfirmForm instanceof HTMLElement && resetRequestForm instanceof HTMLElement) {
-          const resetDetails = resetConfirmForm.closest("details");
-          if (resetDetails instanceof HTMLDetailsElement) resetDetails.open = true;
           resetRequestForm.classList.add("hidden");
           resetConfirmForm.classList.remove("hidden");
           resetConfirmForm.classList.add("grid");
@@ -235,13 +255,34 @@ import "../styles/global.css";
           const username = isInput(userInput) ? userInput.value.trim() : "";
           const password = isInput(passwordInput) ? passwordInput.value : "";
 
+          if (username.length < 3) {
+            if (errorMessage instanceof HTMLElement) errorMessage.textContent = "Ingresa tu usuario para iniciar sesion.";
+            errorMessage?.classList.remove("hidden");
+            return;
+          }
+
+          if (password.length < 8) {
+            if (errorMessage instanceof HTMLElement) errorMessage.textContent = "La clave debe tener al menos 8 caracteres.";
+            errorMessage?.classList.remove("hidden");
+            return;
+          }
+
           try {
+            if (loginSubmit instanceof HTMLButtonElement) {
+              loginSubmit.disabled = true;
+              loginSubmit.textContent = "Entrando...";
+            }
             const session = await login(username, password);
             createSession(session);
             errorMessage?.classList.add("hidden");
             window.location.assign(session.user.role === "admin" ? "/admin-inventario" : "/");
           } catch {
+            if (errorMessage instanceof HTMLElement) errorMessage.textContent = "No pudimos iniciar sesion. Revisa usuario y clave.";
             errorMessage?.classList.remove("hidden");
+            if (loginSubmit instanceof HTMLButtonElement) {
+              loginSubmit.disabled = false;
+              loginSubmit.textContent = "Entrar";
+            }
           }
         }, { signal });
 
