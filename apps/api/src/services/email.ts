@@ -11,6 +11,10 @@ type EmailMessage = {
 };
 
 type SmtpSocket = net.Socket | tls.TLSSocket;
+type EmailLogger = {
+  info: (value: object, message?: string) => void;
+  error: (value: object, message?: string) => void;
+};
 
 const SMTP_TIMEOUT_MS = 15_000;
 
@@ -20,6 +24,23 @@ const getSmtpFromAddress = () => {
   const from = env.SMTP_FROM ?? "";
   return from.match(/<([^>]+)>/)?.[1]?.trim() ?? from.trim();
 };
+const getErrorLog = (error: unknown) =>
+  error instanceof Error
+    ? {
+        name: error.name,
+        message: error.message,
+        code: "code" in error ? error.code : undefined
+      }
+    : { message: String(error) };
+
+const getSmtpLogConfig = () => ({
+  host: env.SMTP_HOST,
+  port: env.SMTP_PORT,
+  secure: env.SMTP_SECURE,
+  hasUser: Boolean(env.SMTP_USER),
+  hasPassword: Boolean(env.SMTP_PASSWORD),
+  from: getSmtpFromAddress()
+});
 
 const readResponse = (socket: SmtpSocket) =>
   new Promise<string>((resolve, reject) => {
@@ -133,7 +154,7 @@ const buildMimeMessage = ({ to, subject, text, html }: EmailMessage) => {
   ].join("\r\n");
 };
 
-export async function sendEmail(message: EmailMessage) {
+export async function sendEmail(message: EmailMessage, logger?: EmailLogger) {
   if (!env.SMTP_HOST || !env.SMTP_FROM) {
     if (env.NODE_ENV === "production") throw new ApiError(500, "El envio de correos no esta configurado");
     console.info("[onlycartitas] Email omitido por falta de SMTP", {
@@ -144,30 +165,45 @@ export async function sendEmail(message: EmailMessage) {
     return;
   }
 
-  let socket = await connectSmtp();
+  let socket: SmtpSocket | undefined;
+  let phase = "connect";
+  logger?.info({ smtp: getSmtpLogConfig(), phase }, "SMTP send starting");
   try {
+    socket = await connectSmtp();
+    phase = "greeting";
     await readResponse(socket);
+    phase = "ehlo";
     const greeting = await sendCommand(socket, `EHLO ${env.API_PUBLIC_URL ? new URL(env.API_PUBLIC_URL).hostname : "localhost"}`, [250]);
 
     if (!env.SMTP_SECURE && greeting.toUpperCase().includes("STARTTLS")) {
+      phase = "starttls";
       await sendCommand(socket, "STARTTLS", [220]);
+      phase = "tls-upgrade";
       socket = await upgradeToTls(socket);
+      phase = "ehlo-after-starttls";
       await sendCommand(socket, `EHLO ${env.API_PUBLIC_URL ? new URL(env.API_PUBLIC_URL).hostname : "localhost"}`, [250]);
     }
 
     if (env.SMTP_USER && env.SMTP_PASSWORD) {
+      phase = "auth";
       await sendCommand(socket, `AUTH PLAIN ${encodeBase64(`\u0000${env.SMTP_USER}\u0000${env.SMTP_PASSWORD}`)}`, [235]);
     }
 
+    phase = "mail-from";
     await sendCommand(socket, `MAIL FROM:<${sanitizeHeader(getSmtpFromAddress())}>`, [250]);
+    phase = "rcpt-to";
     await sendCommand(socket, `RCPT TO:<${sanitizeHeader(message.to)}>`, [250, 251]);
+    phase = "data";
     await sendCommand(socket, "DATA", [354]);
     await sendCommand(socket, buildMimeMessage(message), [250]);
+    phase = "quit";
     await sendCommand(socket, "QUIT", [221]);
-  } catch {
+    logger?.info({ smtp: getSmtpLogConfig() }, "SMTP send completed");
+  } catch (error) {
+    logger?.error({ smtp: getSmtpLogConfig(), phase, err: getErrorLog(error) }, "SMTP send failed");
     throw new ApiError(500, "No se pudo enviar el correo de recuperacion");
   } finally {
-    socket.end();
+    socket?.end();
   }
 }
 
