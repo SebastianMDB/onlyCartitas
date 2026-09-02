@@ -18,7 +18,7 @@ import "../styles/global.css";
     <Header />
 
     <main class="pb-14 sm:pb-18">
-      <section class="mx-auto grid w-full max-w-6xl gap-6 px-4 pt-6 sm:px-6 sm:pt-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(420px,1fr)] lg:items-start lg:px-8">
+      <section class="mx-auto grid w-full max-w-5xl gap-5 px-4 pt-6 sm:px-6 sm:pt-10 lg:grid-cols-[0.86fr_1fr] lg:items-start lg:px-8">
         <div class="overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white/90 shadow-[0_20px_60px_rgba(17,48,71,0.08)]">
           <div class="bg-[color:var(--color-primary)] px-5 py-5 text-white sm:px-7 sm:py-6">
             <div class="flex items-center gap-4">
@@ -103,9 +103,11 @@ import "../styles/global.css";
             </form>
           </section>
 
-          <section class="rounded-[1.5rem] border border-slate-200 bg-slate-50/90 p-5 sm:p-6" data-reset-panel aria-labelledby="reset-title">
-            <h2 id="reset-title" class="text-lg font-semibold tracking-normal text-[color:var(--color-primary)]">Recuperar clave</h2>
-            <p class="mt-1 text-sm leading-6 text-slate-500">Confirma el usuario y correo registrado. Te enviaremos un link temporal.</p>
+          <section class="rounded-[1.5rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_14px_42px_rgba(17,48,71,0.06)] sm:p-6" data-reset-panel aria-labelledby="reset-title">
+            <div class="flex flex-col gap-1 border-b border-slate-200/80 pb-4">
+              <h2 id="reset-title" class="text-lg font-semibold tracking-normal text-[color:var(--color-primary)]">Recuperar clave</h2>
+              <p class="text-sm leading-6 text-slate-500">Confirma el usuario y correo registrado. Te enviaremos un link temporal.</p>
+            </div>
 
             <form class="mt-4 grid gap-4 sm:grid-cols-2" data-reset-request-form>
               <label class="block">
@@ -117,7 +119,7 @@ import "../styles/global.css";
                 <input data-reset-email type="email" autocomplete="email" placeholder="correo@dominio.cl" class="h-12 w-full rounded-[1rem] border border-slate-300 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--color-secondary)] focus:ring-4 focus:ring-[color:var(--color-secondary)]/15" />
               </label>
               <p class="hidden rounded-[1rem] px-4 py-3 text-sm font-semibold sm:col-span-2" data-reset-message></p>
-              <button data-reset-request-submit type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950 sm:col-span-2 disabled:cursor-not-allowed disabled:opacity-60">
+              <button data-reset-request-submit type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:text-slate-950 sm:col-span-2 disabled:cursor-not-allowed disabled:opacity-60">
                 Enviar link
               </button>
             </form>
@@ -138,6 +140,18 @@ import "../styles/global.css";
       </section>
     </main>
     <Footer />
+
+    <style>
+      html[data-theme="dark"] [data-reset-panel] {
+        background: linear-gradient(145deg, rgba(14, 45, 61, 0.92), rgba(6, 22, 33, 0.96)) !important;
+        border-color: rgba(127, 199, 216, 0.24) !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28) !important;
+      }
+
+      html[data-theme="dark"] [data-reset-panel] > div {
+        border-color: rgba(127, 199, 216, 0.22) !important;
+      }
+    </style>
 
     <script>
       type AuthSessionResponse = {
