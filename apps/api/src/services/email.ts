@@ -90,6 +90,22 @@ const sendCommand = async (socket: SmtpSocket, command: string, expectedCodes: n
   return response;
 };
 
+const sendData = async (socket: SmtpSocket, data: string) => {
+  socket.write(data.endsWith("\r\n.\r\n") ? data : `${data}\r\n.\r\n`);
+  const response = await readResponse(socket);
+  const code = Number(response.slice(0, 3));
+  if (code !== 250) {
+    const error = new Error(`SMTP rechazo DATA con codigo ${code}`);
+    error.cause = response
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .map((line) => line.replace(/[A-Za-z0-9+/=]{24,}/g, "[redacted]"))
+      .join(" ");
+    throw error;
+  }
+  return response;
+};
+
 const connectSmtp = () =>
   new Promise<SmtpSocket>((resolve, reject) => {
     const options = {
@@ -157,9 +173,7 @@ const buildMimeMessage = ({ to, subject, text, html }: EmailMessage) => {
     "",
     html,
     "",
-    `--${boundary}--`,
-    ".",
-    ""
+    `--${boundary}--`
   ].join("\r\n");
 };
 
@@ -204,9 +218,13 @@ export async function sendEmail(message: EmailMessage, logger?: EmailLogger) {
     await sendCommand(socket, `RCPT TO:<${sanitizeHeader(message.to)}>`, [250, 251]);
     phase = "data";
     await sendCommand(socket, "DATA", [354]);
-    await sendCommand(socket, buildMimeMessage(message), [250]);
+    await sendData(socket, buildMimeMessage(message));
     phase = "quit";
-    await sendCommand(socket, "QUIT", [221]);
+    try {
+      await sendCommand(socket, "QUIT", [221]);
+    } catch (error) {
+      logger?.info({ smtp: getSmtpLogConfig(), err: getErrorLog(error) }, "SMTP QUIT failed after accepted DATA");
+    }
     logger?.info({ smtp: getSmtpLogConfig() }, "SMTP send completed");
   } catch (error) {
     logger?.error({ smtp: getSmtpLogConfig(), phase, err: getErrorLog(error) }, "SMTP send failed");
