@@ -10,6 +10,14 @@ const trimOriginList = (value: unknown) =>
         .join(",")
     : value;
 
+const booleanFromEnv = z.preprocess((value) => {
+  if (typeof value !== "string") return value;
+  const normalized = value.trim().toLowerCase();
+  if (["true", "1", "yes", "y", "on"].includes(normalized)) return true;
+  if (["false", "0", "no", "n", "off"].includes(normalized)) return false;
+  return value;
+}, z.boolean());
+
 const envSchema = z
   .object({
     NODE_ENV: z.string().default("development"),
@@ -17,13 +25,13 @@ const envSchema = z
     WEB_ORIGIN: z.preprocess(trimOriginList, z.string().default("http://localhost:4321")),
     API_SECRET: z.string().default("dev-onlycartitas-secret"),
     SESSION_TTL_SECONDS: z.coerce.number().int().positive().default(60 * 60 * 24 * 7),
-    AUTH_REGISTER_ENABLED: z.coerce.boolean().default(true),
+    AUTH_REGISTER_ENABLED: booleanFromEnv.default(true),
     PASSWORD_RESET_TOKEN_TTL_MINUTES: z.coerce.number().int().positive().default(30),
     DATABASE_URL: z.string().url(),
     API_PUBLIC_URL: z.preprocess(trimTrailingSlashes, z.string().url().optional().or(z.literal(""))),
     SMTP_HOST: z.string().optional().or(z.literal("")),
     SMTP_PORT: z.coerce.number().int().positive().default(587),
-    SMTP_SECURE: z.coerce.boolean().default(false),
+    SMTP_SECURE: booleanFromEnv.default(false),
     SMTP_USER: z.string().optional().or(z.literal("")),
     SMTP_PASSWORD: z.string().optional().or(z.literal("")),
     SMTP_FROM: z.string().optional().or(z.literal("")),
