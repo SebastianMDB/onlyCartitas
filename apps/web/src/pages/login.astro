@@ -261,13 +261,20 @@ import "../styles/global.css";
           }
 
           try {
-            if (resetRequestSubmit instanceof HTMLButtonElement) resetRequestSubmit.disabled = true;
+            if (resetRequestSubmit instanceof HTMLButtonElement) {
+              resetRequestSubmit.disabled = true;
+              resetRequestSubmit.textContent = "Enviando...";
+            }
+            showResetMessage("Enviando link de recuperacion...", "success");
             const message = await requestPasswordReset(username, email);
             showResetMessage(message, "success");
           } catch (error) {
             showResetMessage(error instanceof Error ? error.message : "No se pudo enviar el link de recuperacion.", "error");
           } finally {
-            if (resetRequestSubmit instanceof HTMLButtonElement) resetRequestSubmit.disabled = false;
+            if (resetRequestSubmit instanceof HTMLButtonElement) {
+              resetRequestSubmit.disabled = false;
+              resetRequestSubmit.textContent = "Enviar link";
+            }
           }
         }, { signal });
 

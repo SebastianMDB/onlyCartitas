@@ -12,6 +12,8 @@ type EmailMessage = {
 
 type SmtpSocket = net.Socket | tls.TLSSocket;
 
+const SMTP_TIMEOUT_MS = 15_000;
+
 const sanitizeHeader = (value: string) => value.replace(/[\r\n]+/g, " ").trim();
 const encodeBase64 = (value: string) => Buffer.from(value, "utf8").toString("base64");
 const getSmtpFromAddress = () => {
@@ -25,10 +27,15 @@ const readResponse = (socket: SmtpSocket) =>
     const cleanup = () => {
       socket.off("data", onData);
       socket.off("error", onError);
+      socket.off("timeout", onTimeout);
     };
     const onError = (error: Error) => {
       cleanup();
       reject(error);
+    };
+    const onTimeout = () => {
+      cleanup();
+      reject(new Error("SMTP timeout"));
     };
     const onData = (chunk: Buffer) => {
       buffer += chunk.toString("utf8");
@@ -42,6 +49,7 @@ const readResponse = (socket: SmtpSocket) =>
 
     socket.on("data", onData);
     socket.on("error", onError);
+    socket.on("timeout", onTimeout);
   });
 
 const sendCommand = async (socket: SmtpSocket, command: string, expectedCodes: number[]) => {
@@ -59,8 +67,10 @@ const connectSmtp = () =>
       port: env.SMTP_PORT
     };
     const socket = env.SMTP_SECURE ? tls.connect(options) : net.connect(options);
+    socket.setTimeout(SMTP_TIMEOUT_MS);
     socket.once(env.SMTP_SECURE ? "secureConnect" : "connect", () => resolve(socket));
     socket.once("error", reject);
+    socket.once("timeout", () => reject(new Error("SMTP connection timeout")));
   });
 
 const upgradeToTls = (socket: SmtpSocket) =>
@@ -70,8 +80,10 @@ const upgradeToTls = (socket: SmtpSocket) =>
       host: env.SMTP_HOST,
       servername: env.SMTP_HOST
     });
+    tlsSocket.setTimeout(SMTP_TIMEOUT_MS);
     tlsSocket.once("secureConnect", () => resolve(tlsSocket));
     tlsSocket.once("error", reject);
+    tlsSocket.once("timeout", () => reject(new Error("SMTP TLS timeout")));
   });
 
 const escapeHtml = (value: string) =>
