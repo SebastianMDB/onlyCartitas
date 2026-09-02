@@ -29,7 +29,8 @@ const getErrorLog = (error: unknown) =>
     ? {
         name: error.name,
         message: error.message,
-        code: "code" in error ? error.code : undefined
+        code: "code" in error ? error.code : undefined,
+        cause: error.cause
       }
     : { message: String(error) };
 
@@ -77,7 +78,15 @@ const sendCommand = async (socket: SmtpSocket, command: string, expectedCodes: n
   socket.write(`${command}\r\n`);
   const response = await readResponse(socket);
   const code = Number(response.slice(0, 3));
-  if (!expectedCodes.includes(code)) throw new Error(`SMTP rechazo el comando ${command.split(" ")[0]}`);
+  if (!expectedCodes.includes(code)) {
+    const error = new Error(`SMTP rechazo el comando ${command.split(" ")[0]} con codigo ${code}`);
+    error.cause = response
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .map((line) => line.replace(/[A-Za-z0-9+/=]{24,}/g, "[redacted]"))
+      .join(" ");
+    throw error;
+  }
   return response;
 };
 
