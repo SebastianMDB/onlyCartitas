@@ -17,6 +17,7 @@ export const getB2Client = () => {
   b2Client ??= new S3Client({
     endpoint: requiredEnv("B2_ENDPOINT"),
     region: requiredEnv("B2_REGION"),
+    forcePathStyle: true,
     credentials: {
       accessKeyId: requiredEnv("B2_KEY_ID"),
       secretAccessKey: requiredEnv("B2_APPLICATION_KEY")

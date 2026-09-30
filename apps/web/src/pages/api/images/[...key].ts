@@ -4,6 +4,12 @@ import { getB2Bucket, getB2Client } from "../../../lib/backblaze";
 
 export const prerender = false;
 
+type B2Error = Error & {
+  $metadata?: {
+    httpStatusCode?: number;
+  };
+};
+
 const isSafeImageKey = (key: string) =>
   Boolean(key) &&
   !key.startsWith("/") &&
@@ -19,10 +25,13 @@ export const GET: APIRoute = async ({ params }) => {
     return new Response("Invalid image key", { status: 400 });
   }
 
+  let bucket = "";
+
   try {
+    bucket = getB2Bucket();
     const file = await getB2Client().send(
       new GetObjectCommand({
-        Bucket: getB2Bucket(),
+        Bucket: bucket,
         Key: key
       })
     );
@@ -43,12 +52,43 @@ export const GET: APIRoute = async ({ params }) => {
 
     return new Response(file.Body.transformToWebStream(), { headers });
   } catch (error) {
-    console.error("Backblaze image error:", error);
+    const b2Error = error as B2Error;
+    const statusCode = b2Error.$metadata?.httpStatusCode;
+    const errorName = b2Error.name || "BackblazeError";
+    const headers = new Headers({
+      "Cache-Control": "no-store",
+      "X-Content-Type-Options": "nosniff",
+      "X-Backblaze-Error": errorName
+    });
 
-    if (error instanceof NoSuchKey || (error instanceof Error && error.name === "NoSuchKey")) {
-      return new Response("Image not found", { status: 404 });
+    console.error("Backblaze image error:", {
+      name: errorName,
+      message: b2Error.message,
+      statusCode,
+      bucket,
+      key
+    });
+
+    if (
+      error instanceof NoSuchKey ||
+      errorName === "NoSuchKey" ||
+      errorName === "NotFound" ||
+      statusCode === 404
+    ) {
+      return new Response("Image not found", { status: 404, headers });
     }
 
-    return new Response("Error loading image", { status: 500 });
+    if (statusCode === 401 || statusCode === 403) {
+      return new Response("Backblaze credentials or permissions rejected", {
+        status: statusCode,
+        headers
+      });
+    }
+
+    if (errorName === "Error" && b2Error.message.includes(" is required ")) {
+      return new Response("Backblaze environment is not configured", { status: 500, headers });
+    }
+
+    return new Response("Error loading image", { status: 500, headers });
   }
 };
