@@ -12,6 +12,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@astrojs/vercel": "^8.2.11",
+    "@aws-sdk/client-s3": "^3.1143.0",
     "@tailwindcss/vite": "^4.1.4",
     "astro": "^5.7.0",
     "tailwindcss": "^4.1.4"
