@@ -9,13 +9,18 @@ const requiredEnv = (name: string) => {
   return value.trim();
 };
 
+const requiredEndpoint = () => {
+  const endpoint = requiredEnv("B2_ENDPOINT");
+  return /^https?:\/\//i.test(endpoint) ? endpoint : `https://${endpoint}`;
+};
+
 let b2Client: S3Client | undefined;
 
 export const getB2Bucket = () => requiredEnv("B2_BUCKET");
 
 export const getB2Client = () => {
   b2Client ??= new S3Client({
-    endpoint: requiredEnv("B2_ENDPOINT"),
+    endpoint: requiredEndpoint(),
     region: requiredEnv("B2_REGION"),
     forcePathStyle: true,
     credentials: {
