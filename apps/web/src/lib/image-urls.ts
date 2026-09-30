@@ -7,11 +7,16 @@ type SupabaseTransformOptions = {
 
 const SUPABASE_OBJECT_PUBLIC_PATH = "/storage/v1/object/public/";
 const SUPABASE_RENDER_PUBLIC_PATH = "/storage/v1/render/image/public/";
+const B2_FILE_PUBLIC_PATH = "/file/";
+const B2_IMAGE_PROXY_PATH = "/api/images/";
 const TRANSFORMED_IMAGE_EXTENSIONS = new Set(["jpg", "jpeg", "png", "webp", "avif", "gif"]);
 
 const isSupabaseStorageUrl = (url: URL) =>
   url.hostname.endsWith(".supabase.co") &&
   (url.pathname.includes(SUPABASE_OBJECT_PUBLIC_PATH) || url.pathname.includes(SUPABASE_RENDER_PUBLIC_PATH));
+
+const isBackblazeFileUrl = (url: URL) =>
+  url.hostname.endsWith(".backblazeb2.com") && url.pathname.startsWith(B2_FILE_PUBLIC_PATH);
 
 const canTransformPath = (pathname: string) => {
   const extension = pathname.split(".").pop()?.toLowerCase();
@@ -23,13 +28,33 @@ const normalizeNumber = (value: number | undefined, min: number, max: number) =>
   return Math.min(max, Math.max(min, Math.round(value as number)));
 };
 
-export const getSupabaseImageUrl = (value: string, options: SupabaseTransformOptions = {}) => {
-  const imageTransformationsEnabled = import.meta.env.PUBLIC_SUPABASE_IMAGE_TRANSFORMS_ENABLED === "true";
-  if (!imageTransformationsEnabled) return value;
+export const resolveImageUrl = (value: string | null | undefined) => {
+  const imageUrl = value?.trim();
+  if (!imageUrl) return "";
+  if (imageUrl.startsWith(B2_IMAGE_PROXY_PATH)) return imageUrl;
 
   try {
-    const url = new URL(value);
-    if (!isSupabaseStorageUrl(url) || !canTransformPath(url.pathname)) return value;
+    const url = new URL(imageUrl);
+    if (!isBackblazeFileUrl(url)) return imageUrl;
+
+    const [bucketName, ...keyParts] = url.pathname.slice(B2_FILE_PUBLIC_PATH.length).split("/");
+    if (!bucketName || keyParts.length === 0) return imageUrl;
+
+    const key = keyParts.join("/");
+    return `${B2_IMAGE_PROXY_PATH}${key}${url.search}`;
+  } catch {
+    return imageUrl;
+  }
+};
+
+export const getSupabaseImageUrl = (value: string, options: SupabaseTransformOptions = {}) => {
+  const resolvedImageUrl = resolveImageUrl(value);
+  const imageTransformationsEnabled = import.meta.env.PUBLIC_SUPABASE_IMAGE_TRANSFORMS_ENABLED === "true";
+  if (!imageTransformationsEnabled) return resolvedImageUrl;
+
+  try {
+    const url = new URL(resolvedImageUrl);
+    if (!isSupabaseStorageUrl(url) || !canTransformPath(url.pathname)) return resolvedImageUrl;
 
     url.pathname = url.pathname.replace(SUPABASE_OBJECT_PUBLIC_PATH, SUPABASE_RENDER_PUBLIC_PATH);
 
@@ -43,7 +68,7 @@ export const getSupabaseImageUrl = (value: string, options: SupabaseTransformOpt
 
     return url.toString();
   } catch {
-    return value;
+    return resolvedImageUrl;
   }
 };
 
